@@ -52,12 +52,17 @@ def sub_chars(string):
 def spell_correct(string):
     """
     Uses aspell to spell correct an input string.
+    Requires aspell to be installed and added to the path.
+    Returns the spell corrected string if aspell is found, original string if not.
     """
     f = open('tmpfile', 'w')
     f.write(string)
     f_path = os.path.abspath(f.name)
     f.close()
-    p = os.popen(aspell_path + " -a < " + f_path + " --sug-mode=ultra")
+    try:
+        p = os.popen(aspell_path + " -a < " + f_path + " --sug-mode=ultra")
+    except:
+        return string
     incorrect = p.readlines()
     p.close()
     incorrect_words = list()
@@ -85,22 +90,35 @@ def spell_correct(string):
     return newstring
 
 
-def ngrams(tokens, MIN_N, MAX_N):
+def ngrams(tokens, min_n, max_n):
+    """
+    Generates ngrams(word sequences of fixed length) from an input token sequence.
+    tokens is a list of words.
+    min_n is the minimum length of an ngram to return.
+    max_n is the maximum length of an ngram to return.
+    returns a list of ngrams (words separated by a space)
+    """
     all_ngrams = list()
     n_tokens = len(tokens)
     for i in xrange(n_tokens):
-        for j in xrange(i + MIN_N, min(n_tokens, i + MAX_N) + 1):
+        for j in xrange(i + min_n, min(n_tokens, i + max_n) + 1):
             all_ngrams.append(" ".join(tokens[i:j]))
     return all_ngrams
 
 
 def f7(seq):
+    """
+    Makes a list unique
+    """
     seen = set()
     seen_add = seen.add
     return [x for x in seq if x not in seen and not seen_add(x)]
 
 
 def count_list(the_list):
+    """
+    Generates a count of the number of times each unique item appears in a list
+    """
     count = the_list.count
     result = [(item, count(item)) for item in set(the_list)]
     result.sort()
@@ -108,6 +126,12 @@ def count_list(the_list):
 
 
 def regenerate_good_tokens(string):
+    """
+    Given an input string, part of speech tags the string, then generates a list of
+    ngrams that appear in the string.
+    Used to define grammatically correct part of speech tag sequences.
+    Returns a list of part of speech tag sequences.
+    """
     toks = nltk.word_tokenize(string)
     pos_string = nltk.pos_tag(toks)
     pos_seq = [tag[1] for tag in pos_string]
@@ -116,7 +140,16 @@ def regenerate_good_tokens(string):
     return sel_pos_ngrams
 
 
-def get_vocab(text, score, max_feats=750, min_length=100):
+def get_vocab(text, score, max_feats=750, max_feats2=200):
+    """
+    Uses a fisher test to find words that are significant in that they separate
+    high scoring essays from low scoring essays.
+    text is a list of input essays.
+    score is a list of scores, with score[n] corresponding to text[n]
+    max_feats is the maximum number of features to consider in the first pass
+    max_feats2 is the maximum number of features to consider in the second (final) pass
+    Returns a list of words that constitute the significant vocabulary
+    """
     dict = CountVectorizer(min_n=1, max_n=2, max_features=max_feats)
     dict_mat = dict.fit_transform(text)
     set_score = numpy.asarray(score, dtype=numpy.int)
@@ -141,8 +174,8 @@ def get_vocab(text, score, max_feats=750, min_length=100):
         fish_vals.append(fish_val)
 
     cutoff = 1
-    if(len(fish_vals) > 200):
-        cutoff = sorted(fish_vals)[200]
+    if(len(fish_vals) > max_feats2):
+        cutoff = sorted(fish_vals)[max_feats2]
     good_cols = numpy.asarray([num for num in range(0, dict_mat.shape[1]) if fish_vals[num] <= cutoff])
 
     getVar = lambda searchList, ind: [searchList[i] for i in ind]
@@ -152,6 +185,10 @@ def get_vocab(text, score, max_feats=750, min_length=100):
 
 
 def edit_distance(s1, s2):
+    """
+    Calculates string edit distance between string 1 and string 2.
+    Deletion, insertion, substitution, and transposition all increase edit distance.
+    """
     d = {}
     lenstr1 = len(s1)
     lenstr2 = len(s2)
@@ -188,6 +225,14 @@ class InputError(Error):
 
 
 def gen_cv_preds(clf, arr, sel_score, num_chunks=3):
+    """
+    Generates cross validated predictions using an input classifier and data.
+    clf is a classifier that implements that implements the fit and predict methods.
+    arr is the input data array (X)
+    sel_score is the target list (y).  y[n] corresponds to X[n,:]
+    num_chunks is the number of cross validation folds to use
+    Returns an array of the predictions where prediction[n] corresponds to X[n,:]
+    """
     cv_len = int(math.floor(len(sel_score) / num_chunks))
     chunks = []
     for i in range(0, num_chunks):
@@ -208,13 +253,26 @@ def gen_cv_preds(clf, arr, sel_score, num_chunks=3):
     return(all_preds)
 
 
-def gen_model(clf, arr, sel_score, num_chunks=3):
+def gen_model(clf, arr, sel_score):
+    """
+    Fits a classifier to data and a target score
+    clf is an input classifier that implements the fit method.
+    arr is a data array(X)
+    sel_score is the target list (y) where y[n] corresponds to X[n,:]
+    sim_fit is not a useful return value.  Instead the clf is the useful output.
+    """
     set_score = numpy.asarray(sel_score, dtype=numpy.int)
     sim_fit = clf.fit(arr, set_score)
     return(sim_fit)
 
 
-def gen_preds(clf, arr, num_chunks=3):
+def gen_preds(clf, arr):
+    """
+    Generates predictions on a novel data array using a fit classifier
+    clf is a classifier that has already been fit
+    arr is a data array identical in dimension to the array clf was trained on
+    Returns the array of predictions.
+    """
     if(hasattr(clf, "predict_proba")):
         ret = clf.predict(arr)
         #pred_score=preds.argmax(1)+min(x._score)
@@ -224,6 +282,10 @@ def gen_preds(clf, arr, num_chunks=3):
 
 
 def calc_list_average(l):
+    """
+    Calculates the average value of a list of numbers
+    Returns a float
+    """
     total = 0.0
     for value in l:
         total += value
@@ -232,6 +294,14 @@ def calc_list_average(l):
 stdev = lambda d: (sum((x - 1. * sum(d) / len(d)) ** 2 for x in d) / (1. * (len(d) - 1))) ** .5
 
 def quadratic_weighted_kappa(rater_a, rater_b, min_rating=None, max_rating=None):
+    """
+    Calculates kappa correlation between rater_a and rater_b.
+    Kappa measures how well 2 quantities vary together.
+    rater_a is a list of rater a scores
+    rater_b is a list of rater b scores
+    min_rating is an optional argument describing the minimum rating possible on the data set
+    max_rating is an optional argument describing the maximum rating possible on the data set
+    """
     assert(len(rater_a) == len(rater_b))
     if min_rating is None:
         min_rating = min(rater_a + rater_b)

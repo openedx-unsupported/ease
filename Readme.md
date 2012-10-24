@@ -1,4 +1,4 @@
-Project to integrate machine learning based essay scoring with xserver. Aspell must be installed and added to path to run.  numpy, scipy and sklearn also need to be installed.
+Project to integrate machine learning based essay scoring with xserver. Aspell must be installed and added to path to run.  numpy, scipy, sklearn, and nltk also need to be installed.
 
 Runnable files:
 

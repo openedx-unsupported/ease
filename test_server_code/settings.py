@@ -18,7 +18,7 @@ RUN_URL = 'http://127.0.0.1:3031/'  # Victor's VM ...
 RUN_URL = 'http://sandbox-runserver-001.m.edx.org:8080/'
 RUN_URL = 'http://sandbox-runserver.elb.edx.org:80/'
 
-GRADER_ROOT = os.path.dirname(__file__)
+GRADER_ROOT = os.path.join(os.path.dirname(__file__),'..')
 
 # AWS
 

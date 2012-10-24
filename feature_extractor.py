@@ -21,6 +21,12 @@ class FeatureExtractor:
         self.dict_initialized = False
 
     def initialize_dictionaries(self, e_set):
+        """
+        Initializes dictionaries from an essay set object
+        Dictionaries must be initialized prior to using this to extract features
+        e_set is an input essay set
+        returns a confirmation of initialization
+        """
         if(hasattr(e_set, '_type')):
             if(e_set._type == "train"):
                 nvocab = util_functions.get_vocab(e_set._text, e_set._score)
@@ -36,6 +42,10 @@ class FeatureExtractor:
         return ret
 
     def get_good_pos_ngrams(self):
+        """
+        Gets a list of gramatically correct part of speech sequences from an input file called essaycorpus.txt
+        Returns the list and caches the file
+        """
         if(os.path.isfile("good_pos_ngrams.p")):
             good_pos_ngrams = pickle.load(open('good_pos_ngrams.p', 'rb'))
         else:
@@ -46,6 +56,11 @@ class FeatureExtractor:
         return good_pos_ngrams
 
     def gen_length_feats(self, e_set):
+        """
+        Generates length based features from an essay set
+        Generally an internal function called by gen_feats
+        Returns an array of length features
+        """
         text = e_set._text
         lengths = [len(e) for e in text]
         word_counts = [len(t) for t in e_set._tokens]
@@ -68,6 +83,11 @@ class FeatureExtractor:
         return length_arr.copy()
 
     def gen_bag_feats(self, e_set):
+        """
+        Generates bag of words features from an input essay set and trained FeatureExtractor
+        Generally called by gen_feats
+        Returns an array of features
+        """
         if(hasattr(self, '_stem_dict')):
             sfeats = self._stem_dict.transform(e_set._clean_stem_text)
             nfeats = self._normal_dict.transform(e_set._text)
@@ -77,6 +97,10 @@ class FeatureExtractor:
         return bag_feats.copy()
 
     def gen_feats(self, e_set):
+        """
+        Generates bag of words, length, and prompt features from an essay set object
+        returns an array of features
+        """
         bag_feats = self.gen_bag_feats(e_set)
         length_feats = self.gen_length_feats(e_set)
         prompt_feats = self.gen_prompt_feats(e_set)
@@ -86,6 +110,11 @@ class FeatureExtractor:
         return overall_feats
 
     def gen_prompt_feats(self, e_set):
+        """
+        Generates prompt based features from an essay set object and internal prompt variable.
+        Generally called internally by gen_feats
+        Returns an array of prompt features
+        """
         prompt_toks = nltk.word_tokenize(e_set._prompt)
         expand_syns = []
         for word in prompt_toks:

@@ -11,11 +11,11 @@ from itertools import chain
 
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
-from essay_set import essay_set
+from essay_set import EssaySet
 import util_functions
 
 
-class feature_extractor:
+class FeatureExtractor:
     def __init__(self):
         self._good_pos_ngrams = self.get_good_pos_ngrams()
         self.dict_initialized = False

@@ -1,5 +1,7 @@
 Project to integrate machine learning based essay scoring with xserver. Aspell must be installed and added to path to run.  numpy, scipy, sklearn, and nltk also need to be installed.
 
+Nltk also requires the treebank maxent tagger and wordnet to be installed.  These can be installed through the nltk downloader(nltk.download()), or programatically through  python -m nltk.downloader maxent_treebank_pos_tagger wordnet .
+
 Runnable files:
 
 1. create_test_models.py 

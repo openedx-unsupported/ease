@@ -12,7 +12,7 @@ sys.path.append(base_path)
 import util_functions
 
 
-class essay_set:
+class EssaySet:
     def __init__(self, type="train"):
         """
         Initialize variables and check essay set type

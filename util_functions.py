@@ -301,6 +301,7 @@ def quadratic_weighted_kappa(rater_a, rater_b, min_rating=None, max_rating=None)
     rater_b is a list of rater b scores
     min_rating is an optional argument describing the minimum rating possible on the data set
     max_rating is an optional argument describing the maximum rating possible on the data set
+    Returns a float corresponding to the kappa correlation
     """
     assert(len(rater_a) == len(rater_b))
     if min_rating is None:
@@ -333,6 +334,11 @@ def quadratic_weighted_kappa(rater_a, rater_b, min_rating=None, max_rating=None)
 
 
 def confusion_matrix(rater_a, rater_b, min_rating=None, max_rating=None):
+    """
+    Generates a confusion matrix between rater_a and rater_b
+    A confusion matrix shows how often 2 values agree and disagree
+    See quadratic_weighted_kappa for argument descriptions
+    """
     assert(len(rater_a) == len(rater_b))
     if min_rating is None:
         min_rating = min(rater_a)
@@ -347,6 +353,11 @@ def confusion_matrix(rater_a, rater_b, min_rating=None, max_rating=None):
 
 
 def histogram(ratings, min_rating=None, max_rating=None):
+    """
+    Generates a frequency count of each rating on the scale
+    ratings is a list of scores
+    Returns a list of frequencies
+    """
     if min_rating is None:
         min_rating = min(ratings)
     if max_rating is None:
@@ -359,6 +370,11 @@ def histogram(ratings, min_rating=None, max_rating=None):
 
 
 def get_wordnet_syns(word):
+    """
+    Utilize wordnet (installed with nltk) to get synonyms for words
+    word is the input word
+    returns a list of unique synonyms
+    """
     synonyms = []
     regex = r"_"
     pat = re.compile(regex)
@@ -371,6 +387,12 @@ def get_wordnet_syns(word):
 
 
 def get_separator_words(toks1):
+    """
+    Finds the words that separate a list of tokens from a background corpus
+    Basically this generates a list of informative/interesting words in a set
+    toks1 is a list of words
+    Returns a list of separator words
+    """
     tab_toks1 = nltk.FreqDist(word.lower() for word in toks1)
     if(os.path.isfile("essay_cor_tokens.p")):
         toks2 = pickle.load(open('essay_cor_tokens.p', 'rb'))
@@ -395,12 +417,21 @@ def get_separator_words(toks1):
 
 
 def encode_plus(s):
+    """
+    Literally encodes the plus sign
+    input is a string
+    returns the string with plus signs encoded
+    """
     regex = r"\+"
     pat = re.compile(regex)
     return pat.sub("%2B", s)
 
 
 def getMedian(numericValues):
+    """
+    Gets the median of a list of values
+    Returns a float/int
+    """
     theValues = sorted(numericValues)
 
     if len(theValues) % 2 == 1:

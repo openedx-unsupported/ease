@@ -55,8 +55,7 @@ class EssaySet(object):
             # Clean text by removing non digit/work/punctuation characters
             cleaned_essay=util_functions.sub_chars(essay_text).lower()
             if(len(cleaned_essay)>MAXIMUM_ESSAY_LENGTH):
-                raise util_functions.InputError(essay_text, ("essay longer than {0} characters."
-                                                             .format(MAXIMUM_ESSAY_LENGTH)))
+                cleaned_essay=cleaned_essay[0:MAXIMUM_ESSAY_LENGTH]
             self._text.append(cleaned_essay)
             # Spell correct text using aspell
             self._clean_text.append(util_functions.spell_correct(self._text[len(self._text) - 1]))

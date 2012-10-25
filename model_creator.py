@@ -45,6 +45,24 @@ def read_in_test_prompt(filename):
     prompt_string = open(filename).read()
     return prompt_string
 
+def read_in_test_data_twocolumn(filename,sep=","):
+    """
+    Reads in a two column version of the test data.
+    Filename must point to a delimited file.
+    In filename, the first column should be integer score data.
+    The second column should be string text data.
+    Sep specifies the type of separator between fields.
+    """
+    score, text = [], []
+    combined_raw = open(filename).read()
+    raw_lines = combined_raw.splitlines()
+    for row in xrange(1, len(raw_lines)):
+        score1, text1 = raw_lines[row].strip().split("\t")
+        text.append(text1)
+        score.append(int(score1))
+
+    return score, text
+
 
 def create_essay_set(text, score, prompt_string, generate_additional=True):
     """
@@ -64,22 +82,28 @@ def create_essay_set(text, score, prompt_string, generate_additional=True):
 
     return x
 
-def extract_features_and_generate_model(essays):
+def extract_features_and_generate_model(essays,additional_array=None):
     """
     Feed in an essay set to get feature vector and classifier
     essays must be an essay set object
+    additional array is an optional argument that can specify
+    a numpy array of values to add in
     returns a trained FeatureExtractor object and a trained classifier
     """
     f = feature_extractor.FeatureExtractor()
     f.initialize_dictionaries(essays)
 
     train_feats = f.gen_feats(essays)
+    if(additional_array!=None and type(additional_array)==type(numpy.array([1]))):
+        if(additional_array.shape[0]==train_feats.shape[0]):
+            train_feats=numpy.concatenate((train_feats,additional_array),axis=1)
 
     clf = sklearn.ensemble.GradientBoostingClassifier(n_estimators=100, learn_rate=.05,
         max_depth=4, random_state=1,
         min_samples_leaf=3)
 
-    model = util_functions.gen_model(clf, train_feats, essays._score)
+    set_score = numpy.asarray(essays._score, dtype=numpy.int)
+    clf.fit(train_feats, set_score)
 
     return f, clf
 
@@ -93,5 +117,14 @@ def dump_model_to_file(prompt_string, feature_ext, classifier, model_path):
     """
     model_file = {'prompt': prompt_string, 'extractor': feature_ext, 'model': classifier}
     pickle.dump(model_file, file=open(model_path, "w"))
+
+def create_essay_set_and_dump_model(text,score,prompt,model_path,additional_array=None):
+    """
+    Function that creates essay set, extracts features, and writes out model
+    See above functions for argument descriptions
+    """
+    essay_set=create_essay_set(text_score,prompt)
+    feature_ext,clf=extract_features_and_generate_model(essay_set,additional_array)
+    dump_model_to_file(prompt,feature_ext,clf,model_path)
 
 

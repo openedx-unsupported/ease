@@ -44,16 +44,22 @@ def send(payload, answer):
 def check_contains(string, substr):
     if not substr in string:
         print "ERROR: Expected '{0}' in '{1}'".format(substr, string)
+        return False
+    else:
+        return True
 
 def check_not_contains(string, substr):
     if substr in string:
         print "ERROR: Expected '{0}' not to be in '{1}'".format(substr, string)
+        return False
+    else:
+        return True
 
 def check_right(string):
-    check_contains(string, '\"correct\": true')
+    return check_contains(string, '\"correct\": true')
 
 def check_wrong(string):
-    check_contains(string, '\"correct\": false')
+    return check_contains(string, '\"correct\": false')
 
 def globs(dirname, *patterns):
     """
@@ -91,12 +97,23 @@ def check(dirname):
     for name in globs(dirname, 'answer*.txt', 'right*.py'):
         print "Checking correct response from {0}".format(name)
         answer = contents(name)
-        check_right(send(payload, answer))
+        right=check_right(send(payload, answer))
 
     for name in globs(dirname, 'wrong*.txt'):
         print "Checking wrong response from {0}".format(name)
         answer = contents(name)
-        check_wrong(send(payload, answer))
+        wrong=check_wrong(send(payload, answer))
+
+    assert wrong and right
+
+
+def test():
+    #root = args.root or '.'
+    root=os.path.dirname( os.path.abspath(__file__ ))
+    for dirpath, _, _ in os.walk(root):
+        print("checking" + dirpath)
+        yield check, dirpath
+
 
 def main(argv):
     global xserver

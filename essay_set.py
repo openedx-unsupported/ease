@@ -23,8 +23,14 @@ class EssaySet(object):
             type = "train"
 
         self._type = type
-        self._score, self._text, self._id, self._clean_text, self._tokens, self._pos,\
-        self._clean_stem_text, self._generated = [], [], [], [], [], [], [], []
+        self._score=[]
+        self._text=[]
+        self._id=[]
+        self._clean_text=[]
+        self._tokens=[]
+        self._pos=[]
+        self._clean_stem_text=[]
+        self._generated = []
         self._prompt = ""
 
     def add_essay(self, essay_text, essay_score, essay_generated=0):

@@ -37,20 +37,21 @@ def send(payload, answer):
     if r.status_code != requests.codes.ok:
         print "Request error:{0},{1},{2}".format(r.headers,payload,answer)
 
-    print "Text: ", r.text
+    parsed_text=json.loads(r.text)
+    print "Score:{0} {1}".format(parsed_text['score'],parsed_text['correct'])
     return r.text
 
 
 def check_contains(string, substr):
     if not substr in string:
-        print "ERROR: Expected '{0}' in '{1}'".format(substr, string)
+        print "ERROR: Expected to be {0}".format(substr)
         return False
     else:
         return True
 
 def check_not_contains(string, substr):
     if substr in string:
-        print "ERROR: Expected '{0}' not to be in '{1}'".format(substr, string)
+        print "ERROR: Expected to be {0}".format(substr)
         return False
     else:
         return True

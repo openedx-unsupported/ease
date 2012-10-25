@@ -23,9 +23,13 @@ def main(argv):
 
     score, text = model_creator.read_in_test_data(args.train_file)
     prompt_string = model_creator.read_in_test_prompt(args.prompt_file)
+    print("data read")
     e_set = model_creator.create_essay_set(text, score, prompt_string)
+    print("essay set created")
     feature_ext, classifier = model_creator.extract_features_and_generate_model(e_set)
+    print("features pulled out and model generated")
     model_creator.dump_model_to_file(prompt_string, feature_ext, classifier, args.model_path)
+    print("model file written")
 
 if __name__ == "__main__":
     main(sys.argv[1:])

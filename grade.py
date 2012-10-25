@@ -23,12 +23,12 @@ def grade(grader_path,submission):
     results = {'errors': [],'tests': [],'correct': False,'score': 0}
 
     #Try to find and load the model file
+
     try:
         grader_data=pickle.load(file(grader_path,"r"))
     except:
         results['errors'].append("Could not find a valid model file.")
-
-    grader_set=essay_set(type="test")
+    grader_set=EssaySet(type="test")
 
     #Try to add essays to essay set object
     try:
@@ -51,7 +51,6 @@ def grade(grader_path,submission):
         results['correct']=True
     else:
         results['correct']=False
-
     return results
 
 

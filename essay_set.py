@@ -13,6 +13,7 @@ base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
 import util_functions
 
+MAXIMUM_ESSAY_LENGTH=20000
 
 class EssaySet(object):
     def __init__(self, type="train"):
@@ -52,7 +53,11 @@ class EssaySet(object):
             self._id.append(max_id + 1)
             self._score.append(essay_score)
             # Clean text by removing non digit/work/punctuation characters
-            self._text.append(util_functions.sub_chars(essay_text).lower())
+            cleaned_essay=util_functions.sub_chars(essay_text).lower()
+            if(len(cleaned_essay)>MAXIMUM_ESSAY_LENGTH):
+                raise util_functions.InputError(essay_text, ("essay longer than {0} characters."
+                                                             .format(MAXIMUM_ESSAY_LENGTH)))
+            self._text.append(cleaned_essay)
             # Spell correct text using aspell
             self._clean_text.append(util_functions.spell_correct(self._text[len(self._text) - 1]))
             # Tokenize text

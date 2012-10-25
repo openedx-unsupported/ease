@@ -35,7 +35,7 @@ def send(payload, answer):
     print "Request took %.03f sec" % (end - start)
 
     if r.status_code != requests.codes.ok:
-        print "Request error:{0}".format(r.headers)
+        print "Request error:{0},{1},{2}".format(r.headers,payload,answer)
 
     print "Text: ", r.text
     return r.text

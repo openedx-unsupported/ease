@@ -13,7 +13,7 @@ import numpy
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
 
-from essay_set import essay_set
+from essay_set import EssaySet
 
 #Imports needed to unpickle grader data
 import feature_extractor

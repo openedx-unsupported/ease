@@ -76,7 +76,7 @@ def contents(fname):
     with open(fname) as f:
         return f.read()
 
-def check(dirname):
+def check(dirname,type):
     """
     Look for payload.json, answer*.py, right*.py, wrong*.py, run tests.
     """
@@ -103,8 +103,8 @@ def check(dirname):
         print "Checking wrong response from {0}".format(name)
         answer = contents(name)
         wrong=check_wrong(send(payload, answer))
-
-    assert wrong and right
+    if(type=="test"):
+        assert wrong and right
 
 def main(argv):
     global xserver
@@ -123,7 +123,7 @@ def main(argv):
     root=os.path.dirname( os.path.abspath(__file__ ))
     for dirpath, _, _ in os.walk(root):
         print("checking" + dirpath)
-        check(dirpath)
+        check(dirpath,"normal")
 
 if __name__=="__main__":
     main(sys.argv[1:])
@@ -132,7 +132,7 @@ def test_graders():
     root=os.path.dirname( os.path.abspath(__file__ ))
     for dirpath, _, _ in os.walk(root):
         print("checking" + dirpath)
-        yield check, dirpath
+        yield check, dirpath, "test"
 
 def test_model_creation():
     model_creator_dir=os.path.abspath(os.path.join(os.path.dirname(__file__),'..'))

@@ -16,5 +16,6 @@ Runnable files:
 
 	Submits test data found in directories within the tests folder to the xserver and displays results.  See tests/simple_essay for an example of how to format files.  You need payload.json, wrong.txt, and answer.txt to make a test.
 
+Testing:
 
-Tests can be run by running nosetests in the tests directory.
+Tests can be run by running nosetests in the tests directory.  Make sure the test server is running first! 

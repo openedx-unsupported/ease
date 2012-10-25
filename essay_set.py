@@ -74,7 +74,6 @@ class EssaySet(object):
             raise util_functions.InputError(essay_text, "arguments need to be in format "
                                                         "(text,score). text needs to be string,"
                                                         " score needs to be int.")
-        return ret
 
     def update_prompt(self, prompt_text):
         """

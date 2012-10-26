@@ -150,7 +150,7 @@ def get_vocab(text, score, max_feats=750, max_feats2=200):
     max_feats2 is the maximum number of features to consider in the second (final) pass
     Returns a list of words that constitute the significant vocabulary
     """
-    dict = CountVectorizer(min_n=1, max_n=2, max_features=max_feats)
+    dict = CountVectorizer(ngram_range=(1,2), max_features=max_feats)
     dict_mat = dict.fit_transform(text)
     set_score = numpy.asarray(score, dtype=numpy.int)
     med_score = numpy.median(set_score)

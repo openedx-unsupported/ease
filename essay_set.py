@@ -13,6 +13,9 @@ base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
 import util_functions
 
+if not base_path.endswith("/"):
+    base_path=base_path+"/"
+
 MAXIMUM_ESSAY_LENGTH=20000
 
 class EssaySet(object):

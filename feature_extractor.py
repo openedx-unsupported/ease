@@ -16,6 +16,9 @@ sys.path.append(base_path)
 from essay_set import EssaySet
 import util_functions
 
+if not base_path.endswith("/"):
+    base_path=base_path+"/"
+
 
 class FeatureExtractor(object):
     def __init__(self):
@@ -33,8 +36,8 @@ class FeatureExtractor(object):
             if(e_set._type == "train"):
                 nvocab = util_functions.get_vocab(e_set._text, e_set._score)
                 svocab = util_functions.get_vocab(e_set._clean_stem_text, e_set._score)
-                self._normal_dict = CountVectorizer(min_n=1, max_n=2, vocabulary=nvocab)
-                self._stem_dict = CountVectorizer(min_n=1, max_n=2, vocabulary=svocab)
+                self._normal_dict = CountVectorizer(ngram_range=(1,2), vocabulary=nvocab)
+                self._stem_dict = CountVectorizer(ngram_range=(1,2), vocabulary=svocab)
                 self.dict_initialized = True
                 ret = "ok"
             else:
@@ -48,13 +51,13 @@ class FeatureExtractor(object):
         Gets a list of gramatically correct part of speech sequences from an input file called essaycorpus.txt
         Returns the list and caches the file
         """
-        if(os.path.isfile("good_pos_ngrams.p")):
-            good_pos_ngrams = pickle.load(open('good_pos_ngrams.p', 'rb'))
+        if(os.path.isfile(base_path + "good_pos_ngrams.p")):
+            good_pos_ngrams = pickle.load(open(base_path + 'good_pos_ngrams.p', 'rb'))
         else:
-            essay_corpus = open("essaycorpus.txt").read()
+            essay_corpus = open(base_path + "essaycorpus.txt").read()
             essay_corpus = util_functions.sub_chars(essay_corpus)
             good_pos_ngrams = util_functions.regenerate_good_tokens(essay_corpus)
-            pickle.dump(good_pos_ngrams, open('good_pos_ngrams.p', 'wb'))
+            pickle.dump(good_pos_ngrams, open(base_path + 'good_pos_ngrams.p', 'wb'))
         return good_pos_ngrams
 
     def gen_length_feats(self, e_set):
@@ -65,7 +68,7 @@ class FeatureExtractor(object):
         """
         text = e_set._text
         lengths = [len(e) for e in text]
-        word_counts = [len(t) for t in e_set._tokens]
+        word_counts = [max(len(t),1) for t in e_set._tokens]
         comma_count = [e.count(",") for e in text]
         ap_count = [e.count("'") for e in text]
         punc_count = [e.count(".") + e.count("?") + e.count("!") for e in text]

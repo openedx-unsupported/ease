@@ -129,13 +129,19 @@ class FeatureExtractor(object):
         prompt_overlap = []
         prompt_overlap_prop = []
         for j in e_set._tokens:
+            tok_length=len(j)
+            if(tok_length==0):
+                tok_length=1
             prompt_overlap.append(len([i for i in j if i in prompt_toks]))
-            prompt_overlap_prop.append(prompt_overlap[len(prompt_overlap) - 1] / float(len(j)))
+            prompt_overlap_prop.append(prompt_overlap[len(prompt_overlap) - 1] / float(tok_length))
         expand_overlap = []
         expand_overlap_prop = []
         for j in e_set._tokens:
+            tok_length=len(j)
+            if(tok_length==0):
+                tok_length=1
             expand_overlap.append(len([i for i in j if i in expand_syns]))
-            expand_overlap_prop.append(expand_overlap[len(expand_overlap) - 1] / float(len(j)))
+            expand_overlap_prop.append(expand_overlap[len(expand_overlap) - 1] / float(tok_length))
 
         prompt_arr = numpy.array((prompt_overlap, prompt_overlap_prop, expand_overlap, expand_overlap_prop)).transpose()
 

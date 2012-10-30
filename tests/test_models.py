@@ -28,7 +28,7 @@ def main(argv):
     print("essay set created")
     feature_ext, classifier = model_creator.extract_features_and_generate_model(e_set)
     print("features pulled out and model generated")
-    model_creator.dump_model_to_file(prompt_string, feature_ext, classifier, args.model_path)
+    model_creator.dump_model_to_file(prompt_string, feature_ext, classifier, text, score, args.model_path)
     print("model file written")
 
 if __name__ == "__main__":

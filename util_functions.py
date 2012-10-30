@@ -19,7 +19,7 @@ def sub_chars(string):
     Removes all non-punctuation, digit, or letter characters.
     Returns sanitized string.
     """
-    sub_pat = r"[^A-Za-z\.\?!,;:']"
+    sub_pat = r"[^A-Za-z\.\?!,]"
     char_pat = r"\."
     com_pat = r","
     ques_pat = r"\?"

@@ -87,7 +87,7 @@ def spell_correct(string):
         sub_pat = r"\b" + incorrect_words[i] + r"\b"
         sub_comp = re.compile(sub_pat)
         newstring = re.sub(sub_comp, correct_spelling[i], newstring)
-    return newstring,len(incorrect)
+    return newstring,len(incorrect)-1
 
 
 def ngrams(tokens, min_n, max_n):

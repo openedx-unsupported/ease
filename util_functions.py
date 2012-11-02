@@ -62,7 +62,7 @@ def spell_correct(string):
     try:
         p = os.popen(aspell_path + " -a < " + f_path + " --sug-mode=ultra")
     except:
-        return string
+        return string,0
     incorrect = p.readlines()
     p.close()
     incorrect_words = list()

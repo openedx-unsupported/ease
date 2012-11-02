@@ -180,15 +180,16 @@ class FeatureExtractor(object):
         in order to get off topic feedback.
         Returns a list of lists (one list per essay in e_set)
         """
+        modifier_ratio=1.1
         set_grammar=self._get_grammar_errors(e_set._pos,e_set._text,e_set._tokens)
         set_grammar_per_character=[set_grammar[m]/float(len(e_set._text[m])) for m in xrange(0,len(e_set._text))]
         set_spell_errors_per_character=[e_set._spelling_errors[m]/float(len(e_set._text[m])) for m in xrange(0,len(e_set._text))]
         all_feedback=[]
         for m in xrange(0,len(e_set._text)):
             individual_feedback=[]
-            if set_grammar_per_character[m]>(self._grammar_errors_per_character):
+            if set_grammar_per_character[m]>(self._grammar_errors_per_character*modifier_ratio):
                 individual_feedback.append("Potential grammar errors.")
-            if set_spell_errors_per_character[m]>(self._spell_errors_per_character):
+            if set_spell_errors_per_character[m]>(self._spell_errors_per_character*modifier_ratio):
                 individual_feedback.append("Potential spelling errors.")
             if features is not None:
                 f_row_sum=numpy.sum(features[m,12:])

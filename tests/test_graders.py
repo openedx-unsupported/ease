@@ -38,7 +38,9 @@ def send(payload, answer):
         print "Request error:{0},{1},{2}".format(r.headers,payload,answer)
 
     parsed_text=json.loads(r.text)
-    print(parsed_text)
+    print("\nAnswer: {0}\nScore: {1} Correct: {2} \nFeedback: {3}"
+          .format(answer,parsed_text['score'],parsed_text['correct'],
+          parsed_text['feedback']))
     #print "Score:{0} {1}".format(parsed_text['score'],parsed_text['correct'])
     return r.text
 
@@ -97,12 +99,12 @@ def check(dirname,type):
         payload = json.dumps({'grader': os.path.abspath(graders[0])})
 
     for name in globs(dirname, 'answer*.txt', 'right*.py'):
-        print "Checking correct response from {0}".format(name)
+        #print "Checking correct response from {0}".format(name)
         answer = contents(name)
         right=check_right(send(payload, answer))
 
     for name in globs(dirname, 'wrong*.txt'):
-        print "Checking wrong response from {0}".format(name)
+        #print "Checking wrong response from {0}".format(name)
         answer = contents(name)
         wrong=check_wrong(send(payload, answer))
     if(type=="test"):

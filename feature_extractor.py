@@ -160,9 +160,8 @@ class FeatureExtractor(object):
 
     def gen_feedback(self, e_set, features=None):
         set_grammar=self._get_grammar_errors(e_set._pos,e_set._text,e_set._tokens)
-        set_grammar_per_character=[set_grammar[m]/len(e_set._text[m]) for m in xrange(0,len(e_set._text))]
-        set_spell_errors_per_character=[e_set._spelling_errors[m]/len(e_set._text[m]) for m in xrange(0,len(e_set._text))]
-        e_set._spelling_errors
+        set_grammar_per_character=[set_grammar[m]/float(len(e_set._text[m])) for m in xrange(0,len(e_set._text))]
+        set_spell_errors_per_character=[e_set._spelling_errors[m]/float(len(e_set._text[m])) for m in xrange(0,len(e_set._text))]
         all_feedback=[]
         for m in xrange(0,len(e_set._text)):
             individual_feedback=[]

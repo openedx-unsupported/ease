@@ -19,7 +19,7 @@ from essay_set import EssaySet
 import feature_extractor
 import sklearn.ensemble
 
-def grade(grader_path,submission,sandbox):
+def grade(grader_path,submission,sandbox=None):
     results = {'errors': [],'tests': [],'correct': False,'score': 0, 'feedback' : []}
 
     #Try to find and load the model file

@@ -158,7 +158,7 @@ class FeatureExtractor(object):
 
         return prompt_arr.copy()
 
-    def gen_feedback(self, e_set):
+    def gen_feedback(self, e_set, features=None):
         set_grammar=self._get_grammar_errors(e_set._pos,e_set._text,e_set._tokens)
         set_grammar_per_character=[set_grammar[m]/len(e_set._text[m]) for m in xrange(0,len(e_set._text))]
         set_spell_errors_per_character=[e_set._spelling_errors[m]/len(e_set._text[m]) for m in xrange(0,len(e_set._text))]
@@ -170,6 +170,11 @@ class FeatureExtractor(object):
                 individual_feedback.append("Potential grammatical errors.")
             if set_spell_errors_per_character[m]>self._spell_errors_per_character:
                 individual_feedback.append("Potential spelling errors.")
+            if features is not None:
+                f_row_sum=numpy.sum(features[m,12:])
+                f_row_prop=f_row_sum/len(e_set._text[m])
+                if f_row_prop<.05:
+                    individual_feedback.append("Essay may be off topic.")
             all_feedback.append(individual_feedback)
 
         return all_feedback

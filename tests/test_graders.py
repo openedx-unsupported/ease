@@ -38,7 +38,8 @@ def send(payload, answer):
         print "Request error:{0},{1},{2}".format(r.headers,payload,answer)
 
     parsed_text=json.loads(r.text)
-    print "Score:{0} {1}".format(parsed_text['score'],parsed_text['correct'])
+    print(parsed_text)
+    #print "Score:{0} {1}".format(parsed_text['score'],parsed_text['correct'])
     return r.text
 
 

@@ -43,7 +43,7 @@ class FeatureExtractor(object):
                 self._mean_spelling_errors=sum(e_set._spelling_errors)/float(len(e_set._spelling_errors))
                 self._spell_errors_per_character=sum(e_set._spelling_errors)/float(sum([len(t) for t in e_set._text]))
                 self._grammar_errors_per_character=sum(self._get_grammar_errors
-                    (e_set._pos,e_set._text,e_set._tokens))/float(len(e_set._text))
+                    (e_set._pos,e_set._text,e_set._tokens))/float(sum([len(t) for t in e_set._text]))
                 ret = "ok"
             else:
                 raise util_functions.InputError(e_set, "needs to be an essay set of the train type.")
@@ -157,3 +157,19 @@ class FeatureExtractor(object):
         prompt_arr = numpy.array((prompt_overlap, prompt_overlap_prop, expand_overlap, expand_overlap_prop)).transpose()
 
         return prompt_arr.copy()
+
+    def gen_feedback(self, e_set):
+        set_grammar=self._get_grammar_errors(e_set._pos,e_set._text,e_set._tokens)
+        set_grammar_per_character=[set_grammar[m]/len(e_set._text[m]) for m in xrange(0,len(e_set._text))]
+        set_spell_errors_per_character=[e_set._spelling_errors[m]/len(e_set._text[m]) for m in xrange(0,len(e_set._text))]
+        e_set._spelling_errors
+        all_feedback=[]
+        for m in xrange(0,len(e_set._text)):
+            individual_feedback=[]
+            if set_grammar_per_character[m]<self._grammar_errors_per_character:
+                individual_feedback.append("Potential grammatical errors.")
+            if set_spell_errors_per_character[m]>self._spell_errors_per_character:
+                individual_feedback.append("Potential spelling errors.")
+            all_feedback.append(individual_feedback)
+
+        return all_feedback

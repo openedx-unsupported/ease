@@ -20,7 +20,7 @@ import feature_extractor
 import sklearn.ensemble
 
 def grade(grader_path,submission,sandbox):
-    results = {'errors': [],'tests': [],'correct': False,'score': 0}
+    results = {'errors': [],'tests': [],'correct': False,'score': 0, 'feedback' : []}
 
     #Try to find and load the model file
 
@@ -40,7 +40,7 @@ def grade(grader_path,submission,sandbox):
     #Try to extract features from submission and assign score via the model
     try:
         grader_feats=grader_data['extractor'].gen_feats(grader_set)
-
+        results['feedback']=grader_data['extractor'].gen_feedback(grader_set)
         results['score']=int(grader_data['model'].predict(grader_feats)[0])
     except:
         results['errors'].append("Could not extract features and score essay.")

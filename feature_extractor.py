@@ -41,9 +41,9 @@ class FeatureExtractor(object):
                 self._stem_dict = CountVectorizer(ngram_range=(1,2), vocabulary=svocab)
                 self.dict_initialized = True
                 self._mean_spelling_errors=sum(e_set._spelling_errors)/float(len(e_set._spelling_errors))
-                self._spell_errors_per_word=sum(e_set._spelling_errors)/float(sum([len(t) for t in e_set._text]))
-                self._grammar_errors_per_word=sum(self._get_grammar_errors
-                    (e_set._pos,e_set._text,e_set._tokens))/float(len(text))
+                self._spell_errors_per_character=sum(e_set._spelling_errors)/float(sum([len(t) for t in e_set._text]))
+                self._grammar_errors_per_character=sum(self._get_grammar_errors
+                    (e_set._pos,e_set._text,e_set._tokens))/float(len(e_set._text))
                 ret = "ok"
             else:
                 raise util_functions.InputError(e_set, "needs to be an essay set of the train type.")
@@ -73,8 +73,7 @@ class FeatureExtractor(object):
             pos_ngrams = util_functions.ngrams(pos_seq, 2, 4)
             overlap_ngrams = [i for i in pos_ngrams if i in self._good_pos_ngrams]
             good_pos_tags.append(len(overlap_ngrams))
-        good_pos_tag_prop = [good_pos_tags[m] / float(word_counts[m]) for m in xrange(0, len(text))]
-        return good_pos_tag_prop
+        return good_pos_tags
 
     def gen_length_feats(self, e_set):
         """
@@ -89,7 +88,9 @@ class FeatureExtractor(object):
         ap_count = [e.count("'") for e in text]
         punc_count = [e.count(".") + e.count("?") + e.count("!") for e in text]
         chars_per_word = [lengths[m] / float(word_counts[m]) for m in xrange(0, len(text))]
-        good_pos_tag_prop = self._get_grammar_errors(e_set._pos,e_set._text,e_set._tokens)
+
+        good_pos_tags= self._get_grammar_errors(e_set._pos,e_set._text,e_set._tokens)
+        good_pos_tag_prop = [good_pos_tags[m] / float(word_counts[m]) for m in xrange(0, len(text))]
 
         length_arr = numpy.array((
         lengths, word_counts, comma_count, ap_count, punc_count, chars_per_word, good_pos_tags,

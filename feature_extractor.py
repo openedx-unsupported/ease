@@ -10,6 +10,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 import pickle
 import os
 from itertools import chain
+import copy
 
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
@@ -39,6 +40,9 @@ class FeatureExtractor(object):
                 self._normal_dict = CountVectorizer(ngram_range=(1,2), vocabulary=nvocab)
                 self._stem_dict = CountVectorizer(ngram_range=(1,2), vocabulary=svocab)
                 self.dict_initialized = True
+                self._mean_spelling_errors=sum(e_set._spelling_errors)/len(e_set._spelling_errors)
+                self._spell_errors_per_word=sum(e_set._spelling_errors)/sum([len(t) for t in e_set._text])
+                self._grammar_errors_per_word=[]
                 ret = "ok"
             else:
                 raise util_functions.InputError(e_set, "needs to be an essay set of the train type.")
@@ -80,6 +84,7 @@ class FeatureExtractor(object):
             overlap_ngrams = [i for i in pos_ngrams if i in self._good_pos_ngrams]
             good_pos_tags.append(len(overlap_ngrams))
         good_pos_tag_prop = [good_pos_tags[m] / float(word_counts[m]) for m in xrange(0, len(text))]
+        self._grammar_errors_per_word=[1-good_pos_tag_prop[m] for m in xrange(0,len(text))]
 
         length_arr = numpy.array((
         lengths, word_counts, comma_count, ap_count, punc_count, chars_per_word, good_pos_tags,

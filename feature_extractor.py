@@ -61,14 +61,25 @@ class FeatureExtractor(object):
         """
         if(os.path.isfile(base_path + "good_pos_ngrams.p")):
             good_pos_ngrams = pickle.load(open(base_path + 'good_pos_ngrams.p', 'rb'))
-        else:
+        elif os.path.isfile(base_path + "essaycorpus.txt"):
             essay_corpus = open(base_path + "essaycorpus.txt").read()
             essay_corpus = util_functions.sub_chars(essay_corpus)
             good_pos_ngrams = util_functions.regenerate_good_tokens(essay_corpus)
             pickle.dump(good_pos_ngrams, open(base_path + 'good_pos_ngrams.p', 'wb'))
+        else:
+            #Hard coded list in case the needed files cannot be found
+            good_pos_ngrams=['NN PRP', 'NN PRP .', 'NN PRP . DT', 'PRP .', 'PRP . DT', 'PRP . DT NNP', '. DT',
+             '. DT NNP', '. DT NNP NNP', 'DT NNP', 'DT NNP NNP', 'DT NNP NNP NNP', 'NNP NNP',
+             'NNP NNP NNP', 'NNP NNP NNP NNP', 'NNP NNP NNP .', 'NNP NNP .', 'NNP NNP . TO',
+             'NNP .', 'NNP . TO', 'NNP . TO NNP', '. TO', '. TO NNP', '. TO NNP NNP',
+             'TO NNP', 'TO NNP NNP']
+
         return good_pos_ngrams
 
     def _get_grammar_errors(self,pos,text,tokens):
+        """
+        Internal function to get the number of grammar errors in given text
+        """
         word_counts = [max(len(t),1) for t in tokens]
         good_pos_tags = []
         for i in xrange(0, len(text)):
@@ -162,6 +173,13 @@ class FeatureExtractor(object):
         return prompt_arr.copy()
 
     def gen_feedback(self, e_set, features=None):
+        """
+        Generate feedback for a given set of essays
+        e_set - EssaySet object
+        features - optionally, pass in a matrix of features extracted from e_set using FeatureExtractor
+        in order to get off topic feedback.
+        Returns a list of lists (one list per essay in e_set)
+        """
         set_grammar=self._get_grammar_errors(e_set._pos,e_set._text,e_set._tokens)
         set_grammar_per_character=[set_grammar[m]/float(len(e_set._text[m])) for m in xrange(0,len(e_set._text))]
         set_spell_errors_per_character=[e_set._spelling_errors[m]/float(len(e_set._text[m])) for m in xrange(0,len(e_set._text))]

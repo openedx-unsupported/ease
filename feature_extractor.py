@@ -205,12 +205,12 @@ class FeatureExtractor(object):
         all_feedback=[]
         for m in xrange(0,len(e_set._text)):
             individual_feedback={'grammar' : "Ok.", 'spelling' : "Ok.", 'topicality' : "Ok.", 'markup_text' : ""}
-            markup_tokens=nltk.word_tokenize(e_set._markup_text)
+            markup_tokens=nltk.word_tokenize(e_set._markup_text[m])
             bad_pos_starts=[z[0] for z in bad_pos_positions[m]]
-            bad_pos_ends=[z[1] for z in bad_pos_positions[m]]
+            bad_pos_ends=[z[1]-1 for z in bad_pos_positions[m]]
             for z in xrange(0,len(markup_tokens)):
                 if z in bad_pos_starts:
-                    markup_tokens[z]=="[[" + markup_tokens[z]
+                    markup_tokens[z]="[[" + markup_tokens[z]
                 elif z in bad_pos_ends:
                     markup_tokens[z]=markup_tokens[z] + "]]"
 
@@ -223,7 +223,8 @@ class FeatureExtractor(object):
                 f_row_prop=f_row_sum/len(e_set._text[m])
                 if f_row_prop<(self._mean_f_prop):
                     individual_feedback['topicality']="Essay may be off topic."
-            individual_feedback['markup_text']=" ".join(markup_tokens)
+            markup_string=" ".join(markup_tokens)
+            individual_feedback['markup_text']=markup_string
             all_feedback.append(individual_feedback)
 
         return all_feedback

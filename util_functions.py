@@ -88,7 +88,7 @@ def spell_correct(string):
         sub_pat = r"\b" + incorrect_words[i] + r"\b"
         sub_comp = re.compile(sub_pat)
         newstring = re.sub(sub_comp, correct_spelling[i], newstring)
-        markup_string=re.sub(sub_comp,".." + correct_spelling[i] + "..", markup_string)
+        markup_string=re.sub(sub_comp," .." + incorrect_words[i] + ".. ", markup_string)
     return newstring,len(incorrect_words),markup_string
 
 

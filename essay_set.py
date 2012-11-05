@@ -70,7 +70,7 @@ class EssaySet(object):
             # Tokenize text
             self._tokens.append(nltk.word_tokenize(self._clean_text[len(self._clean_text) - 1]))
             # Part of speech tag text
-            self._pos.append(nltk.pos_tag(self._tokens[len(self._tokens) - 1]))
+            self._pos.append(nltk.pos_tag(self._clean_text[len(self._clean_text) - 1].split(" ")))
             self._generated.append(essay_generated)
             # Stem spell corrected text
             porter = nltk.PorterStemmer()

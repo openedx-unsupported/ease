@@ -37,6 +37,7 @@ class EssaySet(object):
         self._generated = []
         self._prompt = ""
         self._spelling_errors=[]
+        self._markup_text=[]
 
     def add_essay(self, essay_text, essay_score, essay_generated=0):
         """
@@ -62,9 +63,10 @@ class EssaySet(object):
                 cleaned_essay=cleaned_essay[0:MAXIMUM_ESSAY_LENGTH]
             self._text.append(cleaned_essay)
             # Spell correct text using aspell
-            cleaned_text,spell_errors=util_functions.spell_correct(self._text[len(self._text) - 1])
+            cleaned_text,spell_errors,markup_text=util_functions.spell_correct(self._text[len(self._text) - 1])
             self._clean_text.append(cleaned_text)
             self._spelling_errors.append(spell_errors)
+            self._markup_text.append(markup_text)
             # Tokenize text
             self._tokens.append(nltk.word_tokenize(self._clean_text[len(self._clean_text) - 1]))
             # Part of speech tag text

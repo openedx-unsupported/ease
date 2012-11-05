@@ -205,7 +205,7 @@ class FeatureExtractor(object):
         all_feedback=[]
         for m in xrange(0,len(e_set._text)):
             individual_feedback={'grammar' : "Ok.", 'spelling' : "Ok.", 'topicality' : "Ok.", 'markup_text' : ""}
-            markup_tokens=nltk.word_tokenize(e_set._markup_text[m])
+            markup_tokens=e_set._markup_text[m].split(" ")
             bad_pos_starts=[z[0] for z in bad_pos_positions[m]]
             bad_pos_ends=[z[1]-1 for z in bad_pos_positions[m]]
             for z in xrange(0,len(markup_tokens)):

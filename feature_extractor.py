@@ -204,16 +204,26 @@ class FeatureExtractor(object):
         set_spell_errors_per_character=[e_set._spelling_errors[m]/float(len(e_set._text[m])) for m in xrange(0,len(e_set._text))]
         all_feedback=[]
         for m in xrange(0,len(e_set._text)):
-            individual_feedback=[]
+            individual_feedback={'grammar' : "Ok.", 'spelling' : "Ok.", 'topicality' : "Ok.", 'markup_text' : ""}
+            markup_tokens=nltk.word_tokenize(e_set._markup_text)
+            bad_pos_starts=[z[0] for z in bad_pos_positions[m]]
+            bad_pos_ends=[z[1] for z in bad_pos_positions[m]]
+            for z in xrange(0,len(markup_tokens)):
+                if z in bad_pos_starts:
+                    markup_tokens[z]=="[[" + markup_tokens[z]
+                elif z in bad_pos_ends:
+                    markup_tokens[z]=markup_tokens[z] + "]]"
+
             if set_grammar_per_character[m]>(self._grammar_errors_per_character*modifier_ratio):
-                individual_feedback.append("Potential grammar errors.")
+                individual_feedback['grammar']="Potential grammar errors."
             if set_spell_errors_per_character[m]>(self._spell_errors_per_character*modifier_ratio):
-                individual_feedback.append("Potential spelling errors.")
+                individual_feedback['spelling']="Potential spelling errors."
             if features is not None:
                 f_row_sum=numpy.sum(features[m,12:])
                 f_row_prop=f_row_sum/len(e_set._text[m])
                 if f_row_prop<(self._mean_f_prop):
-                    individual_feedback.append("Essay may be off topic.")
+                    individual_feedback['topicality']="Essay may be off topic."
+            individual_feedback['markup_text']=" ".join(markup_tokens)
             all_feedback.append(individual_feedback)
 
         return all_feedback

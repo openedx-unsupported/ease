@@ -44,7 +44,7 @@ class FeatureExtractor(object):
                 self._mean_spelling_errors=sum(e_set._spelling_errors)/float(len(e_set._spelling_errors))
                 self._spell_errors_per_character=sum(e_set._spelling_errors)/float(sum([len(t) for t in e_set._text]))
                 self._grammar_errors_per_character=1-(sum(self._get_grammar_errors
-                    (e_set._pos,e_set._text,e_set._tokens))/float(sum([len(t) for t in e_set._text])))
+                    (e_set._pos,e_set._text,e_set._tokens)[0])/float(sum([len(t) for t in e_set._text])))
                 bag_feats=self.gen_bag_feats(e_set)
                 f_row_sum=numpy.sum(bag_feats[:,:])/bag_feats.shape[0]
                 self._mean_f_prop=f_row_sum/float(sum([len(t) for t in e_set._text]))
@@ -85,6 +85,7 @@ class FeatureExtractor(object):
         good_pos_tags = []
         min_pos_seq=2
         max_pos_seq=4
+        bad_pos_positions=[]
         for i in xrange(0, len(text)):
             pos_seq = [tag[1] for tag in pos[i]]
             pos_ngrams = util_functions.ngrams(pos_seq, min_pos_seq, max_pos_seq)
@@ -101,10 +102,10 @@ class FeatureExtractor(object):
                         to_delete.append(j)
 
             fixed_bad_pos_tuples=[bad_pos_tuples[z] for z in xrange(0,len(bad_pos_tuples)) if z not in to_delete]
-
+            bad_pos_positions.append(fixed_bad_pos_tuples)
             overlap_ngrams = [z for z in pos_ngrams if z in self._good_pos_ngrams]
             good_pos_tags.append(len(overlap_ngrams))
-        return good_pos_tags
+        return good_pos_tags,bad_pos_positions
 
     def gen_length_feats(self, e_set):
         """
@@ -120,7 +121,7 @@ class FeatureExtractor(object):
         punc_count = [e.count(".") + e.count("?") + e.count("!") for e in text]
         chars_per_word = [lengths[m] / float(word_counts[m]) for m in xrange(0, len(text))]
 
-        good_pos_tags= self._get_grammar_errors(e_set._pos,e_set._text,e_set._tokens)
+        good_pos_tags,bad_pos_positions= self._get_grammar_errors(e_set._pos,e_set._text,e_set._tokens)
         good_pos_tag_prop = [good_pos_tags[m] / float(word_counts[m]) for m in xrange(0, len(text))]
 
         length_arr = numpy.array((
@@ -198,7 +199,7 @@ class FeatureExtractor(object):
         Returns a list of lists (one list per essay in e_set)
         """
         modifier_ratio=1.05
-        set_grammar=self._get_grammar_errors(e_set._pos,e_set._text,e_set._tokens)
+        set_grammar,bad_pos_positions=self._get_grammar_errors(e_set._pos,e_set._text,e_set._tokens)
         set_grammar_per_character=[set_grammar[m]/float(len(e_set._text[m])) for m in xrange(0,len(e_set._text))]
         set_spell_errors_per_character=[e_set._spelling_errors[m]/float(len(e_set._text[m])) for m in xrange(0,len(e_set._text))]
         all_feedback=[]

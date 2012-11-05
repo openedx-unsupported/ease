@@ -82,10 +82,14 @@ class FeatureExtractor(object):
         """
         word_counts = [max(len(t),1) for t in tokens]
         good_pos_tags = []
+        min_pos_seq=2
+        max_pos_seq=4
         for i in xrange(0, len(text)):
             pos_seq = [tag[1] for tag in pos[i]]
-            pos_ngrams = util_functions.ngrams(pos_seq, 2, 4)
-            overlap_ngrams = [i for i in pos_ngrams if i in self._good_pos_ngrams]
+            pos_ngrams = util_functions.ngrams(pos_seq, min_pos_seq, max_pos_seq)
+            long_pos_ngrams=[z for z in pos_ngrams if z.count(' ')==(max_pos_seq-1)]
+            bad_pos_positions=[z for z in xrange(0,len(long_pos_ngrams)) if long_pos_ngrams[z] not in self._good_pos_ngrams]
+            overlap_ngrams = [z for z in pos_ngrams if z in self._good_pos_ngrams]
             good_pos_tags.append(len(overlap_ngrams))
         return good_pos_tags
 

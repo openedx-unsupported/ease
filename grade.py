@@ -9,6 +9,7 @@ import sys
 import pickle
 import os
 import numpy
+import logging
 
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
@@ -19,7 +20,10 @@ from essay_set import EssaySet
 import feature_extractor
 import sklearn.ensemble
 
+log = logging.getLogger(__name__)
+
 def grade(grader_path,submission,sandbox=None):
+    log.debug("Grader path: {0}\n Submission: {1}".format(grader_path,submission))
     results = {'errors': [],'tests': [],'correct': False,'score': 0, 'feedback' : []}
 
     #Try to find and load the model file
@@ -42,7 +46,7 @@ def grade(grader_path,submission,sandbox=None):
         grader_feats=grader_data['extractor'].gen_feats(grader_set)
         results['feedback']=grader_data['extractor'].gen_feedback(grader_set)
         results['score']=int(grader_data['model'].predict(grader_feats)[0])
-    except:
+    except :
         results['errors'].append("Could not extract features and score essay.")
 
     #Determine maximum score and correctness of response

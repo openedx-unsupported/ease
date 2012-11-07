@@ -28,7 +28,7 @@ feedback_template = u"""
 <section>
     <div class="shortform">
         <div class="result-output">
-          There are {problem_areas} potential problem areas in your submission.
+          Number of potential problem areas identified: {problem_areas}
         </div>
     </div>
     <div class="longform">
@@ -104,7 +104,8 @@ def grade(grader_path,submission,sandbox=None):
     #Generate short form output--number of problem areas identified in feedback
     problem_areas=0
     for tag in feedback:
-        problem_areas+=len(feedback[tag])>5
+        if tag is not 'markup_text':
+            problem_areas+=len(feedback[tag])>5
 
     #Determine maximum score and correctness of response
     max_score=numpy.max(grader_data['model'].classes_)

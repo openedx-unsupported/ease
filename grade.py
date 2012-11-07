@@ -27,7 +27,7 @@ feedback_template = u"""
 <header>Feedback</header>
   <section>
     <div class="topicality">
-    {topicality}
+      {topicality}
     </div>
     <div class="spelling">
       {spelling}
@@ -42,10 +42,23 @@ feedback_template = u"""
 </div>
 """
 
+error_template = u"""
+<div class="feedback">
+<header>Feedback</header>
+  <section>
+    <div class="error">
+      {errors}
+    </div>
+  </section>
+</div>
+"""
+
 
 def grade(grader_path,submission,sandbox=None):
     log.debug("Grader path: {0}\n Submission: {1}".format(grader_path,submission))
     results = {'errors': [],'tests': [],'correct': False,'score': 0, 'feedback' : ""}
+
+    has_error=False
 
     #Try to find and load the model file
 
@@ -53,6 +66,7 @@ def grade(grader_path,submission,sandbox=None):
         grader_data=pickle.load(file(grader_path,"r"))
     except:
         results['errors'].append("Could not find a valid model file.")
+        has_error=True
     grader_set=EssaySet(type="test")
 
     #Try to add essays to essay set object
@@ -61,14 +75,16 @@ def grade(grader_path,submission,sandbox=None):
         grader_set.update_prompt(str(grader_data['prompt']))
     except:
         results['errors'].append("Essay could not be added to essay set:{0}".format(submission))
+        has_error=True
 
     #Try to extract features from submission and assign score via the model
     try:
         grader_feats=grader_data['extractor'].gen_feats(grader_set)
-        feedback=grader_data['extractor'].gen_feedback(grader_set)
+        feedback=grader_data['extractor'].gen_feedback(grader_set)[0]
         results['score']=int(grader_data['model'].predict(grader_feats)[0])
     except :
         results['errors'].append("Could not extract features and score essay.")
+        has_error=True
 
     #Determine maximum score and correctness of response
     max_score=numpy.max(grader_data['model'].classes_)
@@ -78,8 +94,11 @@ def grade(grader_path,submission,sandbox=None):
         results['correct']=False
 
     #Add feedback template to results
-    results["feedback"]=feedback_template.format(topicality=feedback['topicality'],
-        spelling=feedback['spelling'],grammar=feedback['grammar'],markup_text=feedback['markup_text'])
+    if not has_error:
+        results['feedback']=feedback_template.format(topicality=feedback['topicality'],
+            spelling=feedback['spelling'],grammar=feedback['grammar'],markup_text=feedback['markup_text'])
+    else:
+        results['feedback']=error_template.format(errors=' '.join(results['errors']))
 
     return results
 

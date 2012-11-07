@@ -26,8 +26,8 @@ TEMPORARY_WANTS_CONFIG=True
 
 feedback_template = u"""
 
-<header>Feedback</header>
 <section>
+    <header>Feedback</header>
     <div class="shortform">
         <div class="result-output">
           Number of potential problem areas identified: {problem_areas}
@@ -72,7 +72,7 @@ error_template = u"""
 
 
 def grade(grader_path,grader_config,submission,sandbox=None):
-    
+
     if not grader_path.endswith(".p"):
         model_path+=".p"
     log.debug("Grader path: {0}\n Submission: {1}".format(grader_path,submission))

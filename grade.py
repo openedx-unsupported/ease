@@ -22,9 +22,30 @@ import sklearn.ensemble
 
 log = logging.getLogger(__name__)
 
+feedback_template = u"""
+<div class="feedback">
+<header>Feedback</header>
+  <section>
+    <div class="topicality">
+    {topicality}
+    </div>
+    <div class="spelling">
+      {spelling}
+    </div>
+    <div class="grammar">
+        {grammar}
+    </div>
+    <div class="markup_text">
+        {markup_text}
+    </div>
+  </section>
+</div>
+"""
+
+
 def grade(grader_path,submission,sandbox=None):
     log.debug("Grader path: {0}\n Submission: {1}".format(grader_path,submission))
-    results = {'errors': [],'tests': [],'correct': False,'score': 0, 'feedback' : []}
+    results = {'errors': [],'tests': [],'correct': False,'score': 0, 'feedback' : ""}
 
     #Try to find and load the model file
 
@@ -44,7 +65,7 @@ def grade(grader_path,submission,sandbox=None):
     #Try to extract features from submission and assign score via the model
     try:
         grader_feats=grader_data['extractor'].gen_feats(grader_set)
-        results['feedback']=grader_data['extractor'].gen_feedback(grader_set)
+        feedback=grader_data['extractor'].gen_feedback(grader_set)
         results['score']=int(grader_data['model'].predict(grader_feats)[0])
     except :
         results['errors'].append("Could not extract features and score essay.")
@@ -55,6 +76,11 @@ def grade(grader_path,submission,sandbox=None):
         results['correct']=True
     else:
         results['correct']=False
+
+    #Add feedback template to results
+    results["feedback"]=feedback_template.format(topicality=feedback['topicality'],
+        spelling=feedback['spelling'],grammar=feedback['grammar'],markup_text=feedback['markup_text'])
+
     return results
 
 

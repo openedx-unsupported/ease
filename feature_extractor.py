@@ -12,6 +12,7 @@ import os
 from itertools import chain
 import copy
 import operator
+import logging
 
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
@@ -20,6 +21,8 @@ import util_functions
 
 if not base_path.endswith("/"):
     base_path=base_path+"/"
+
+log = logging.getLogger(__name__)
 
 
 class FeatureExtractor(object):
@@ -46,7 +49,7 @@ class FeatureExtractor(object):
                 self._grammar_errors_per_character=1-(sum(self._get_grammar_errors
                     (e_set._pos,e_set._text,e_set._tokens)[0])/float(sum([len(t) for t in e_set._text])))
                 bag_feats=self.gen_bag_feats(e_set)
-                f_row_sum=numpy.sum(bag_feats[:,:])/bag_feats.shape[0]
+                f_row_sum=numpy.sum(bag_feats[:,:])
                 self._mean_f_prop=f_row_sum/float(sum([len(t) for t in e_set._text]))
                 ret = "ok"
             else:
@@ -224,7 +227,7 @@ class FeatureExtractor(object):
             if features is not None:
                 f_row_sum=numpy.sum(features[m,12:])
                 f_row_prop=f_row_sum/len(e_set._text[m])
-                if f_row_prop<(self._mean_f_prop):
+                if f_row_prop<(self._mean_f_prop/1.5) or len(e_set._text[m])<20:
                     individual_feedback['topicality']="Essay may be off topic."
             markup_string=" ".join(markup_tokens)
             individual_feedback['markup_text']=markup_string

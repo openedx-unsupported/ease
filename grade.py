@@ -74,7 +74,8 @@ error_template = u"""
 def grade(grader_path,grader_config,submission,sandbox=None):
 
     if not grader_path.endswith(".p"):
-        model_path+=".p"
+        grader_path+=".p"
+
     log.debug("Grader path: {0}\n Submission: {1}".format(grader_path,submission))
     results = {'errors': [],'tests': [],'correct': False,'score': 0, 'feedback' : ""}
 
@@ -100,7 +101,7 @@ def grade(grader_path,grader_config,submission,sandbox=None):
     #Try to extract features from submission and assign score via the model
     try:
         grader_feats=grader_data['extractor'].gen_feats(grader_set)
-        feedback=grader_data['extractor'].gen_feedback(grader_set)[0]
+        feedback=grader_data['extractor'].gen_feedback(grader_set,grader_feats)[0]
         results['score']=int(grader_data['model'].predict(grader_feats)[0])
     except :
         results['errors'].append("Could not extract features and score essay.")
@@ -128,6 +129,7 @@ def grade(grader_path,grader_config,submission,sandbox=None):
         results['feedback']=error_template.format(errors=' '.join(results['errors']))
 
     return results
+
 
 
     

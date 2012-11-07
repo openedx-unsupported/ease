@@ -10,6 +10,9 @@ sys.path.append(one_up_path)
 import model_creator
 
 def create(text,scores,prompt,model_path):
+    if not model_path.endswith(".p"):
+        model_path+=".p"
+
     results = {'errors': [],'created' : False}
     try:
         e_set = model_creator.create_essay_set(text, score, prompt_string)

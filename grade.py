@@ -22,6 +22,8 @@ import sklearn.ensemble
 
 log = logging.getLogger(__name__)
 
+TEMPORARY_WANTS_CONFIG=True
+
 feedback_template = u"""
 
 <header>Feedback</header>
@@ -69,7 +71,10 @@ error_template = u"""
 """
 
 
-def grade(grader_path,submission,sandbox=None):
+def grade(grader_path,grader_config,submission,sandbox=None):
+    
+    if not grader_path.endswith(".p"):
+        model_path+=".p"
     log.debug("Grader path: {0}\n Submission: {1}".format(grader_path,submission))
     results = {'errors': [],'tests': [],'correct': False,'score': 0, 'feedback' : ""}
 

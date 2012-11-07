@@ -90,7 +90,7 @@ def spell_correct(string):
         sub_comp = re.compile(sub_pat)
         newstring = re.sub(sub_comp, correct_spelling[i], newstring)
         if incorrect_words[i] not in already_subbed:
-            markup_string=re.sub(sub_comp,'<feedback class="badspelling">' + incorrect_words[i] + "</feedback>", markup_string)
+            markup_string=re.sub(sub_comp,'<bs>' + incorrect_words[i] + "</bs>", markup_string)
             already_subbed.append(incorrect_words[i])
 
     return newstring,len(incorrect_words),markup_string

@@ -210,12 +210,12 @@ class FeatureExtractor(object):
             bad_pos_ends=[z[1]-1 for z in bad_pos_positions[m]]
             for z in xrange(0,len(markup_tokens)):
                 if z in bad_pos_starts:
-                    markup_tokens[z]='<feedback class="badgrammar">' + markup_tokens[z]
+                    markup_tokens[z]='<bg>' + markup_tokens[z]
                 elif z in bad_pos_ends:
-                    markup_tokens[z]=markup_tokens[z] + "</feedback>"
+                    markup_tokens[z]=markup_tokens[z] + "</bg>"
             if(len(bad_pos_ends)>0 and len(bad_pos_starts)>0 and len(markup_tokens)>1):
                 if max(bad_pos_ends)>(len(markup_tokens)-1) and max(bad_pos_starts)<(len(markup_tokens)-1):
-                    markup_tokens[len(markup_tokens)-1]+="</feedback>"
+                    markup_tokens[len(markup_tokens)-1]+="</bg>"
 
             if set_grammar_per_character[m]>(self._grammar_errors_per_character*modifier_ratio):
                 individual_feedback['grammar']="Potential grammar errors."

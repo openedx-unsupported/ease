@@ -23,34 +23,49 @@ import sklearn.ensemble
 log = logging.getLogger(__name__)
 
 feedback_template = u"""
-<div class="feedback">
+
 <header>Feedback</header>
-  <section>
-    <div class="topicality">
-      {topicality}
+<section>
+    <div class="shortform">
+        <div class="result-output">
+          There are {problem_areas} potential problem areas in your submission.
+        </div>
     </div>
-    <div class="spelling">
-      {spelling}
+    <div class="longform">
+        <div class="result-output">
+          <div class="topicality">
+            Topicality: {topicality}
+          </div>
+          <div class="spelling">
+            Spelling: {spelling}
+          </div>
+          <div class="grammar">
+            Grammar: {grammar}
+          </div>
+          <div class="markup-text">
+            {markup_text}
+          </div>
+        </div>
     </div>
-    <div class="grammar">
-        {grammar}
-    </div>
-    <div class="markup_text">
-        {markup_text}
-    </div>
-  </section>
-</div>
+</section>
+
 """
 
 error_template = u"""
-<div class="feedback">
-<header>Feedback</header>
-  <section>
-    <div class="error">
-      {errors}
+
+<section>
+    <div class="shortform">
+        <div class="result-errors">
+          There was an error with your submission.  Please contact course staff.
+        </div>
     </div>
-  </section>
-</div>
+    <div class="longform">
+        <div class="result-errors">
+          {errors}
+        </div>
+    </div>
+</section>
+
 """
 
 
@@ -86,6 +101,11 @@ def grade(grader_path,submission,sandbox=None):
         results['errors'].append("Could not extract features and score essay.")
         has_error=True
 
+    #Generate short form output--number of problem areas identified in feedback
+    problem_areas=0
+    for tag in feedback:
+        problem_areas+=len(feedback[tag])>5
+
     #Determine maximum score and correctness of response
     max_score=numpy.max(grader_data['model'].classes_)
     if results['score']/float(max_score) >= .66:
@@ -96,7 +116,8 @@ def grade(grader_path,submission,sandbox=None):
     #Add feedback template to results
     if not has_error:
         results['feedback']=feedback_template.format(topicality=feedback['topicality'],
-            spelling=feedback['spelling'],grammar=feedback['grammar'],markup_text=feedback['markup_text'])
+            spelling=feedback['spelling'],grammar=feedback['grammar'],
+            markup_text=feedback['markup_text'],problem_areas=problem_areas)
     else:
         results['feedback']=error_template.format(errors=' '.join(results['errors']))
 

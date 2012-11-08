@@ -107,25 +107,26 @@ def grade(grader_path,grader_config,submission,sandbox=None):
         results['errors'].append("Could not extract features and score essay.")
         has_error=True
 
-    #Generate short form output--number of problem areas identified in feedback
-    problem_areas=0
-    for tag in feedback:
-        if tag is not 'markup_text':
-            problem_areas+=len(feedback[tag])>5
-
-    #Determine maximum score and correctness of response
-    max_score=numpy.max(grader_data['model'].classes_)
-    if results['score']/float(max_score) >= .66:
-        results['correct']=True
-    else:
-        results['correct']=False
-
-    #Add feedback template to results
     if not has_error:
+        #Determine maximum score and correctness of response
+        max_score=numpy.max(grader_data['model'].classes_)
+        if results['score']/float(max_score) >= .66:
+            results['correct']=True
+        else:
+            results['correct']=False
+
+        #Generate short form output--number of problem areas identified in feedback
+        problem_areas=0
+        for tag in feedback:
+            if tag is not 'markup_text':
+                problem_areas+=len(feedback[tag])>5
+
+        #Add feedback template to results
         results['feedback']=feedback_template.format(topicality=feedback['topicality'],
             spelling=feedback['spelling'],grammar=feedback['grammar'],
             markup_text=feedback['markup_text'],problem_areas=problem_areas)
     else:
+        #If error, add errors to template.
         results['feedback']=error_template.format(errors=' '.join(results['errors']))
 
     return results

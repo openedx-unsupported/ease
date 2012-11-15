@@ -74,7 +74,7 @@ error_template = u"""
 
 def grade(grader_path,grader_config,submission,sandbox=None):
 
-    grader_path=util_functions.create_model_path(grader_path)
+    grader_path=os.path.join(base_path,util_functions.create_model_path(grader_path))
 
     log.debug("Grader path: {0}\n Submission: {1}".format(grader_path,submission))
     results = {'errors': [],'tests': [],'correct': False,'score': 0, 'feedback' : "", 'success' : False}

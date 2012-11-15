@@ -8,10 +8,10 @@ one_up_path = os.path.abspath(os.path.join(os.path.dirname(__file__),'..'))
 sys.path.append(one_up_path)
 
 import model_creator
+import util_functions
 
 def create(text,scores,prompt,model_path):
-    if not model_path.endswith(".p"):
-        model_path+=".p"
+    model_path=util_functions.create_model_path(model_path)
 
     results = {'errors': [],'created' : False}
     try:
@@ -29,5 +29,15 @@ def create(text,scores,prompt,model_path):
         results['errors'].append("could not write model to: {0}".format(model_path))
 
     return results
+
+def check(model_path):
+    model_path=util_functions.create_model_path(model_path)
+
+    try:
+        with open(model_path) as f: pass
+    except IOError as e:
+        return False
+
+    return True
 
 

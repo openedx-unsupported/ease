@@ -13,6 +13,17 @@ import nltk
 import random
 import pickle
 
+
+def create_model_path(model_path):
+    if not model_path.startswith("/") and not model_path.startswith("models/"):
+        model_path="/" + model_path
+    if not model.path.startswith("models"):
+        model_path = "models" + model_path
+    if not model_path.endswith(".p"):
+        model_path+=".p"
+
+    return model_path
+
 def sub_chars(string):
     """
     Strips illegal characters from a string.  Used to sanitize input essays.

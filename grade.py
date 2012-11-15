@@ -15,6 +15,7 @@ base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
 
 from essay_set import EssaySet
+import util_functions
 
 #Imports needed to unpickle grader data
 import feature_extractor
@@ -73,8 +74,7 @@ error_template = u"""
 
 def grade(grader_path,grader_config,submission,sandbox=None):
 
-    if not grader_path.endswith(".p"):
-        grader_path+=".p"
+    grader_path=util_functions.create_model_path(grader_path)
 
     log.debug("Grader path: {0}\n Submission: {1}".format(grader_path,submission))
     results = {'errors': [],'tests': [],'correct': False,'score': 0, 'feedback' : ""}

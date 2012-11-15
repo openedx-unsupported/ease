@@ -31,13 +31,17 @@ feedback_template = u"""
     <header>Feedback</header>
     <div class="shortform">
         <div class="result-output">
-          Number of potential problem areas identified: {problem_areas}
+          <p>Score: {score}</p>
+          <p>Number of potential problem areas identified: {problem_areas}</p>
         </div>
     </div>
     <div class="longform">
         <div class="result-output">
           <div class="topicality">
             Topicality: {topicality}
+          </div>
+          <div class="prompt_overlap">
+            Prompt Overlap : {prompt_overlap}
           </div>
           <div class="spelling">
             Spelling: {spelling}
@@ -115,6 +119,10 @@ def grade(grader_path,grader_config,submission,sandbox=None):
         else:
             results['correct']=False
 
+        if(len(feedback['prompt_overlap'])>4):
+            results['score']=0
+            results['correct']=False
+
         results['success']=True
 
         #Generate short form output--number of problem areas identified in feedback
@@ -124,9 +132,16 @@ def grade(grader_path,grader_config,submission,sandbox=None):
                 problem_areas+=len(feedback[tag])>5
 
         #Add feedback template to results
-        results['feedback']=feedback_template.format(topicality=feedback['topicality'],
-            spelling=feedback['spelling'],grammar=feedback['grammar'],
-            markup_text=feedback['markup_text'],problem_areas=problem_areas)
+        results['feedback']=feedback_template.format(
+            topicality=feedback['topicality'],
+            spelling=feedback['spelling'],
+            grammar=feedback['grammar'],
+            markup_text=feedback['markup_text'],
+            problem_areas=problem_areas,
+            score=results['score'],
+            prompt_overlap=feedback['prompt_overlap'],
+        )
+
     else:
         #If error, add errors to template.
         results['feedback']=error_template.format(errors=' '.join(results['errors']))

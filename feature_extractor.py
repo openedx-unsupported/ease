@@ -213,7 +213,7 @@ class FeatureExtractor(object):
         #Iterate through essays and create a feedback dict for each
         all_feedback=[]
         for m in xrange(0,len(e_set._text)):
-            individual_feedback={'grammar' : "Ok.", 'spelling' : "Ok.", 'topicality' : "Ok.", 'markup_text' : ""}
+            individual_feedback={'grammar' : "Ok.", 'spelling' : "Ok.", 'topicality' : "Ok.", 'markup_text' : "", 'prompt_overlap' : "Ok."}
             markup_tokens=e_set._markup_text[m].split(" ")
 
             #This loop ensures that sequences of bad grammar get put together into one sequence instead of staying
@@ -242,6 +242,10 @@ class FeatureExtractor(object):
                 f_row_prop=f_row_sum/len(e_set._text[m])
                 if f_row_prop<(self._mean_f_prop/1.5) or len(e_set._text[m])<20:
                     individual_feedback['topicality']="Essay may be off topic."
+
+                if(features[m,9]>.5):
+                    individual_feedback['prompt_overlap']="Too much overlap with prompt."
+                    log.debug(features[m,9])
 
             #Create string representation of markup text
             markup_string=" ".join(markup_tokens)

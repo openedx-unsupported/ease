@@ -10,7 +10,7 @@ sys.path.append(one_up_path)
 import model_creator
 import util_functions
 
-def create(text,scores,prompt,model_path):
+def create(text,score,prompt_string,model_path):
     model_path=util_functions.create_model_path(model_path)
 
     results = {'errors': [],'created' : False}
@@ -23,6 +23,7 @@ def create(text,scores,prompt,model_path):
     except:
         results['errors'].append("feature extraction and model creation failed.")
     try:
+        util_functions.create_directory(model_path)
         model_creator.dump_model_to_file(prompt_string, feature_ext, classifier, text, score, args.model_path)
         results['created']=True
     except:

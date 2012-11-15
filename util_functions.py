@@ -12,17 +12,24 @@ import math
 import nltk
 import random
 import pickle
-
+from path import path
 
 def create_model_path(model_path):
     if not model_path.startswith("/") and not model_path.startswith("models/"):
         model_path="/" + model_path
-    if not model.path.startswith("models"):
+    if not model_path.startswith("models"):
         model_path = "models" + model_path
     if not model_path.endswith(".p"):
         model_path+=".p"
 
     return model_path
+
+def create_directory(model_path):
+    directory=path(model_path).dirname()
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    return True
 
 def sub_chars(string):
     """

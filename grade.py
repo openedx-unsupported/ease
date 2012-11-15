@@ -77,7 +77,7 @@ def grade(grader_path,grader_config,submission,sandbox=None):
     grader_path=util_functions.create_model_path(grader_path)
 
     log.debug("Grader path: {0}\n Submission: {1}".format(grader_path,submission))
-    results = {'errors': [],'tests': [],'correct': False,'score': 0, 'feedback' : ""}
+    results = {'errors': [],'tests': [],'correct': False,'score': 0, 'feedback' : "", 'success' : False}
 
     has_error=False
 
@@ -114,6 +114,8 @@ def grade(grader_path,grader_config,submission,sandbox=None):
             results['correct']=True
         else:
             results['correct']=False
+
+        results['success']=True
 
         #Generate short form output--number of problem areas identified in feedback
         problem_areas=0

@@ -231,9 +231,9 @@ class FeatureExtractor(object):
 
             #Display messages if grammar/spelling errors greater than average in training set
             if set_grammar_per_character[m]>(self._grammar_errors_per_character*modifier_ratio):
-                individual_feedback['grammar']="Potential grammar errors."
+                individual_feedback['grammar']="More grammar errors than average."
             if set_spell_errors_per_character[m]>(self._spell_errors_per_character*modifier_ratio):
-                individual_feedback['spelling']="Potential spelling errors."
+                individual_feedback['spelling']="More spelling errors than average."
 
             #Test topicality by calculating # of on topic words per character and comparing to the training set
             #mean.  Requires features to be passed in

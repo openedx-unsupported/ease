@@ -9,6 +9,7 @@ sys.path.append(one_up_path)
 import util_functions
 import essay_set
 import feature_extractor
+import numpy
 
 from sklearn.ensemble import GradientBoostingClassifier
 
@@ -30,8 +31,8 @@ for i in xrange(1,len(lines)):
     scores.append(int(score))
     texts.append(text)
     eset.add_essay(text,int(score))
-    if score==0:
-        eset.generate_additional_essays(text,int(score))
+    #if int(score)==0:
+    #    eset.generate_additional_essays(text,int(score))
 
 extractor=feature_extractor.FeatureExtractor()
 extractor.initialize_dictionaries(eset)
@@ -43,9 +44,13 @@ clf=GradientBoostingClassifier(n_estimators=100, learn_rate=.05,
 
 cv_preds=util_functions.gen_cv_preds(clf,train_feats,scores)
 
-kappa=util_functions.quadratic_weighted_kappa(cv_preds,scores)
+err=numpy.mean(numpy.abs(cv_preds-scores))
+print err
 
-outfile=open("cvout.tsv",'w+')
+kappa=util_functions.quadratic_weighted_kappa(list(cv_preds),scores)
+print kappa
+
+outfile=open("full_cvout.tsv",'w+')
 outfile.write("cv_pred" + "\t" + "actual")
 for i in xrange(0,len(cv_preds)):
     outfile.write("{0}\t{1}".format(cv_preds[i],scores[i]))

@@ -45,6 +45,10 @@ cv_preds=util_functions.gen_cv_preds(clf,train_feats,scores)
 
 kappa=util_functions.quadratic_weighted_kappa(cv_preds,scores)
 
+outfile=open("cvout.tsv",'w+')
+outfile.write("cv_pred" + "\t" + "actual")
+for i in xrange(0,len(cv_preds)):
+    outfile.write("{0}\t{1}".format(cv_preds[i],scores[i]))
 
 
 

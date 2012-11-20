@@ -81,7 +81,7 @@ def grade(grader_path,grader_config,submission,sandbox=None):
     grader_path=os.path.join(base_path,util_functions.create_model_path(grader_path))
 
     log.debug("Grader path: {0}\n Submission: {1}".format(grader_path,submission))
-    results = {'errors': [],'tests': [],'correct': False,'score': 0, 'feedback' : "", 'success' : False}
+    results = {'errors': [],'tests': [],'score': 0, 'feedback' : "", 'success' : False}
 
     has_error=False
 
@@ -112,12 +112,6 @@ def grade(grader_path,grader_config,submission,sandbox=None):
         has_error=True
 
     if not has_error:
-        #Determine maximum score and correctness of response
-        max_score=numpy.max(grader_data['model'].classes_)
-        if results['score']/float(max_score) >= .66:
-            results['correct']=True
-        else:
-            results['correct']=False
 
         if(len(feedback['prompt_overlap'])>4):
             results['score']=0

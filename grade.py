@@ -25,62 +25,9 @@ log = logging.getLogger(__name__)
 
 TEMPORARY_WANTS_CONFIG=True
 
-feedback_template = u"""
-
-<section>
-    <header>Feedback</header>
-    <div class="shortform">
-        <div class="result-output">
-          <p>Score: {score}</p>
-          <p>Number of potential problem areas identified: {problem_areas}</p>
-        </div>
-    </div>
-    <div class="longform">
-        <div class="result-output">
-          <div class="topicality">
-            Topicality: {topicality}
-          </div>
-          <div class="prompt_overlap">
-            Prompt Overlap : {prompt_overlap}
-          </div>
-          <div class="spelling">
-            Spelling: {spelling}
-          </div>
-          <div class="grammar">
-            Grammar: {grammar}
-          </div>
-          <div class="markup-text">
-            {markup_text}
-          </div>
-        </div>
-    </div>
-</section>
-
-"""
-
-error_template = u"""
-
-<section>
-    <div class="shortform">
-        <div class="result-errors">
-          There was an error with your submission.  Please contact course staff.
-        </div>
-    </div>
-    <div class="longform">
-        <div class="result-errors">
-          {errors}
-        </div>
-    </div>
-</section>
-
-"""
-
 
 def grade(grader_path,grader_config,submission,sandbox=None):
 
-    grader_path=os.path.join(base_path,util_functions.create_model_path(grader_path))
-
-    log.debug("Grader path: {0}\n Submission: {1}".format(grader_path,submission))
     results = {'errors': [],'tests': [],'score': 0, 'feedback' : "", 'success' : False}
 
     has_error=False
@@ -125,20 +72,20 @@ def grade(grader_path,grader_config,submission,sandbox=None):
             if tag is not 'markup_text':
                 problem_areas+=len(feedback[tag])>5
 
-        #Add feedback template to results
-        results['feedback']=feedback_template.format(
-            topicality=feedback['topicality'],
-            spelling=feedback['spelling'],
-            grammar=feedback['grammar'],
-            markup_text=feedback['markup_text'],
-            problem_areas=problem_areas,
-            score=results['score'],
-            prompt_overlap=feedback['prompt_overlap'],
-        )
+        #Add feedback to results
+        results['feedback']={
+            'topicality' : feedback['topicality'],
+            'spelling' : feedback['spelling'],
+            'grammar' : feedback['grammar'],
+            'markup_text' : feedback['markup_text'],
+            'problem_areas' : problem_areas,
+            'score' : results['score'],
+            'prompt_overlap' : feedback['prompt_overlap'],
+        }
 
     else:
-        #If error, add errors to template.
-        results['feedback']=error_template.format(errors=' '.join(results['errors']))
+        #If error, success is False.
+        results['success']=False
 
     return results
 

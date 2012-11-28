@@ -11,7 +11,6 @@ import model_creator
 import util_functions
 
 def create(text,score,prompt_string,model_path):
-    model_path=util_functions.create_model_path(model_path)
 
     results = {'errors': [],'created' : False}
     try:
@@ -22,15 +21,13 @@ def create(text,score,prompt_string,model_path):
         feature_ext, classifier = model_creator.extract_features_and_generate_model(e_set)
     except:
         results['errors'].append("feature extraction and model creation failed.")
-
-    full_path=os.path.join(base_path,model_path)
-    util_functions.create_directory(full_path)
-    model_creator.dump_model_to_file(prompt_string, feature_ext, classifier, text, score, full_path)
-    results['created']=True
-    """
+    try:
+        full_path=os.path.join(base_path,model_path)
+        util_functions.create_directory(full_path)
+        model_creator.dump_model_to_file(prompt_string, feature_ext, classifier, text, score, full_path)
+        results['created']=True
     except:
         results['errors'].append("could not write model to: {0}".format(model_path))
-    """
 
     return results
 

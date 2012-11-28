@@ -12,7 +12,7 @@ import util_functions
 
 def create(text,score,prompt_string,model_path):
 
-    results = {'errors': [],'created' : False}
+    results = {'errors': [],'success' : False, 'cv_kappa' : 0, 'cv_mean_absolute_error': 0}
     try:
         e_set = model_creator.create_essay_set(text, score, prompt_string)
     except:
@@ -23,20 +23,9 @@ def create(text,score,prompt_string,model_path):
         results['errors'].append("feature extraction and model creation failed.")
     try:
         model_creator.dump_model_to_file(prompt_string, feature_ext, classifier, text, score, model_path)
-        results['created']=True
+        results['success']=True
     except:
         results['errors'].append("could not write model to: {0}".format(model_path))
 
     return results
-
-def check(model_path):
-    model_path=util_functions.create_model_path(model_path)
-
-    try:
-        with open(model_path) as f: pass
-    except IOError as e:
-        return False
-
-    return True
-
 

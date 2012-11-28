@@ -18,7 +18,9 @@ def create(text,score,prompt_string,model_path):
     except:
         results['errors'].append("essay set creation failed.")
     try:
-        feature_ext, classifier = model_creator.extract_features_and_generate_model(e_set)
+        feature_ext, classifier, cv_error_results = model_creator.extract_features_and_generate_model(e_set)
+        results['cv_kappa']=cv_error_results['kappa']
+        results['cv_mean_absolute_error']=cv_error_results['mae']
     except:
         results['errors'].append("feature extraction and model creation failed.")
     try:

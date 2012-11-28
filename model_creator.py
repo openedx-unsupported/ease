@@ -16,6 +16,9 @@ sys.path.append(base_path)
 from essay_set import EssaySet
 import util_functions
 import feature_extractor
+import logging
+
+log=logging.getLogger()
 
 def read_in_test_data(filename):
     """
@@ -82,6 +85,21 @@ def create_essay_set(text, score, prompt_string, generate_additional=True):
 
     return x
 
+def get_cv_error(clf,feats,scores):
+    results={'success' : False, 'kappa' : 0, 'mae' : 0}
+    try:
+        cv_preds=util_functions.gen_cv_preds(clf,feats,scores)
+        err=numpy.mean(numpy.abs(cv_preds-scores))
+        kappa=util_functions.quadratic_weighted_kappa(list(cv_preds),scores)
+        results['mae']=err
+        results['kappa']=kappa
+        results['success']=True
+    except:
+        log.debug("Error getting cv error estimates.")
+
+    return results
+
+
 def extract_features_and_generate_model(essays,additional_array=None):
     """
     Feed in an essay set to get feature vector and classifier
@@ -99,13 +117,18 @@ def extract_features_and_generate_model(essays,additional_array=None):
             train_feats=numpy.concatenate((train_feats,additional_array),axis=1)
 
     clf = sklearn.ensemble.GradientBoostingClassifier(n_estimators=100, learn_rate=.05,
-        max_depth=4, random_state=1,
-        min_samples_leaf=3)
+        max_depth=4, random_state=1,min_samples_leaf=3)
+
+    clf2=sklearn.ensemble.GradientBoostingClassifier(n_estimators=100, learn_rate=.05,
+        max_depth=4, random_state=1,min_samples_leaf=3)
+
+    cv_error_results=get_cv_error(clf2,train_feats,essays._score)
 
     set_score = numpy.asarray(essays._score, dtype=numpy.int)
     clf.fit(train_feats, set_score)
 
-    return f, clf
+
+    return f, clf, cv_error_results
 
 def dump_model_to_file(prompt_string, feature_ext, classifier, text, score, model_path):
     """

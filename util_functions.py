@@ -24,13 +24,6 @@ def create_model_path(model_path):
 
     return model_path
 
-def create_directory(model_path):
-    directory=path(model_path).dirname()
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
-    return True
-
 def sub_chars(string):
     """
     Strips illegal characters from a string.  Used to sanitize input essays.

@@ -22,9 +22,7 @@ def create(text,score,prompt_string,model_path):
     except:
         results['errors'].append("feature extraction and model creation failed.")
     try:
-        full_path=os.path.join(base_path,model_path)
-        util_functions.create_directory(full_path)
-        model_creator.dump_model_to_file(prompt_string, feature_ext, classifier, text, score, full_path)
+        model_creator.dump_model_to_file(prompt_string, feature_ext, classifier, text, score, model_path)
         results['created']=True
     except:
         results['errors'].append("could not write model to: {0}".format(model_path))

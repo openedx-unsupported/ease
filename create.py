@@ -10,6 +10,9 @@ sys.path.append(one_up_path)
 import model_creator
 import util_functions
 
+from statsd import statsd
+
+@statsd.timed('open_ended_assessment.machine_learning.creator.time')
 def create(text,score,prompt_string,model_path):
 
     results = {'errors': [],'success' : False, 'cv_kappa' : 0, 'cv_mean_absolute_error': 0}
@@ -28,6 +31,10 @@ def create(text,score,prompt_string,model_path):
         results['success']=True
     except:
         results['errors'].append("could not write model to: {0}".format(model_path))
+
+    #Count number of successful/unsuccessful creations
+    statsd.increment("open_ended_assessment.machine_learning.creator_count",
+        tags=["success:{0}".format(results['success'])])
 
     return results
 

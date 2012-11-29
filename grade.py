@@ -10,6 +10,7 @@ import pickle
 import os
 import numpy
 import logging
+from statsd import statsd
 
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
@@ -25,7 +26,7 @@ log = logging.getLogger(__name__)
 
 TEMPORARY_WANTS_CONFIG=True
 
-
+@statsd.timed('open_ended_assessment.machine_learning.grader.time')
 def grade(grader_path,grader_config,submission,sandbox=None):
 
     results = {'errors': [],'tests': [],'score': 0, 'feedback' : "", 'success' : False}
@@ -86,6 +87,10 @@ def grade(grader_path,grader_config,submission,sandbox=None):
     else:
         #If error, success is False.
         results['success']=False
+
+    #Count number of successful/unsuccessful gradings
+    statsd.increment("open_ended_assessment.machine_learning.grader_count",
+        tags=["success:{0}".format(results['success'])])
 
     return results
 

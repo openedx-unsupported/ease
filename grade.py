@@ -78,10 +78,10 @@ def grade(grader_path,grader_config,submission,sandbox=None):
             'topicality' : feedback['topicality'],
             'spelling' : feedback['spelling'],
             'grammar' : feedback['grammar'],
-            'markup_text' : feedback['markup_text'],
-            'problem_areas' : problem_areas,
+            'markup-text' : feedback['markup_text'],
+            'problem-areas' : problem_areas,
             'score' : results['score'],
-            'prompt_overlap' : feedback['prompt_overlap'],
+            'prompt-overlap' : feedback['prompt_overlap'],
         }
 
     else:

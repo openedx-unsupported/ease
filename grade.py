@@ -76,12 +76,10 @@ def grade(grader_path,grader_config,submission,sandbox=None):
         #Add feedback to results
         results['feedback']={
             'topicality' : feedback['topicality'],
+            'prompt-overlap' : feedback['prompt_overlap'],
             'spelling' : feedback['spelling'],
             'grammar' : feedback['grammar'],
             'markup-text' : feedback['markup_text'],
-            'problem-areas' : problem_areas,
-            'score' : results['score'],
-            'prompt-overlap' : feedback['prompt_overlap'],
         }
 
     else:

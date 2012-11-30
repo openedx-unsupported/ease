@@ -213,7 +213,9 @@ class FeatureExtractor(object):
         #Iterate through essays and create a feedback dict for each
         all_feedback=[]
         for m in xrange(0,len(e_set._text)):
-            individual_feedback={'grammar' : "Ok.", 'spelling' : "Ok.", 'topicality' : "Ok.", 'markup_text' : "", 'prompt_overlap' : "Ok."}
+            individual_feedback={'grammar' : "Grammar: Ok.", 'spelling' : "Spelling: Ok.",
+                                 'topicality' : "Topicality: Ok.", 'markup_text' : "",
+                                 'prompt_overlap' : "Prompt Overlap: Ok."}
             markup_tokens=e_set._markup_text[m].split(" ")
 
             #This loop ensures that sequences of bad grammar get put together into one sequence instead of staying
@@ -231,9 +233,9 @@ class FeatureExtractor(object):
 
             #Display messages if grammar/spelling errors greater than average in training set
             if set_grammar_per_character[m]>(self._grammar_errors_per_character*modifier_ratio):
-                individual_feedback['grammar']="More grammar errors than average."
+                individual_feedback['grammar']="Grammar: More grammar errors than average."
             if set_spell_errors_per_character[m]>(self._spell_errors_per_character*modifier_ratio):
-                individual_feedback['spelling']="More spelling errors than average."
+                individual_feedback['spelling']="Spelling: More spelling errors than average."
 
             #Test topicality by calculating # of on topic words per character and comparing to the training set
             #mean.  Requires features to be passed in
@@ -241,10 +243,10 @@ class FeatureExtractor(object):
                 f_row_sum=numpy.sum(features[m,12:])
                 f_row_prop=f_row_sum/len(e_set._text[m])
                 if f_row_prop<(self._mean_f_prop/1.5) or len(e_set._text[m])<20:
-                    individual_feedback['topicality']="Essay may be off topic."
+                    individual_feedback['topicality']="Topicality: Essay may be off topic."
 
                 if(features[m,9]>.5):
-                    individual_feedback['prompt_overlap']="Too much overlap with prompt."
+                    individual_feedback['prompt_overlap']="Prompt Overlap: Too much overlap with prompt."
                     log.debug(features[m,9])
 
             #Create string representation of markup text

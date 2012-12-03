@@ -1,5 +1,4 @@
 boto==2.6.0
-capa==0.1
 coverage==3.5.3
 dogstatsd-python==0.2
 lxml==3.0.1

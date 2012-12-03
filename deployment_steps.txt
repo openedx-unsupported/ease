@@ -1,0 +1,30 @@
+Machine learning step:
+
+source opt/edx/bin/activate
+sudo apt-get upgrade gcc
+sudo pip install numpy
+#in ml dir
+sudo pip install -r requirements.txt
+#in controller dir
+sudo pip install -r requirements.txt
+mkdir log in both repos
+mkdir /opt/wwc/log
+touch /opt/wwc/log/edx.log
+sudo su makeitso
+django-admin syncdb
+django-admin migrate
+
+sudo su makeitso
+bash
+source /opt/edx/bin/activate
+cd /opt/wwc/grading-controller
+pip install numpy
+pip install -r requirements.txt
+cd opt/wwc/machine-learning
+pup install -r requirements.txt
+
+
+How to run:
+/opt/edx/bin/gunicorn --preload -b 127.0.0.1:8000 -w 4 --timeout=300 --pythonpath=/opt/wwc/grading-controller grading_controller.wsgi
+
+

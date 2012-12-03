@@ -6,10 +6,11 @@ mock==0.8.0
 nltk==2.0.3
 nose==1.2.1
 numpy==1.6.2
+scipy==0.11.0
 path.py
 pip
 pygraphviz==1.1
 pylint==0.26.0
 pytz==2012h
 scikit-learn==0.12.1
-scipy==0.11.0
+

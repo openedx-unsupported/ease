@@ -1,5 +1,7 @@
 import os
 import sys
+import logging
+log = logging.getLogger(__name__)
 
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
@@ -19,18 +21,24 @@ def create(text,score,prompt_string,model_path):
     try:
         e_set = model_creator.create_essay_set(text, score, prompt_string)
     except:
-        results['errors'].append("essay set creation failed.")
+        msg = "essay set creation failed."
+        results['errors'].append(msg)
+        log.exception(msg)
     try:
         feature_ext, classifier, cv_error_results = model_creator.extract_features_and_generate_model(e_set)
         results['cv_kappa']=cv_error_results['kappa']
         results['cv_mean_absolute_error']=cv_error_results['mae']
     except:
-        results['errors'].append("feature extraction and model creation failed.")
+        msg = "feature extraction and model creation failed."
+        results['errors'].append(msg)
+        log.exception(msg)
     try:
         model_creator.dump_model_to_file(prompt_string, feature_ext, classifier, text, score, model_path)
         results['success']=True
     except:
-        results['errors'].append("could not write model to: {0}".format(model_path))
+        msg = "could not write model to: {0}".format(model_path)
+        results['errors'].append(msg)
+        log.exception(msg)
 
     #Count number of successful/unsuccessful creations
     statsd.increment("open_ended_assessment.machine_learning.creator_count",

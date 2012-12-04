@@ -8,6 +8,7 @@ import nltk
 import sys
 import random
 import os
+import logging
 
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
@@ -15,6 +16,8 @@ import util_functions
 
 if not base_path.endswith("/"):
     base_path=base_path+"/"
+
+log=logging.getLogger(__name__)
 
 MAXIMUM_ESSAY_LENGTH=20000
 
@@ -53,6 +56,15 @@ class EssaySet(object):
         else:
             max_id = 0
             # Verify that essay_score is an int, essay_text is a string, and essay_generated equals 0 or 1
+
+        try:
+            #Try conversion of types
+            essay_score=int(essay_score)
+            essay_text=str(essay_text)
+        except:
+            #Nothing needed here, will return error in any case.
+            log.exception("Invalid type for essay score : {0} or essay text : {1}".format(type(essay_score),type(essay_text)))
+
         if type(essay_score) == type(0) and type(essay_text) == type("text")\
         and (essay_generated == 0 or essay_generated == 1):
             self._id.append(max_id + 1)

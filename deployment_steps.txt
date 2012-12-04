@@ -25,6 +25,9 @@ pip install -r requirements.txt
 cd opt/wwc/machine-learning
 pup install -r requirements.txt
 python -m nltk.downloader maxent_treebank_pos_tagger wordnet
+sudo mv /path/to/nltk_data /usr/share
+sudo apt-get install aspell
+
 python /opt/wwc/grading-controller/manage.py update_users
 
 Copy auth.json and env.json into the grading-controller folder (no idea why this is needed, but django-admin doesn't find them at ENV_ROOT)
@@ -38,6 +41,8 @@ For some reason, have to copy auth.json and env.json to both opt/wwc/grading-con
 sudo apt-get install super
 
 pip install MySQL-python
+
+In upstart files, be sure to specify settings file and full python path! (/opt/wwc/grading-controller)
 
 
 How to run:

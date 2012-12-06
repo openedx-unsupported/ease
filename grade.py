@@ -73,7 +73,7 @@ def grade(grader_data,grader_config,submission):
         #Generate short form output--number of problem areas identified in feedback
         problem_areas=0
         for tag in feedback:
-            if tag is not 'markup_text':
+            if tag in ['topicality', 'prompt-overlap', 'spelling', 'grammar']:
                 problem_areas+=len(feedback[tag])>5
 
         #Add feedback to results

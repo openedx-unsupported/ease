@@ -24,10 +24,8 @@ import sklearn.ensemble
 
 log = logging.getLogger(__name__)
 
-TEMPORARY_WANTS_CONFIG=True
-
 @statsd.timed('open_ended_assessment.machine_learning.grader.time')
-def grade(grader_data,grader_config,submission,sandbox=None):
+def grade(grader_data,grader_config,submission):
 
     results = {'errors': [],'tests': [],'score': 0, 'feedback' : "", 'success' : False, 'confidence' : 0}
 
@@ -57,7 +55,6 @@ def grade(grader_data,grader_config,submission,sandbox=None):
     #Try to determine confidence level
     try:
         min_score=min(numpy.asarray(grader_data['score']))
-        log.debug(grader_data['score'])
         raw_confidence=grader_data['model'].predict_proba(grader_feats)[0,(results['score']-min_score)]
         #TODO: Normalize confidence somehow here
         results['confidence']=raw_confidence

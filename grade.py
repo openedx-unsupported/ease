@@ -29,7 +29,7 @@ TEMPORARY_WANTS_CONFIG=True
 @statsd.timed('open_ended_assessment.machine_learning.grader.time')
 def grade(grader_path,grader_config,submission,sandbox=None):
 
-    results = {'errors': [],'tests': [],'score': 0, 'feedback' : "", 'success' : False}
+    results = {'errors': [],'tests': [],'score': 0, 'feedback' : "", 'success' : False, 'confidence' : 0}
 
     has_error=False
 
@@ -58,6 +58,16 @@ def grade(grader_path,grader_config,submission,sandbox=None):
     except :
         results['errors'].append("Could not extract features and score essay.")
         has_error=True
+
+    #Try to determine confidence level
+    try:
+        min_score=min(grader_data['score'])
+        raw_confidence=grader_data['model'].predict_proba(grader_feats)[0,(results['score']-min_score)]
+        #TODO: Normalize confidence somehow here
+        results['confidence']=raw_confidence
+    except:
+        #If there is an error getting confidence, it is not a show-stopper, so just log
+        log.exception("Problem generating confidence value")
 
     if not has_error:
 

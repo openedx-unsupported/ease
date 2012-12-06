@@ -29,6 +29,8 @@ class FeatureExtractor(object):
     def __init__(self):
         self._good_pos_ngrams = self.get_good_pos_ngrams()
         self.dict_initialized = False
+        self._spell_errors_per_character=0
+        self._grammar_errors_per_character=0
 
     def initialize_dictionaries(self, e_set):
         """
@@ -46,8 +48,8 @@ class FeatureExtractor(object):
                 self.dict_initialized = True
                 self._mean_spelling_errors=sum(e_set._spelling_errors)/float(len(e_set._spelling_errors))
                 self._spell_errors_per_character=sum(e_set._spelling_errors)/float(sum([len(t) for t in e_set._text]))
-                self._grammar_errors_per_character=1-(sum(self._get_grammar_errors
-                    (e_set._pos,e_set._text,e_set._tokens)[0])/float(sum([len(t) for t in e_set._text])))
+                self._grammar_errors_per_character=(sum(self._get_grammar_errors
+                    (e_set._pos,e_set._text,e_set._tokens))/float(sum([len(t) for t in e_set._text])))
                 bag_feats=self.gen_bag_feats(e_set)
                 f_row_sum=numpy.sum(bag_feats[:,:])
                 self._mean_f_prop=f_row_sum/float(sum([len(t) for t in e_set._text]))
@@ -107,7 +109,11 @@ class FeatureExtractor(object):
             fixed_bad_pos_tuples=[bad_pos_tuples[z] for z in xrange(0,len(bad_pos_tuples)) if z not in to_delete]
             bad_pos_positions.append(fixed_bad_pos_tuples)
             overlap_ngrams = [z for z in pos_ngrams if z in self._good_pos_ngrams]
-            good_pos_tags.append(len(overlap_ngrams))
+            if (len(pos_ngrams)-len(overlap_ngrams))>0:
+                divisor=len(pos_ngrams)/len(pos_seq)
+            else:
+                divisor=1
+            good_pos_tags.append((len(pos_ngrams)-len(overlap_ngrams))/divisor)
         return good_pos_tags,bad_pos_positions
 
     def gen_length_feats(self, e_set):
@@ -215,7 +221,9 @@ class FeatureExtractor(object):
         for m in xrange(0,len(e_set._text)):
             individual_feedback={'grammar' : "Grammar: Ok.", 'spelling' : "Spelling: Ok.",
                                  'topicality' : "Topicality: Ok.", 'markup_text' : "",
-                                 'prompt_overlap' : "Prompt Overlap: Ok."}
+                                 'prompt_overlap' : "Prompt Overlap: Ok.",
+                                 'grammar_per_char' : set_grammar_per_character[m],
+                                 'spelling_per_char' : set_spell_errors_per_character[m]}
             markup_tokens=e_set._markup_text[m].split(" ")
 
             #This loop ensures that sequences of bad grammar get put together into one sequence instead of staying

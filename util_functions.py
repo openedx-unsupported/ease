@@ -13,6 +13,9 @@ import nltk
 import random
 import pickle
 from path import path
+import logging
+
+log=logging.getLogger(__name__)
 
 def create_model_path(model_path):
     if not model_path.startswith("/") and not model_path.startswith("models/"):

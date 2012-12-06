@@ -27,7 +27,7 @@ log = logging.getLogger(__name__)
 TEMPORARY_WANTS_CONFIG=True
 
 @statsd.timed('open_ended_assessment.machine_learning.grader.time')
-def grade(grader_path,grader_config,submission,sandbox=None):
+def grade(grader_data,grader_config,submission,sandbox=None):
 
     results = {'errors': [],'tests': [],'score': 0, 'feedback' : "", 'success' : False, 'confidence' : 0}
 
@@ -35,11 +35,6 @@ def grade(grader_path,grader_config,submission,sandbox=None):
 
     #Try to find and load the model file
 
-    try:
-        grader_data=pickle.load(file(grader_path,"r"))
-    except:
-        results['errors'].append("Could not find a valid model file.")
-        has_error=True
     grader_set=EssaySet(type="test")
 
     #Try to add essays to essay set object

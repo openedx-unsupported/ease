@@ -56,7 +56,8 @@ def grade(grader_data,grader_config,submission,sandbox=None):
 
     #Try to determine confidence level
     try:
-        min_score=min(grader_data['score'])
+        min_score=min(numpy.asarray(grader_data['score']))
+        log.debug(grader_data['score'])
         raw_confidence=grader_data['model'].predict_proba(grader_feats)[0,(results['score']-min_score)]
         #TODO: Normalize confidence somehow here
         results['confidence']=raw_confidence

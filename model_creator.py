@@ -94,8 +94,11 @@ def get_cv_error(clf,feats,scores):
         results['mae']=err
         results['kappa']=kappa
         results['success']=True
+    except ValueError:
+        #If this is hit, everything is fine.  It is hard to explain why the error occurs, but it isn't a big deal.
+        log.exception("Not enough classes (0,1,etc) in each cross validation fold.")
     except:
-        log.debug("Error getting cv error estimates.")
+        log.exception("Error getting cv error estimates.")
 
     return results
 

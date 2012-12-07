@@ -48,8 +48,8 @@ class FeatureExtractor(object):
                 self.dict_initialized = True
                 self._mean_spelling_errors=sum(e_set._spelling_errors)/float(len(e_set._spelling_errors))
                 self._spell_errors_per_character=sum(e_set._spelling_errors)/float(sum([len(t) for t in e_set._text]))
-                self._grammar_errors_per_character=(sum(self._get_grammar_errors
-                    (e_set._pos,e_set._text,e_set._tokens))/float(sum([len(t) for t in e_set._text])))
+                good_pos_tags,bad_pos_positions=self._get_grammar_errors(e_set._pos,e_set._text,e_set._tokens)
+                self._grammar_errors_per_character=(sum(good_pos_tags)/float(sum([len(t) for t in e_set._text])))
                 bag_feats=self.gen_bag_feats(e_set)
                 f_row_sum=numpy.sum(bag_feats[:,:])
                 self._mean_f_prop=f_row_sum/float(sum([len(t) for t in e_set._text]))

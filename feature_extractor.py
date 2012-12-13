@@ -213,8 +213,8 @@ class FeatureExtractor(object):
 
         #Calc number of grammar and spelling errors per character
         set_grammar,bad_pos_positions=self._get_grammar_errors(e_set._pos,e_set._text,e_set._tokens)
-        set_grammar_per_character=[set_grammar[m]/float(len(e_set._text[m])) for m in xrange(0,len(e_set._text))]
-        set_spell_errors_per_character=[e_set._spelling_errors[m]/float(len(e_set._text[m])) for m in xrange(0,len(e_set._text))]
+        set_grammar_per_character=[set_grammar[m]/float(len(e_set._text[m])+.1) for m in xrange(0,len(e_set._text))]
+        set_spell_errors_per_character=[e_set._spelling_errors[m]/float(len(e_set._text[m])+.1) for m in xrange(0,len(e_set._text))]
 
         #Iterate through essays and create a feedback dict for each
         all_feedback=[]

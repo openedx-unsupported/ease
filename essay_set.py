@@ -58,6 +58,13 @@ class EssaySet(object):
             # Verify that essay_score is an int, essay_text is a string, and essay_generated equals 0 or 1
 
         try:
+            essay_text=essay_text.encode('ascii', 'ignore')
+            if len(essay_text)<5:
+                essay_text="Invalid essay."
+        except:
+            log.exception("Could not parse essay into ascii.")
+
+        try:
             #Try conversion of types
             essay_score=int(essay_score)
             essay_text=str(essay_text)
@@ -65,7 +72,7 @@ class EssaySet(object):
             #Nothing needed here, will return error in any case.
             log.exception("Invalid type for essay score : {0} or essay text : {1}".format(type(essay_score),type(essay_text)))
 
-        if type(essay_score) == type(0) and type(essay_text) == type("text")\
+        if isinstance(essay_score,int) and isinstance(essay_text, basestring)\
         and (essay_generated == 0 or essay_generated == 1):
             self._id.append(max_id + 1)
             self._score.append(essay_score)

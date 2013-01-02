@@ -219,6 +219,7 @@ class FeatureExtractor(object):
         #Iterate through essays and create a feedback dict for each
         all_feedback=[]
         for m in xrange(0,len(e_set._text)):
+            #Be very careful about changing these messages!
             individual_feedback={'grammar' : "Grammar: Ok.", 'spelling' : "Spelling: Ok.",
                                  'topicality' : "Topicality: Ok.", 'markup_text' : "",
                                  'prompt_overlap' : "Prompt Overlap: Ok.",
@@ -253,7 +254,7 @@ class FeatureExtractor(object):
                 if f_row_prop<(self._mean_f_prop/1.5) or len(e_set._text[m])<20:
                     individual_feedback['topicality']="Topicality: Essay may be off topic."
 
-                if(features[m,9]>.5):
+                if(features[m,9]>.6):
                     individual_feedback['prompt_overlap']="Prompt Overlap: Too much overlap with prompt."
                     log.debug(features[m,9])
 

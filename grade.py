@@ -64,7 +64,7 @@ def grade(grader_data,grader_config,submission):
 
     if not has_error:
 
-        if(len(feedback['prompt_overlap'])>4):
+        if(len(feedback['prompt_overlap'])>20):
             results['score']=0
             results['correct']=False
 

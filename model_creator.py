@@ -127,9 +127,14 @@ def extract_features_and_generate_model(essays,additional_array=None):
 
     cv_error_results=get_cv_error(clf2,train_feats,essays._score)
 
-    set_score = numpy.asarray(essays._score, dtype=numpy.int)
-    clf.fit(train_feats, set_score)
-
+    try:
+        set_score = numpy.asarray(essays._score, dtype=numpy.int)
+        clf.fit(train_feats, set_score)
+    except ValueError:
+        log.exception("Not enough classes (0,1,etc) in sample.")
+        set_score[0]=1
+        set_score[1]=0
+        clf.fit(train_feats, set_score)
 
     return f, clf, cv_error_results
 

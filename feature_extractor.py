@@ -224,7 +224,9 @@ class FeatureExtractor(object):
                                  'topicality' : "Topicality: Ok.", 'markup_text' : "",
                                  'prompt_overlap' : "Prompt Overlap: Ok.",
                                  'grammar_per_char' : set_grammar_per_character[m],
-                                 'spelling_per_char' : set_spell_errors_per_character[m]}
+                                 'spelling_per_char' : set_spell_errors_per_character[m],
+                                 'too_similar_to_prompt' : False,
+                                 }
             markup_tokens=e_set._markup_text[m].split(" ")
 
             #This loop ensures that sequences of bad grammar get put together into one sequence instead of staying
@@ -256,6 +258,7 @@ class FeatureExtractor(object):
 
                 if(features[m,9]>.6):
                     individual_feedback['prompt_overlap']="Prompt Overlap: Too much overlap with prompt."
+                    individual_feedback['too_similar_to_prompt']=True
                     log.debug(features[m,9])
 
             #Create string representation of markup text

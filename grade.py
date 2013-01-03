@@ -83,7 +83,7 @@ def grade(grader_data,grader_config,submission):
             'prompt-overlap' : feedback['prompt_overlap'],
         }
 
-        if results['score']/float(max_score)<.5:
+        if results['score']/float(max_score)<.33:
             results['feedback'].update(
                 {'spelling' : feedback['spelling'],
             'grammar' : feedback['grammar'],

@@ -55,6 +55,7 @@ def grade(grader_data,grader_config,submission):
     #Try to determine confidence level
     try:
         min_score=min(numpy.asarray(grader_data['score']))
+        max_score=max(numpy.asarray(grader_data['score']))
         raw_confidence=grader_data['model'].predict_proba(grader_feats)[0,(results['score']-min_score)]
         #TODO: Normalize confidence somehow here
         results['confidence']=raw_confidence
@@ -64,7 +65,7 @@ def grade(grader_data,grader_config,submission):
 
     if not has_error:
 
-        if(len(feedback['prompt_overlap'])>20):
+        if(feedback['too_similar_to_prompt']):
             results['score']=0
             results['correct']=False
 
@@ -80,10 +81,14 @@ def grade(grader_data,grader_config,submission):
         results['feedback']={
             'topicality' : feedback['topicality'],
             'prompt-overlap' : feedback['prompt_overlap'],
-            'spelling' : feedback['spelling'],
+        }
+
+        if results['score']/float(max_score)<.5:
+            results['feedback'].update(
+                {'spelling' : feedback['spelling'],
             'grammar' : feedback['grammar'],
             'markup-text' : feedback['markup_text'],
-        }
+            })
 
     else:
         #If error, success is False.

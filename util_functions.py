@@ -76,7 +76,8 @@ def spell_correct(string):
     try:
         p = os.popen(aspell_path + " -a < " + f_path + " --sug-mode=ultra")
     except:
-        return string,0
+        log.exception("Could not find aspell, so could not spell correct!")
+        return string,0, string
     incorrect = p.readlines()
     p.close()
     incorrect_words = list()

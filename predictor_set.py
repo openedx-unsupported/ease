@@ -15,22 +15,13 @@ if not base_path.endswith("/"):
 
 log=logging.getLogger(__name__)
 
-
-class AlgorithmTypes(object):
-    regression = "regression"
-    classification = "classifiction"
-
-
 class PredictorSet(object):
-    def __init__(self, type = "train", algorithm = AlgorithmTypes.regression):
+    def __init__(self, type = "train"):
         """
         Initialize variables and check essay set type
         """
         if(type != "train" and type != "test"):
             type = "train"
-
-        if(algorithm not in [AlgorithmTypes.regression, AlgorithmTypes.classification]):
-            algorithm = AlgorithmTypes.regression
 
         self._type = type
         self._target=[]
@@ -39,7 +30,6 @@ class PredictorSet(object):
         self._essay_sets=[]
 
     def add_row(self, numeric_features, textual_features, target):
-
         #Basic input checking
         if not isinstance(target, (int, long, float)):
             error_message = "Target is not a numeric value."

@@ -40,12 +40,3 @@ err=numpy.mean(numpy.abs(cv_preds-scores))
 print err
 kappa=util_functions.quadratic_weighted_kappa(list(cv_preds),scores)
 print kappa
-all_err.append(err)
-all_kappa.append(kappa)
-
-"""
-outfile=open("full_cvout.tsv",'w+')
-outfile.write("cv_pred" + "\t" + "actual")
-for i in xrange(0,len(cv_preds)):
-    outfile.write("{0}\t{1}".format(cv_preds[i],scores[i]))
-"""

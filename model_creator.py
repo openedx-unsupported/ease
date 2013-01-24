@@ -17,8 +17,13 @@ from essay_set import EssaySet
 import util_functions
 import feature_extractor
 import logging
+import predictor_extractor
 
 log=logging.getLogger()
+
+class AlgorithmTypes(object):
+    regression = "regression"
+    classification = "classifiction"
 
 def read_in_test_data(filename):
     """
@@ -101,6 +106,39 @@ def get_cv_error(clf,feats,scores):
         log.exception("Error getting cv error estimates.")
 
     return results
+
+def extract_features_and_generate_model_predictors(predictor_set, type=AlgorithmTypes.regression):
+    if(algorithm not in [AlgorithmTypes.regression, AlgorithmTypes.classification]):
+        algorithm = AlgorithmTypes.regression
+
+    f = predictor_extractor.PredictorExtractor()
+    f.initialize_dictionaries(predictor_set)
+
+    train_feats = f.gen_feats(predictor_set)
+
+    if type = AlgorithmTypes.classification:
+        clf = sklearn.ensemble.GradientBoostingClassifier(n_estimators=100, learn_rate=.05,
+            max_depth=4, random_state=1,min_samples_leaf=3)
+        clf2=sklearn.ensemble.GradientBoostingClassifier(n_estimators=100, learn_rate=.05,
+            max_depth=4, random_state=1,min_samples_leaf=3)
+    else:
+        clf = sklearn.ensemble.GradientBoostingRegressor(n_estimators=100, learn_rate=.05,
+            max_depth=4, random_state=1,min_samples_leaf=3)
+        clf2=sklearn.ensemble.GradientBoostingRegressor(n_estimators=100, learn_rate=.05,
+            max_depth=4, random_state=1,min_samples_leaf=3)
+
+    cv_error_results=get_cv_error(clf2,train_feats,predictor_set._target)
+
+    try:
+        set_score = numpy.asarray(predictor_set._target, dtype=numpy.int)
+        clf.fit(train_feats, set_score)
+    except ValueError:
+        log.exception("Not enough classes (0,1,etc) in sample.")
+        set_score[0]=1
+        set_score[1]=0
+        clf.fit(train_feats, set_score)
+
+    return f, clf, cv_error_results
 
 
 def extract_features_and_generate_model(essays,additional_array=None):

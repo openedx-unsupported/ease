@@ -53,9 +53,9 @@ def create(text,score,prompt_string,model_path):
     return results
 
 
-def create_generic(numeric_values, textual_values, target, model_path, algorithm = model_creator.AlgorithmTypes.regression):
+def create_generic(numeric_values, textual_values, target, model_path, algorithm = util_functions.AlgorithmTypes.regression):
     results = {'errors': [],'success' : False, 'cv_kappa' : 0, 'cv_mean_absolute_error': 0,
-               'feature_ext' : "", 'classifier' : ""}
+               'feature_ext' : "", 'classifier' : "", 'algorithm' : algorithm}
 
     if len(numeric_values)!=len(textual_values) or len(numeric_values)!=len(target):
         msg = "Target, numeric features, and text features must all be the same length."

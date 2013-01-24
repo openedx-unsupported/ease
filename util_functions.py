@@ -17,6 +17,10 @@ import logging
 
 log=logging.getLogger(__name__)
 
+class AlgorithmTypes(object):
+    regression = "regression"
+    classification = "classifiction"
+
 def create_model_path(model_path):
     if not model_path.startswith("/") and not model_path.startswith("models/"):
         model_path="/" + model_path

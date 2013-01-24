@@ -16,11 +16,14 @@ base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
 
 from essay_set import EssaySet
+import predictor_extractor
+import predictor_set
 import util_functions
 
 #Imports needed to unpickle grader data
 import feature_extractor
 import sklearn.ensemble
+import math
 
 log = logging.getLogger(__name__)
 
@@ -100,4 +103,51 @@ def grade(grader_data,grader_config,submission):
 
     return results
 
-    
+def grade_generic(grader_data, grader_config, numeric_features, textual_features):
+    results = {'errors': [],'tests': [],'score': 0, 'success' : False, 'confidence' : 0}
+
+    has_error=False
+
+    #Try to find and load the model file
+
+    grader_set=predictor_set.PredictorSet(type="test")
+
+    #Try to add essays to essay set object
+    try:
+        grader_set.add_row(numeric_features, textual_features,0)
+    except:
+        results['errors'].append("Row could not be added to predictor set:{0} {1}".format(numeric_features, textual_features))
+        has_error=True
+
+    #Try to extract features from submission and assign score via the model
+    try:
+        grader_feats=grader_data['extractor'].gen_feats(grader_set)
+        results['score']=grader_data['model'].predict(grader_feats)[0]
+    except :
+        results['errors'].append("Could not extract features and score essay.")
+        has_error=True
+
+    #Try to determine confidence level
+    try:
+        min_score=min(numpy.asarray(grader_data['score']))
+        max_score=max(numpy.asarray(grader_data['score']))
+        if grader_data['algorithm'] == util_functions.AlgorithmTypes.classification:
+            raw_confidence=grader_data['model'].predict_proba(grader_feats)[0,(results['score']-min_score)]
+            #TODO: Normalize confidence somehow here
+            results['confidence']=raw_confidence
+        else:
+            raw_confidence = grader_data['model'].predict(grader_feats)[0]
+            confidence = max(raw_confidence - math.floor(raw_confidence), math.ceil(raw_confidence) - raw_confidence)
+            results['confidence'] = confidence
+    except:
+        #If there is an error getting confidence, it is not a show-stopper, so just log
+        log.exception("Problem generating confidence value")
+
+        #Count number of successful/unsuccessful gradings
+    statsd.increment("open_ended_assessment.machine_learning.grader_count",
+        tags=["success:{0}".format(results['success'])])
+
+    if not has_error:
+        results['success'] = True
+
+    return results

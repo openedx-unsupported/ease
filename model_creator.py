@@ -21,10 +21,6 @@ import predictor_extractor
 
 log=logging.getLogger()
 
-class AlgorithmTypes(object):
-    regression = "regression"
-    classification = "classifiction"
-
 def read_in_test_data(filename):
     """
     Reads in test data file found at filename.
@@ -107,16 +103,16 @@ def get_cv_error(clf,feats,scores):
 
     return results
 
-def extract_features_and_generate_model_predictors(predictor_set, type=AlgorithmTypes.regression):
-    if(algorithm not in [AlgorithmTypes.regression, AlgorithmTypes.classification]):
-        algorithm = AlgorithmTypes.regression
+def extract_features_and_generate_model_predictors(predictor_set, type=util_functions.AlgorithmTypes.regression):
+    if(algorithm not in [util_functions.AlgorithmTypes.regression, util_functions.AlgorithmTypes.classification]):
+        algorithm = util_functions.AlgorithmTypes.regression
 
     f = predictor_extractor.PredictorExtractor()
     f.initialize_dictionaries(predictor_set)
 
     train_feats = f.gen_feats(predictor_set)
 
-    if type = AlgorithmTypes.classification:
+    if type == util_functions.AlgorithmTypes.classification:
         clf = sklearn.ensemble.GradientBoostingClassifier(n_estimators=100, learn_rate=.05,
             max_depth=4, random_state=1,min_samples_leaf=3)
         clf2=sklearn.ensemble.GradientBoostingClassifier(n_estimators=100, learn_rate=.05,

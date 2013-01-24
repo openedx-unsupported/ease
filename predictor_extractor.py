@@ -39,7 +39,11 @@ class PredictorExtractor(object):
             log.exception(error_message)
             raise util_functions.InputError(p_set, error_message)
 
-        max_feats2 = int(math.floor(200/len(p_set._essay_sets)))
+        div_length=len(p_set._essay_sets)
+        if div_length==0:
+            div_length=1
+
+        max_feats2 = int(math.floor(200/div_length))
         for i in xrange(0,len(p_set._essay_sets)):
             self._extractors.append(FeatureExtractor())
             self._extractors[i].initialize_dictionaries(p_set._essay_sets[i], max_feats2=max_feats2)

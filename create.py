@@ -43,3 +43,7 @@ def create(text,score,prompt_string,model_path):
 
     return results
 
+
+def create_generic(numeric_values, textual_values, target, model_path):
+    pass
+

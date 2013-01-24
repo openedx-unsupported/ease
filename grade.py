@@ -100,6 +100,4 @@ def grade(grader_data,grader_config,submission):
 
     return results
 
-
-
     

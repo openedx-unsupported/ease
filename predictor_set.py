@@ -22,7 +22,7 @@ class AlgorithmTypes(object):
 
 
 class PredictorSet(object):
-    def __init__(self, type="train", algorithm = AlgorithmTypes.regression):
+    def __init__(self, type = "train", algorithm = AlgorithmTypes.regression):
         """
         Initialize variables and check essay set type
         """
@@ -92,10 +92,19 @@ class PredictorSet(object):
                 log.exception(error_message)
                 raise util_functions.InputError(textual_features, error_message)
 
+        #Create essay sets for textual features if needed
         if len(self._textual_features)==0:
             for i in xrange(0,len(textual_features)):
-                self.essay_sets.append()
+                self.essay_sets.append(EssaySet(type=self._type))
 
+        #Add numeric and textual features
         self._numeric_features.append(numeric_features)
         self._textual_features.append(textual_features)
+
+        #Add targets
+        self._target.append(target)
+
+        #Add textual features to essay sets
+        for i in xrange(0,len(textual_features)):
+            self.essay_sets[i].add_essay(textual_features[i], target[i])
 

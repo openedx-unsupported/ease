@@ -36,7 +36,7 @@ class PredictorSet(object):
         self._target=[]
         self._textual_features=[]
         self._numeric_features=[]
-        self.essay_sets=[]
+        self._essay_sets=[]
 
     def add_row(self, numeric_features, textual_features, target):
 
@@ -95,7 +95,7 @@ class PredictorSet(object):
         #Create essay sets for textual features if needed
         if len(self._textual_features)==0:
             for i in xrange(0,len(textual_features)):
-                self.essay_sets.append(EssaySet(type=self._type))
+                self._essay_sets.append(EssaySet(type=self._type))
 
         #Add numeric and textual features
         self._numeric_features.append(numeric_features)
@@ -106,5 +106,5 @@ class PredictorSet(object):
 
         #Add textual features to essay sets
         for i in xrange(0,len(textual_features)):
-            self.essay_sets[i].add_essay(textual_features[i], target[i])
+            self._essay_sets[i].add_essay(textual_features[i], target[i])
 

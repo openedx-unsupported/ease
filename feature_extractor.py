@@ -32,7 +32,7 @@ class FeatureExtractor(object):
         self._spell_errors_per_character=0
         self._grammar_errors_per_character=0
 
-    def initialize_dictionaries(self, e_set):
+    def initialize_dictionaries(self, e_set, max_feats2 = 200):
         """
         Initializes dictionaries from an essay set object
         Dictionaries must be initialized prior to using this to extract features
@@ -41,8 +41,8 @@ class FeatureExtractor(object):
         """
         if(hasattr(e_set, '_type')):
             if(e_set._type == "train"):
-                nvocab = util_functions.get_vocab(e_set._text, e_set._score)
-                svocab = util_functions.get_vocab(e_set._clean_stem_text, e_set._score)
+                nvocab = util_functions.get_vocab(e_set._text, e_set._score, max_feats2 = max_feats2)
+                svocab = util_functions.get_vocab(e_set._clean_stem_text, e_set._score, max_feats2 = max_feats2)
                 self._normal_dict = CountVectorizer(ngram_range=(1,2), vocabulary=nvocab)
                 self._stem_dict = CountVectorizer(ngram_range=(1,2), vocabulary=svocab)
                 self.dict_initialized = True

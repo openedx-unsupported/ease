@@ -10,6 +10,7 @@ import util_functions
 import essay_set
 import feature_extractor
 import numpy
+import math
 
 from sklearn.ensemble import GradientBoostingClassifier
 
@@ -40,7 +41,7 @@ for filename in filenames:
     extractor.initialize_dictionaries(eset)
     train_feats=extractor.gen_feats(eset)
     clf=GradientBoostingClassifier(n_estimators=100, learn_rate=.05,max_depth=4, random_state=1,min_samples_leaf=3)
-    cv_preds=util_functions.gen_cv_preds(clf,train_feats,scores)
+    cv_preds=util_functions.gen_cv_preds(clf,train_feats,scores, num_chunks = int(math.floor(len(texts)/2)))
     err=numpy.mean(numpy.abs(cv_preds-scores))
     print err
     kappa=util_functions.quadratic_weighted_kappa(list(cv_preds),scores)

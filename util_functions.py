@@ -269,12 +269,12 @@ def gen_cv_preds(clf, arr, sel_score, num_chunks=3):
     preds = []
     set_score = numpy.asarray(sel_score, dtype=numpy.int)
     chunk_vec = numpy.asarray(range(0, len(chunks)))
-    for i in range(0, len(chunks)):
+    for i in xrange(0, len(chunks)):
         loop_inds = list(
             chain.from_iterable([chunks[int(z)] for z, m in enumerate(range(0, len(chunks))) if int(z) != i]))
         sim_fit = clf.fit(arr[loop_inds], set_score[loop_inds])
-        preds.append(sim_fit.predict(arr[chunks[i]]))
-    all_preds = numpy.concatenate((preds[0], preds[1], preds[2]), axis=0)
+        preds.append(list(sim_fit.predict(arr[chunks[i]])))
+    all_preds = list(chain(*preds))
     return(all_preds)
 
 

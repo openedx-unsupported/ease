@@ -46,6 +46,8 @@ for filename in filenames:
     print err
     kappa=util_functions.quadratic_weighted_kappa(list(cv_preds),scores)
     print kappa
+    percent_error = numpy.mean(numpy.abs(scores - numpy.array(cv_preds))/scores)
+    print percent_error
 
     outfile=open(filename + "_cvout.tsv",'w+')
     outfile.write("cv_pred" + "\t" + "actual\n")

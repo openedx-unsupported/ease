@@ -12,6 +12,7 @@ import essay_set
 import feature_extractor
 import numpy
 import math
+from multiprocessing import Pool
 
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
 
@@ -22,14 +23,9 @@ data_path = "/home/vik/mitx_all/vik_sandbox/hewlett_essay_data/split_data"
 if not data_path.endswith("/"):
     data_path=data_path+"/"
 filenames = [str(i) +".tsv" for i in xrange(1,19)]
-kappas = []
-errs = []
-percent_errors=[]
-human_kappas=[]
-human_errs=[]
-human_percent_errors=[]
 
-for filename in filenames:
+def run_single_worker(args):
+    filename,data_path = args
     base_name = data_path + filename
     print base_name
     sa_val = file(base_name)
@@ -40,7 +36,8 @@ for filename in filenames:
     texts=[]
     lines=sa_val.readlines()
     eset=essay_set.EssaySet(type="train")
-    for i in xrange(1,len(lines)):
+    #len(lines)
+    for i in xrange(1,10):
         id_val,essay_set_num,score1,score2,text=lines[i].split("\t")
         score1s.append(int(score1))
         score2s.append(int(score2))
@@ -65,26 +62,13 @@ for filename in filenames:
         cv_preds = score1s
 
     rounded_cv = [int(round(cv)) for cv in list(cv_preds)]
-
+    added_score1 = [s1+1 for s1 in score1s]
     err=numpy.mean(numpy.abs(numpy.array(cv_preds)-score1s))
-    errs.append(err)
-    print err
     kappa=util_functions.quadratic_weighted_kappa(rounded_cv, score1s)
-    kappas.append(kappa)
-    print kappa
-    percent_error = numpy.mean(numpy.abs(score1s - numpy.array(cv_preds))/score1s)
-    percent_errors.append(percent_error)
-    print percent_error
-
+    percent_error = numpy.mean(numpy.abs(score1s - numpy.array(cv_preds))/added_score1)
     human_err=numpy.mean(numpy.abs(numpy.array(score2s)-score1s))
-    human_errs.append(human_err)
-    print human_err
     human_kappa=util_functions.quadratic_weighted_kappa(list(score2s),score1s)
-    human_kappas.append(human_kappa)
-    print human_kappa
-    human_percent_error = numpy.mean(numpy.abs(score1s - numpy.array(score2s))/score1s)
-    human_percent_errors.append(human_percent_error)
-    print human_percent_error
+    human_percent_error = numpy.mean(numpy.abs(score1s - numpy.array(score2s))/added_score1)
 
     outfile=open(data_path + "outdata/" + filename,'w+')
     outfile.write("cv_pred" + "\t" + "actual1\t" + "actual2\n")
@@ -92,13 +76,21 @@ for filename in filenames:
         outfile.write("{0}\t{1}\t{2}\n".format(str(cv_preds[i]),str(score1s[i]), str(score2s[i])))
     outfile.close()
 
+    return err, kappa,percent_error,human_err,human_kappa,human_percent_error
+
+length = len(filenames)
+np=12
+p = Pool(processes=np)
+errs, kappas,percent_errors,human_errs,human_kappas,human_percent_errors = zip(*p.map(run_single_worker,[(filenames[i],data_path) for i in xrange(0,length)]))
+
 outfile=open(data_path + "outdata/summary.tsv",'w+')
 outfile.write("set\terr\tkappa\tpercent_error\thuman_err\thuman_kappa\thuman_percent_error\n")
-for i in xrange(0,len(cv_preds)):
+for i in xrange(0,len(errs)):
     outfile.write("{set}\t{err}\t{kappa}\t{percent_error}\t{human_err}\t{human_kappa}\t{human_percent_error}\n".format(
         set=i+1,err=errs[i],kappa=kappas[i],percent_error=percent_errors[i], human_err=human_errs[i],
         human_kappa=human_kappas[i], human_percent_error=human_percent_errors[i]))
 outfile.close()
+
 
 
 

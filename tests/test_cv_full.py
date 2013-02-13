@@ -40,7 +40,8 @@ for filename in filenames:
     texts=[]
     lines=sa_val.readlines()
     eset=essay_set.EssaySet(type="train")
-    for i in xrange(1,len(lines)):
+    #len(lines)
+    for i in xrange(1,10):
         id_val,essay_set_num,score1,score2,text=lines[i].split("\t")
         score1s.append(int(score1))
         score2s.append(int(score2))
@@ -53,16 +54,23 @@ for filename in filenames:
     extractor=feature_extractor.FeatureExtractor()
     extractor.initialize_dictionaries(eset)
     train_feats=extractor.gen_feats(eset)
-    clf=GradientBoostingClassifier(n_estimators=100, learn_rate=.05,max_depth=4, random_state=1,min_samples_leaf=3)
+    print(max(score1s))
+    if max(score1s)<=3:
+        clf=GradientBoostingClassifier(n_estimators=100, learn_rate=.05,max_depth=4, random_state=1,min_samples_leaf=3)
+    else:
+        clf=GradientBoostingRegressor(n_estimators=100, learn_rate=.05, max_depth=4, random_state=1, min_samples_leaf=3)
+
     try:
         cv_preds=util_functions.gen_cv_preds(clf,train_feats,score1s, num_chunks = 3) # int(math.floor(len(texts)/2)
     except:
         cv_preds = score1s
 
+    rounded_cv = [int(round(cv)) for cv in list(cv_preds)]
+
     err=numpy.mean(numpy.abs(numpy.array(cv_preds)-score1s))
     errs.append(err)
     print err
-    kappa=util_functions.quadratic_weighted_kappa(list(cv_preds),score1s)
+    kappa=util_functions.quadratic_weighted_kappa(rounded_cv, score1s)
     kappas.append(kappa)
     print kappa
     percent_error = numpy.mean(numpy.abs(score1s - numpy.array(cv_preds))/score1s)

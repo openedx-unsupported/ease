@@ -36,8 +36,7 @@ def run_single_worker(args):
     texts=[]
     lines=sa_val.readlines()
     eset=essay_set.EssaySet(type="train")
-    #len(lines)
-    for i in xrange(1,10):
+    for i in xrange(1,len(lines)):
         id_val,essay_set_num,score1,score2,text=lines[i].split("\t")
         score1s.append(int(score1))
         score2s.append(int(score2))
@@ -57,7 +56,7 @@ def run_single_worker(args):
         clf=GradientBoostingRegressor(n_estimators=100, learn_rate=.05, max_depth=4, random_state=1, min_samples_leaf=3)
 
     try:
-        cv_preds=util_functions.gen_cv_preds(clf,train_feats,score1s, num_chunks = 3) # int(math.floor(len(texts)/2)
+        cv_preds=util_functions.gen_cv_preds(clf,train_feats,score1s, num_chunks = 10) # int(math.floor(len(texts)/2)
     except:
         cv_preds = score1s
 
@@ -79,7 +78,7 @@ def run_single_worker(args):
     return err, kappa,percent_error,human_err,human_kappa,human_percent_error
 
 length = len(filenames)
-np=12
+np=8
 p = Pool(processes=np)
 errs, kappas,percent_errors,human_errs,human_kappas,human_percent_errors = zip(*p.map(run_single_worker,[(filenames[i],data_path) for i in xrange(0,length)]))
 

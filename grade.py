@@ -81,10 +81,12 @@ def grade(grader_data,grader_config,submission):
                 problem_areas+=len(feedback[tag])>5
 
         #Add feedback to results
-        results['feedback']={
-            'topicality' : feedback['topicality'],
-            'prompt-overlap' : feedback['prompt_overlap'],
-        }
+        results['feedback'] = {}
+        if 'topicality' in feedback and 'prompt_overlap' in feedback:
+            results['feedback'].update({
+                'topicality' : feedback['topicality'],
+                'prompt-overlap' : feedback['prompt_overlap'],
+            })
 
         if results['score']/float(max_score)<.33:
             results['feedback'].update(

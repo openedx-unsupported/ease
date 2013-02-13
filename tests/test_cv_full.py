@@ -86,11 +86,11 @@ for filename in filenames:
     outfile.close()
 
 outfile=open(data_path + "outdata/summary.tsv",'w+')
-outfile.write("err\tkappa\tpercent_error\thuman_err\thuman_kappa\thuman_percent_error\n")
+outfile.write("set\terr\tkappa\tpercent_error\thuman_err\thuman_kappa\thuman_percent_error\n")
 for i in xrange(0,len(cv_preds)):
-    outfile.write("{err}\t{kappa}\t{percent_error}\t{human_err}\t{human_kappa}\t{human_percent_error}\n".format(
-        err=errs,kappa=kappas,percent_error=percent_errors, human_err=human_errs,
-        human_kappa=human_kappas, human_percent_error=human_percent_errors))
+    outfile.write("{set}\t{err}\t{kappa}\t{percent_error}\t{human_err}\t{human_kappa}\t{human_percent_error}\n".format(
+        set=i+1,err=errs[i],kappa=kappas[i],percent_error=percent_errors[i], human_err=human_errs[i],
+        human_kappa=human_kappas[i], human_percent_error=human_percent_errors[i]))
 outfile.close()
 
 

@@ -40,8 +40,7 @@ for filename in filenames:
     texts=[]
     lines=sa_val.readlines()
     eset=essay_set.EssaySet(type="train")
-    #len(lines)
-    for i in xrange(1,10):
+    for i in xrange(1,len(lines)):
         id_val,essay_set_num,score1,score2,text=lines[i].split("\t")
         score1s.append(int(score1))
         score2s.append(int(score2))
@@ -80,10 +79,10 @@ for filename in filenames:
     human_percent_errors.append(human_percent_error)
     print human_percent_error
 
-    outfile=open(data_path + "outdata/" + filename + ".tsv",'w+')
+    outfile=open(data_path + "outdata/" + filename,'w+')
     outfile.write("cv_pred" + "\t" + "actual1\t" + "actual2\n")
     for i in xrange(0,len(cv_preds)):
-        outfile.write("{0}\t{1}\t{2}\n".format(str(cv_preds[i]),str(score1s[i]), str(scores2s[i])))
+        outfile.write("{0}\t{1}\t{2}\n".format(str(cv_preds[i]),str(score1s[i]), str(score2s[i])))
     outfile.close()
 
 outfile=open(data_path + "outdata/summary.tsv",'w+')

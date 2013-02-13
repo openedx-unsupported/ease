@@ -24,8 +24,10 @@ if not data_path.endswith("/"):
     data_path=data_path+"/"
 filenames = [str(i) +".tsv" for i in xrange(1,19)]
 
+run_cv = False
+
 def run_single_worker(args):
-    filename,data_path = args
+    filename,data_path,run_cv = args
     base_name = data_path + filename
     print base_name
     sa_val = file(base_name)
@@ -55,10 +57,24 @@ def run_single_worker(args):
     else:
         clf=GradientBoostingRegressor(n_estimators=100, learn_rate=.05, max_depth=4, random_state=1, min_samples_leaf=3)
 
-    try:
-        cv_preds=util_functions.gen_cv_preds(clf,train_feats,score1s, num_chunks = 10) # int(math.floor(len(texts)/2)
-    except:
-        cv_preds = score1s
+    if run_cv:
+        try:
+            cv_preds=util_functions.gen_cv_preds(clf,train_feats,score1s, num_chunks = 10) # int(math.floor(len(texts)/2)
+        except:
+            cv_preds = score1s
+    else:
+        try:
+            random_nums = list(numpy.random.random_integers(0, train_feats.shape[0], 100))
+            out_group_rows = [row for row in xrange(0,train_feats.shape[0]) if row not in random_nums]
+            in_group_scores = list(numpy.array(score1s)[random_nums])
+            out_group_scores = list(numpy.array(score1s)[out_group_rows])
+            out_group_score2s = list(numpy.array(score2s)[out_group_rows])
+            score1s = out_group_scores
+            score2s = out_group_score2s
+            model = util_functions.gen_model(clf,train_feats[random_nums,:],in_group_scores)
+            cv_preds = util_functions.gen_preds(model,train_feats[out_group_rows,:])
+        except:
+            cv_preds = score1s[100:]
 
     rounded_cv = [int(round(cv)) for cv in list(cv_preds)]
     added_score1 = [s1+1 for s1 in score1s]
@@ -80,7 +96,7 @@ def run_single_worker(args):
 length = len(filenames)
 np=8
 p = Pool(processes=np)
-errs, kappas,percent_errors,human_errs,human_kappas,human_percent_errors = zip(*p.map(run_single_worker,[(filenames[i],data_path) for i in xrange(0,length)]))
+errs, kappas,percent_errors,human_errs,human_kappas,human_percent_errors = zip(*p.map(run_single_worker,[(filenames[i],data_path,run_cv) for i in xrange(0,length)]))
 
 outfile=open(data_path + "outdata/summary.tsv",'w+')
 outfile.write("set\terr\tkappa\tpercent_error\thuman_err\thuman_kappa\thuman_percent_error\n")

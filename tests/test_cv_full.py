@@ -13,7 +13,7 @@ import feature_extractor
 import numpy
 import math
 
-from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
 
 if not base_path.endswith("/"):
     base_path=base_path+"/"
@@ -40,8 +40,7 @@ for filename in filenames:
     texts=[]
     lines=sa_val.readlines()
     eset=essay_set.EssaySet(type="train")
-    #len(lines)
-    for i in xrange(1,10):
+    for i in xrange(1,len(lines)):
         id_val,essay_set_num,score1,score2,text=lines[i].split("\t")
         score1s.append(int(score1))
         score2s.append(int(score2))

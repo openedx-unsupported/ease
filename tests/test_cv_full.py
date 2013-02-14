@@ -64,7 +64,8 @@ def run_single_worker(args):
             cv_preds = score1s
     else:
         try:
-            random_nums = list(numpy.random.random_integers(0, train_feats.shape[0], 100))
+            count_to_train_on = 100
+            random_nums = list(numpy.random.random_integers(0, train_feats.shape[0], count_to_train_on))
             out_group_rows = [row for row in xrange(0,train_feats.shape[0]) if row not in random_nums]
             in_group_scores = list(numpy.array(score1s)[random_nums])
             out_group_scores = list(numpy.array(score1s)[out_group_rows])
@@ -74,7 +75,15 @@ def run_single_worker(args):
             model = util_functions.gen_model(clf,train_feats[random_nums,:],in_group_scores)
             cv_preds = util_functions.gen_preds(model,train_feats[out_group_rows,:])
         except:
-            cv_preds = score1s[100:]
+            print "Error with generating cv preds"
+            random_nums = list(numpy.random.random_integers(0, train_feats.shape[0], count_to_train_on))
+            out_group_rows = [row for row in xrange(0,train_feats.shape[0]) if row not in random_nums]
+            in_group_scores = list(numpy.array(score1s)[random_nums])
+            out_group_scores = list(numpy.array(score1s)[out_group_rows])
+            out_group_score2s = list(numpy.array(score2s)[out_group_rows])
+            score1s = out_group_scores
+            score2s = out_group_score2s
+            cv_preds = score1s
 
     rounded_cv = [int(round(cv)) for cv in list(cv_preds)]
     added_score1 = [s1+1 for s1 in score1s]

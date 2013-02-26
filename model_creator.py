@@ -87,6 +87,12 @@ def create_essay_set(text, score, prompt_string, generate_additional=True):
     return x
 
 def get_cv_error(clf,feats,scores):
+    """
+    Gets cross validated error for a given classifier, set of features, and scores
+    clf - classifier
+    feats - features to feed into the classified and cross validate over
+    scores - scores associated with the features -- feature row 1 associates with score 1, etc.
+    """
     results={'success' : False, 'kappa' : 0, 'mae' : 0}
     try:
         cv_preds=util_functions.gen_cv_preds(clf,feats,scores)
@@ -104,6 +110,10 @@ def get_cv_error(clf,feats,scores):
     return results
 
 def get_algorithms(type):
+    """
+    Gets two classifiers for each type of algorithm, and returns them.  First for predicting, second for cv error.
+    type - one of util_functions.AlgorithmTypes
+    """
     if type == util_functions.AlgorithmTypes.classification:
         clf = sklearn.ensemble.GradientBoostingClassifier(n_estimators=100, learn_rate=.05,
             max_depth=4, random_state=1,min_samples_leaf=3)
@@ -118,6 +128,11 @@ def get_algorithms(type):
 
 
 def extract_features_and_generate_model_predictors(predictor_set, type=util_functions.AlgorithmTypes.regression):
+    """
+    Extracts features and generates predictors based on a given predictor set
+    predictor_set - a PredictorSet object that has been initialized with data
+    type - one of util_functions.AlgorithmType
+    """
     if(algorithm not in [util_functions.AlgorithmTypes.regression, util_functions.AlgorithmTypes.classification]):
         algorithm = util_functions.AlgorithmTypes.regression
 

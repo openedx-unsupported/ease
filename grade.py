@@ -174,6 +174,7 @@ def get_confidence_value(algorithm,model,grader_feats,score):
     min_score=min(numpy.asarray(score))
     max_score=max(numpy.asarray(score))
     if algorithm == util_functions.AlgorithmTypes.classification:
+        #If classification, predict with probability, which gives you a matrix of confidences per score point
         raw_confidence=model.predict_proba(grader_feats)[0,(score-min_score)]
         #TODO: Normalize confidence somehow here
         confidence=raw_confidence

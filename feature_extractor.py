@@ -24,6 +24,7 @@ if not base_path.endswith("/"):
 
 log = logging.getLogger(__name__)
 
+#Paths to needed data files
 NGRAM_PATH = base_path + "data/good_pos_ngrams.p"
 ESSAY_CORPUS_PATH = util_functions.ESSAY_CORPUS_PATH
 
@@ -43,17 +44,26 @@ class FeatureExtractor(object):
         """
         if(hasattr(e_set, '_type')):
             if(e_set._type == "train"):
+                #normal text (unstemmed) useful words/bigrams
                 nvocab = util_functions.get_vocab(e_set._text, e_set._score, max_feats2 = max_feats2)
+                #stemmed and spell corrected vocab useful words/ngrams
                 svocab = util_functions.get_vocab(e_set._clean_stem_text, e_set._score, max_feats2 = max_feats2)
+                #dictionary trained on proper vocab
                 self._normal_dict = CountVectorizer(ngram_range=(1,2), vocabulary=nvocab)
+                #dictionary trained on proper vocab
                 self._stem_dict = CountVectorizer(ngram_range=(1,2), vocabulary=svocab)
                 self.dict_initialized = True
+                #Average spelling errors in set. needed later for spelling detection
                 self._mean_spelling_errors=sum(e_set._spelling_errors)/float(len(e_set._spelling_errors))
                 self._spell_errors_per_character=sum(e_set._spelling_errors)/float(sum([len(t) for t in e_set._text]))
+                #Gets the number and positions of grammar errors
                 good_pos_tags,bad_pos_positions=self._get_grammar_errors(e_set._pos,e_set._text,e_set._tokens)
                 self._grammar_errors_per_character=(sum(good_pos_tags)/float(sum([len(t) for t in e_set._text])))
+                #Generate bag of words features
                 bag_feats=self.gen_bag_feats(e_set)
+                #Sum of a row of bag of words features (topical words in an essay)
                 f_row_sum=numpy.sum(bag_feats[:,:])
+                #Average index of how "topical" essays are
                 self._mean_f_prop=f_row_sum/float(sum([len(t) for t in e_set._text]))
                 ret = "ok"
             else:
@@ -87,6 +97,9 @@ class FeatureExtractor(object):
     def _get_grammar_errors(self,pos,text,tokens):
         """
         Internal function to get the number of grammar errors in given text
+        pos - part of speech tagged text (list)
+        text - normal text (list)
+        tokens - list of lists of tokenized text
         """
         word_counts = [max(len(t),1) for t in tokens]
         good_pos_tags = []
@@ -123,6 +136,7 @@ class FeatureExtractor(object):
         Generates length based features from an essay set
         Generally an internal function called by gen_feats
         Returns an array of length features
+        e_set - EssaySet object
         """
         text = e_set._text
         lengths = [len(e) for e in text]
@@ -146,6 +160,7 @@ class FeatureExtractor(object):
         Generates bag of words features from an input essay set and trained FeatureExtractor
         Generally called by gen_feats
         Returns an array of features
+        e_set - EssaySet object
         """
         if(hasattr(self, '_stem_dict')):
             sfeats = self._stem_dict.transform(e_set._clean_stem_text)
@@ -159,6 +174,7 @@ class FeatureExtractor(object):
         """
         Generates bag of words, length, and prompt features from an essay set object
         returns an array of features
+        e_set - EssaySet object
         """
         bag_feats = self.gen_bag_feats(e_set)
         length_feats = self.gen_length_feats(e_set)
@@ -173,6 +189,7 @@ class FeatureExtractor(object):
         Generates prompt based features from an essay set object and internal prompt variable.
         Generally called internally by gen_feats
         Returns an array of prompt features
+        e_set - EssaySet object
         """
         prompt_toks = nltk.word_tokenize(e_set._prompt)
         expand_syns = []
@@ -208,6 +225,7 @@ class FeatureExtractor(object):
         features - optionally, pass in a matrix of features extracted from e_set using FeatureExtractor
         in order to get off topic feedback.
         Returns a list of lists (one list per essay in e_set)
+        e_set - EssaySet object
         """
 
         #Set ratio to modify thresholds for grammar/spelling errors

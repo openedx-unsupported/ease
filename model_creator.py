@@ -141,7 +141,7 @@ def extract_features_and_generate_model_predictors(predictor_set, type=util_func
     return f, clf, cv_error_results
 
 
-def extract_features_and_generate_model(essays,additional_array=None):
+def extract_features_and_generate_model(essays, type=util_functions.AlgorithmTypes.regression):
     """
     Feed in an essay set to get feature vector and classifier
     essays must be an essay set object
@@ -153,9 +153,6 @@ def extract_features_and_generate_model(essays,additional_array=None):
     f.initialize_dictionaries(essays)
 
     train_feats = f.gen_feats(essays)
-    if(additional_array!=None and type(additional_array)==type(numpy.array([1]))):
-        if(additional_array.shape[0]==train_feats.shape[0]):
-            train_feats=numpy.concatenate((train_feats,additional_array),axis=1)
 
     set_score = numpy.asarray(essays._score, dtype=numpy.int)
     if len(util_functions.f7(list(set_score)))>5:

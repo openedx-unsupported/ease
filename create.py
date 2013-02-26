@@ -6,6 +6,7 @@ import os
 import sys
 import logging
 from statsd import statsd
+import numpy
 
 #Define base path and add to sys path
 base_path = os.path.dirname(__file__)
@@ -35,13 +36,22 @@ def create(text,score,prompt_string,model_path = None):
 
     #Initialize a results dictionary to return
     results = {'errors': [],'success' : False, 'cv_kappa' : 0, 'cv_mean_absolute_error': 0,
-               'feature_ext' : "", 'classifier' : ""}
+               'feature_ext' : "", 'classifier' : "", 'algorithm' : util_functions.AlgorithmTypes.classification}
 
     if len(text)!=len(score):
         msg = "Target and text lists must be same length."
         results['errors'].append(msg)
         log.exception(msg)
         return results
+
+    #Decide what algorithm to use (regression or classification)
+    try:
+        if len(util_functions.f7(list(score)))>5:
+            type = util_functions.AlgorithmTypes.regression
+        else:
+            type = util_functions.AlgorithmTypes.classification
+    except:
+        type = util_functions.AlgorithmTypes.regression
 
     try:
         #Create an essay set object that encapsulates all the essays and alternate representations (tokens, etc)
@@ -52,11 +62,12 @@ def create(text,score,prompt_string,model_path = None):
         log.exception(msg)
     try:
         #Gets features from the essay set and computes error
-        feature_ext, classifier, cv_error_results = model_creator.extract_features_and_generate_model(e_set)
+        feature_ext, classifier, cv_error_results = model_creator.extract_features_and_generate_model(e_set, type=type)
         results['cv_kappa']=cv_error_results['kappa']
         results['cv_mean_absolute_error']=cv_error_results['mae']
         results['feature_ext']=feature_ext
         results['classifier']=classifier
+        results['algorithm'] = type
         results['success']=True
     except:
         msg = "feature extraction and model creation failed."
@@ -78,6 +89,7 @@ def create_generic(numeric_values, textual_values, target, model_path = None, al
     (each item in textual_values corresponds to the similarly indexed counterpart in numeric_values)
     target - The variable that we are trying to predict.  A list of integers.
     model_path - deprecated, kept for legacy code.  Do not use.
+    algorithm - the type of algorithm that will be used
     """
 
     #Initialize a result dictionary to return.

@@ -35,6 +35,7 @@ def grade(grader_data,grader_config,submission):
         'model' : trained model,
         'extractor' : trained feature extractor,
         'prompt' : prompt for the question,
+        'algorithm' : algorithm for the question,
     }
     grader_config - Legacy, kept for compatibility with old code.  Need to remove.
     submission - The student submission (string)
@@ -45,6 +46,10 @@ def grade(grader_data,grader_config,submission):
     has_error=False
 
     grader_set=EssaySet(type="test")
+
+    #This is to preserve legacy functionality
+    if 'algorithm' not in grader_data:
+        grader_data['algorithm'] = util_functions.AlgorithmTypes.classification
 
     try:
         #Try to add essay to essay set object
@@ -65,11 +70,7 @@ def grade(grader_data,grader_config,submission):
 
     #Try to determine confidence level
     try:
-        min_score=min(numpy.asarray(grader_data['score']))
-        max_score=max(numpy.asarray(grader_data['score']))
-        raw_confidence=grader_data['model'].predict_proba(grader_feats)[0,(results['score']-min_score)]
-        #TODO: Normalize confidence somehow here
-        results['confidence']=raw_confidence
+        results['confidence'] = get_confidence_value(grader_data['algorithm'], grader_data['model'], grader_feats, results['score'])
     except:
         #If there is an error getting confidence, it is not a show-stopper, so just log
         log.exception("Problem generating confidence value")
@@ -112,6 +113,17 @@ def grade(grader_data,grader_config,submission):
     return results
 
 def grade_generic(grader_data, grader_config, numeric_features, textual_features):
+    """
+    Grades a set of numeric and textual features using a generic model
+    grader_data -- dictionary containing:
+    {
+        'algorithm' - Type of algorithm to use to score
+    }
+    grader_config - legacy, kept for compatibility with old code.  Need to remove.
+    numeric_features - list of numeric features to predict on
+    textual_features - list of textual feature to predict on
+
+    """
     results = {'errors': [],'tests': [],'score': 0, 'success' : False, 'confidence' : 0}
 
     has_error=False
@@ -137,16 +149,7 @@ def grade_generic(grader_data, grader_config, numeric_features, textual_features
 
     #Try to determine confidence level
     try:
-        min_score=min(numpy.asarray(grader_data['score']))
-        max_score=max(numpy.asarray(grader_data['score']))
-        if grader_data['algorithm'] == util_functions.AlgorithmTypes.classification:
-            raw_confidence=grader_data['model'].predict_proba(grader_feats)[0,(results['score']-min_score)]
-            #TODO: Normalize confidence somehow here
-            results['confidence']=raw_confidence
-        else:
-            raw_confidence = grader_data['model'].predict(grader_feats)[0]
-            confidence = max(raw_confidence - math.floor(raw_confidence), math.ceil(raw_confidence) - raw_confidence)
-            results['confidence'] = confidence
+        results['confidence'] = get_confidence_value(grader_data['algorithm'], grader_data['model'], grader_feats, results['score'])
     except:
         #If there is an error getting confidence, it is not a show-stopper, so just log
         log.exception("Problem generating confidence value")
@@ -159,3 +162,17 @@ def grade_generic(grader_data, grader_config, numeric_features, textual_features
         results['success'] = True
 
     return results
+
+def get_confidence_value(algorithm,model,grader_feats,score):
+    min_score=min(numpy.asarray(score))
+    max_score=max(numpy.asarray(score))
+    if algorithm == util_functions.AlgorithmTypes.classification:
+        raw_confidence=model.predict_proba(grader_feats)[0,(score-min_score)]
+        #TODO: Normalize confidence somehow here
+        confidence=raw_confidence
+    else:
+        raw_confidence = model.predict(grader_feats)[0]
+        confidence = max(raw_confidence - math.floor(raw_confidence), math.ceil(raw_confidence) - raw_confidence)
+
+    return confidence
+

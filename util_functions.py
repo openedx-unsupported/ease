@@ -15,6 +15,14 @@ import logging
 
 log=logging.getLogger(__name__)
 
+base_path = os.path.dirname(__file__)
+sys.path.append(base_path)
+if not base_path.endswith("/"):
+    base_path=base_path+"/"
+
+ESSAY_CORPUS_PATH = base_path + "data/essaycorpus.txt"
+ESSAY_COR_TOKENS_PATH = base_path + "data/essay_cor_tokens.p"
+
 class AlgorithmTypes(object):
     regression = "regression"
     classification = "classifiction"
@@ -417,13 +425,13 @@ def get_separator_words(toks1):
     Returns a list of separator words
     """
     tab_toks1 = nltk.FreqDist(word.lower() for word in toks1)
-    if(os.path.isfile("essay_cor_tokens.p")):
-        toks2 = pickle.load(open('essay_cor_tokens.p', 'rb'))
+    if(os.path.isfile(ESSAY_COR_TOKENS_PATH)):
+        toks2 = pickle.load(open(ESSAY_COR_TOKENS_PATH, 'rb'))
     else:
-        essay_corpus = open("essaycorpus.txt").read()
+        essay_corpus = open(ESSAY_CORPUS_PATH).read()
         essay_corpus = sub_chars(essay_corpus)
         toks2 = nltk.FreqDist(word.lower() for word in nltk.word_tokenize(essay_corpus))
-        pickle.dump(toks2, open('essay_cor_tokens.p', 'wb'))
+        pickle.dump(toks2, open(ESSAY_COR_TOKENS_PATH, 'wb'))
     sep_words = []
     for word in tab_toks1.keys():
         tok1_present = tab_toks1[word]

@@ -24,6 +24,8 @@ if not base_path.endswith("/"):
 
 log = logging.getLogger(__name__)
 
+NGRAM_PATH = base_path + "data/good_pos_ngrams.p"
+ESSAY_CORPUS_PATH = util_functions.ESSAY_CORPUS_PATH
 
 class FeatureExtractor(object):
     def __init__(self):
@@ -65,13 +67,13 @@ class FeatureExtractor(object):
         Gets a list of gramatically correct part of speech sequences from an input file called essaycorpus.txt
         Returns the list and caches the file
         """
-        if(os.path.isfile(base_path + "good_pos_ngrams.p")):
-            good_pos_ngrams = pickle.load(open(base_path + 'good_pos_ngrams.p', 'rb'))
-        elif os.path.isfile(base_path + "essaycorpus.txt"):
-            essay_corpus = open(base_path + "essaycorpus.txt").read()
+        if(os.path.isfile(NGRAM_PATH)):
+            good_pos_ngrams = pickle.load(open(NGRAM_PATH, 'rb'))
+        elif os.path.isfile(ESSAY_CORPUS_PATH):
+            essay_corpus = open(ESSAY_CORPUS_PATH).read()
             essay_corpus = util_functions.sub_chars(essay_corpus)
             good_pos_ngrams = util_functions.regenerate_good_tokens(essay_corpus)
-            pickle.dump(good_pos_ngrams, open(base_path + 'good_pos_ngrams.p', 'wb'))
+            pickle.dump(good_pos_ngrams, open(NGRAM_PATH, 'wb'))
         else:
             #Hard coded list in case the needed files cannot be found
             good_pos_ngrams=['NN PRP', 'NN PRP .', 'NN PRP . DT', 'PRP .', 'PRP . DT', 'PRP . DT NNP', '. DT',

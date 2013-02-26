@@ -164,6 +164,13 @@ def grade_generic(grader_data, grader_config, numeric_features, textual_features
     return results
 
 def get_confidence_value(algorithm,model,grader_feats,score):
+    """"
+    Determines a confidence in a certain score, given proper input parameters
+    algorithm- from util_functions.AlgorithmTypes
+    model - a trained model
+    grader_feats - a row of features used by the model for classification/regression
+    score - The score assigned to the submission by a prior model
+    """"
     min_score=min(numpy.asarray(score))
     max_score=max(numpy.asarray(score))
     if algorithm == util_functions.AlgorithmTypes.classification:

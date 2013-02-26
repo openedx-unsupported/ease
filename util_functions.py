@@ -83,6 +83,8 @@ def spell_correct(string):
     Returns the spell corrected string if aspell is found, original string if not.
     string - string
     """
+
+    #Create a temp file so that aspell could be used
     f = open('tmpfile', 'w')
     f.write(string)
     f_path = os.path.abspath(f.name)
@@ -91,13 +93,16 @@ def spell_correct(string):
         p = os.popen(aspell_path + " -a < " + f_path + " --sug-mode=ultra")
     except:
         log.exception("Could not find aspell, so could not spell correct!")
+        #Return original string if aspell fails
         return string,0, string
+    #Aspell returns a list of incorrect words with the above flags
     incorrect = p.readlines()
     p.close()
     incorrect_words = list()
     correct_spelling = list()
     for i in range(1, len(incorrect)):
         if(len(incorrect[i]) > 10):
+            #Reformat aspell output to make sense
             match = re.search(":", incorrect[i])
             if hasattr(match, "start"):
                 begstring = incorrect[i][2:match.start()]
@@ -111,6 +116,8 @@ def spell_correct(string):
 
                     incorrect_words.append(begword)
                     correct_spelling.append(sug)
+
+    #Create markup based on spelling errors
     newstring = string
     markup_string = string
     already_subbed=[]

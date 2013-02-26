@@ -24,14 +24,13 @@ import predictor_extractor
 log = logging.getLogger(__name__)
 
 @statsd.timed('open_ended_assessment.machine_learning.creator.time')
-def create(text,score,prompt_string,model_path = None):
+def create(text,score,prompt_string):
     """
     Creates a machine learning model from input text, associated scores, a prompt, and a path to the model
     TODO: Remove model path argument, it is needed for now to support legacy code
     text - A list of strings containing the text of the essays
     score - a list of integers containing score values
     prompt_string - the common prompt for the set of essays
-    model_path - Deprecated, not needed
     """
 
     #Initialize a results dictionary to return
@@ -81,14 +80,13 @@ def create(text,score,prompt_string,model_path = None):
     return results
 
 
-def create_generic(numeric_values, textual_values, target, model_path = None, algorithm = util_functions.AlgorithmTypes.regression):
+def create_generic(numeric_values, textual_values, target, algorithm = util_functions.AlgorithmTypes.regression):
     """
     Creates a model from a generic list numeric values and text values
     numeric_values - A list of lists that are the predictors
     textual_values - A list of lists that are the predictors
     (each item in textual_values corresponds to the similarly indexed counterpart in numeric_values)
     target - The variable that we are trying to predict.  A list of integers.
-    model_path - deprecated, kept for legacy code.  Do not use.
     algorithm - the type of algorithm that will be used
     """
 

@@ -27,7 +27,7 @@ import math
 log = logging.getLogger(__name__)
 
 @statsd.timed('open_ended_assessment.machine_learning.grader.time')
-def grade(grader_data,grader_config,submission):
+def grade(grader_data,submission):
     """
     Grades a specified submission using specified models
     grader_data - A dictionary:
@@ -37,7 +37,6 @@ def grade(grader_data,grader_config,submission):
         'prompt' : prompt for the question,
         'algorithm' : algorithm for the question,
     }
-    grader_config - Legacy, kept for compatibility with old code.  Need to remove.
     submission - The student submission (string)
     """
 
@@ -112,14 +111,13 @@ def grade(grader_data,grader_config,submission):
 
     return results
 
-def grade_generic(grader_data, grader_config, numeric_features, textual_features):
+def grade_generic(grader_data, numeric_features, textual_features):
     """
     Grades a set of numeric and textual features using a generic model
     grader_data -- dictionary containing:
     {
         'algorithm' - Type of algorithm to use to score
     }
-    grader_config - legacy, kept for compatibility with old code.  Need to remove.
     numeric_features - list of numeric features to predict on
     textual_features - list of textual feature to predict on
 

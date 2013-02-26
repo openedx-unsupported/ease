@@ -21,14 +21,22 @@ sys.path.append(base_path)
 if not base_path.endswith("/"):
     base_path=base_path+"/"
 
+#Paths to needed data files
 ESSAY_CORPUS_PATH = base_path + "data/essaycorpus.txt"
 ESSAY_COR_TOKENS_PATH = base_path + "data/essay_cor_tokens.p"
 
 class AlgorithmTypes(object):
+    """
+    Defines what types of algorithm can be used
+    """
     regression = "regression"
     classification = "classifiction"
 
 def create_model_path(model_path):
+    """
+    Creates a path to model files
+    model_path - string
+    """
     if not model_path.startswith("/") and not model_path.startswith("models/"):
         model_path="/" + model_path
     if not model_path.startswith("models"):
@@ -43,7 +51,9 @@ def sub_chars(string):
     Strips illegal characters from a string.  Used to sanitize input essays.
     Removes all non-punctuation, digit, or letter characters.
     Returns sanitized string.
+    string - string
     """
+    #Define replacement patterns
     sub_pat = r"[^A-Za-z\.\?!,';:]"
     char_pat = r"\."
     com_pat = r","
@@ -51,26 +61,18 @@ def sub_chars(string):
     excl_pat = r"!"
     sem_pat = r";"
     col_pat = r":"
-
     whitespace_pat = r"\s{1,}"
-    whitespace_comp = re.compile(whitespace_pat)
-    sub_comp = re.compile(sub_pat)
-    char_comp = re.compile(char_pat)
-    com_comp = re.compile(com_pat)
-    ques_comp = re.compile(ques_pat)
-    excl_comp = re.compile(excl_pat)
-    sem_comp = re.compile(sem_pat)
-    col_comp = re.compile(col_pat)
 
-    nstring = sub_comp.sub(" ", string)
-    nstring = char_comp.sub(" .", nstring)
-    nstring = com_comp.sub(" ,", nstring)
-    nstring = ques_comp.sub(" ?", nstring)
-    nstring = excl_comp.sub(" !", nstring)
-    nstring = sem_comp.sub(" ;", nstring)
-    nstring = col_comp.sub(" :", nstring)
+    #Replace text.  Ordering is very important!
+    nstring = re.sub(sub_pat, " ", string)
+    nstring = re.sub(char_pat," .", nstring)
+    nstring = re.sub(com_pat, " ,", nstring)
+    nstring = re.sub(ques_pat, " ?", nstring)
+    nstring = re.sub(excl_pat, " !", nstring)
+    nstring = re.sub(sem_pat, " ;", nstring)
+    nstring = re.sub(col_pat, " :", nstring)
+    nstring = re.sub(whitespace_pat, " ", nstring)
 
-    nstring = whitespace_comp.sub(" ", nstring)
     return nstring
 
 
@@ -79,6 +81,7 @@ def spell_correct(string):
     Uses aspell to spell correct an input string.
     Requires aspell to be installed and added to the path.
     Returns the spell corrected string if aspell is found, original string if not.
+    string - string
     """
     f = open('tmpfile', 'w')
     f.write(string)

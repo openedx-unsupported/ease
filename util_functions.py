@@ -1,18 +1,16 @@
 #Collection of misc functions needed to support essay_set.py and feature_extractor.py.
 #Requires aspell to be installed and added to the path
+from external_code.fisher import fisher
 
 aspell_path = "aspell"
 import re
 import os
 from sklearn.feature_extraction.text import CountVectorizer
-import fisher
 import numpy
 from itertools import chain
 import math
 import nltk
-import random
 import pickle
-from path import path
 import logging
 
 log=logging.getLogger(__name__)

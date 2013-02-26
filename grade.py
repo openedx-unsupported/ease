@@ -1,9 +1,6 @@
-#Grader called by pyxserver_wsgi.py
-#Loads a grader file, which is a dict containing the prompt of the question,
-#a feature extractor object, and a trained model.
-#Extracts features and runs trained model on the submission to produce a final score.
-#Correctness determined by ratio of score to max possible score.
-#Requires aspell to be installed and added to the path.
+""""
+Functions to score specified data using specified ML models
+""""
 
 import sys
 import pickle
@@ -12,9 +9,11 @@ import numpy
 import logging
 from statsd import statsd
 
+#Append sys to base path to import the following modules
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
 
+#Depend on base path to be imported
 from essay_set import EssaySet
 import predictor_extractor
 import predictor_set
@@ -29,17 +28,26 @@ log = logging.getLogger(__name__)
 
 @statsd.timed('open_ended_assessment.machine_learning.grader.time')
 def grade(grader_data,grader_config,submission):
+    """
+    Grades a specified submission using specified models
+    grader_data - A dictionary:
+    {
+        'model' : trained model,
+        'extractor' : trained feature extractor,
+        'prompt' : prompt for the question,
+    }
+    grader_config - Legacy, kept for compatibility with old code.  Need to remove.
+    submission - The student submission (string)
+    """
 
+    #Initialize result dictionary
     results = {'errors': [],'tests': [],'score': 0, 'feedback' : "", 'success' : False, 'confidence' : 0}
-
     has_error=False
-
-    #Try to find and load the model file
 
     grader_set=EssaySet(type="test")
 
-    #Try to add essays to essay set object
     try:
+        #Try to add essay to essay set object
         grader_set.add_essay(str(submission),0)
         grader_set.update_prompt(str(grader_data['prompt']))
     except:
@@ -68,6 +76,7 @@ def grade(grader_data,grader_config,submission):
 
     if not has_error:
 
+        #If the essay is just a copy of the prompt, return a 0 as the score
         if(feedback['too_similar_to_prompt']):
             results['score']=0
             results['correct']=False
@@ -75,12 +84,8 @@ def grade(grader_data,grader_config,submission):
         results['success']=True
 
         #Generate short form output--number of problem areas identified in feedback
-        problem_areas=0
-        for tag in feedback:
-            if tag in ['topicality', 'prompt-overlap', 'spelling', 'grammar']:
-                problem_areas+=len(feedback[tag])>5
 
-        #Add feedback to results
+        #Add feedback to results if available
         results['feedback'] = {}
         if 'topicality' in feedback and 'prompt_overlap' in feedback:
             results['feedback'].update({
@@ -88,6 +93,7 @@ def grade(grader_data,grader_config,submission):
                 'prompt-overlap' : feedback['prompt_overlap'],
             })
 
+        #Only return spelling and grammar feedback for low scoring responses
         if results['score']/float(max_score)<.33:
             results['feedback'].update(
                 {'spelling' : feedback['spelling'],

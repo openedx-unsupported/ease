@@ -1,3 +1,7 @@
+"""
+Functions that create a machine learning model from training data
+"""
+
 import os
 import sys
 import logging

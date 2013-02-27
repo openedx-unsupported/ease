@@ -93,13 +93,13 @@ def grade(grader_data,submission):
                 'prompt-overlap' : feedback['prompt_overlap'],
             })
 
-        #Only return spelling and grammar feedback for low scoring responses
-        if results['score']/float(max_score)<.33:
-            results['feedback'].update(
-                {'spelling' : feedback['spelling'],
-            'grammar' : feedback['grammar'],
-            'markup-text' : feedback['markup_text'],
-            })
+        results['feedback'].update(
+            {
+                'spelling' : feedback['spelling'],
+                'grammar' : feedback['grammar'],
+                'markup-text' : feedback['markup_text'],
+            }
+        )
 
     else:
         #If error, success is False.

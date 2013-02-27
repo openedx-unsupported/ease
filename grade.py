@@ -69,7 +69,7 @@ def grade(grader_data,submission):
 
     #Try to determine confidence level
     try:
-        results['confidence'] = get_confidence_value(grader_data['algorithm'], grader_data['model'], grader_feats, results['score'])
+        results['confidence'] = get_confidence_value(grader_data['algorithm'], grader_data['model'], grader_feats, results['score'], grader_data['score'])
     except:
         #If there is an error getting confidence, it is not a show-stopper, so just log
         log.exception("Problem generating confidence value")

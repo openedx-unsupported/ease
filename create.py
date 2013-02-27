@@ -35,7 +35,8 @@ def create(text,score,prompt_string):
 
     #Initialize a results dictionary to return
     results = {'errors': [],'success' : False, 'cv_kappa' : 0, 'cv_mean_absolute_error': 0,
-               'feature_ext' : "", 'classifier' : "", 'algorithm' : util_functions.AlgorithmTypes.classification}
+               'feature_ext' : "", 'classifier' : "", 'algorithm' : util_functions.AlgorithmTypes.classification,
+               'score' : score, 'text' : text, 'prompt' : prompt_string}
 
     if len(text)!=len(score):
         msg = "Target and text lists must be same length."

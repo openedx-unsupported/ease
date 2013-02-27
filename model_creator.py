@@ -87,10 +87,16 @@ def create_essay_set(text, score, prompt_string, generate_additional=True):
     return x
 
 def get_cv_error(clf,feats,scores):
+    """
+    Gets cross validated error for a given classifier, set of features, and scores
+    clf - classifier
+    feats - features to feed into the classified and cross validate over
+    scores - scores associated with the features -- feature row 1 associates with score 1, etc.
+    """
     results={'success' : False, 'kappa' : 0, 'mae' : 0}
     try:
         cv_preds=util_functions.gen_cv_preds(clf,feats,scores)
-        err=numpy.mean(numpy.abs(cv_preds-scores))
+        err=numpy.mean(numpy.abs(numpy.array(cv_preds)-scores))
         kappa=util_functions.quadratic_weighted_kappa(list(cv_preds),scores)
         results['mae']=err
         results['kappa']=kappa
@@ -103,15 +109,11 @@ def get_cv_error(clf,feats,scores):
 
     return results
 
-def extract_features_and_generate_model_predictors(predictor_set, type=util_functions.AlgorithmTypes.regression):
-    if(algorithm not in [util_functions.AlgorithmTypes.regression, util_functions.AlgorithmTypes.classification]):
-        algorithm = util_functions.AlgorithmTypes.regression
-
-    f = predictor_extractor.PredictorExtractor()
-    f.initialize_dictionaries(predictor_set)
-
-    train_feats = f.gen_feats(predictor_set)
-
+def get_algorithms(type):
+    """
+    Gets two classifiers for each type of algorithm, and returns them.  First for predicting, second for cv error.
+    type - one of util_functions.AlgorithmTypes
+    """
     if type == util_functions.AlgorithmTypes.classification:
         clf = sklearn.ensemble.GradientBoostingClassifier(n_estimators=100, learn_rate=.05,
             max_depth=4, random_state=1,min_samples_leaf=3)
@@ -122,7 +124,24 @@ def extract_features_and_generate_model_predictors(predictor_set, type=util_func
             max_depth=4, random_state=1,min_samples_leaf=3)
         clf2=sklearn.ensemble.GradientBoostingRegressor(n_estimators=100, learn_rate=.05,
             max_depth=4, random_state=1,min_samples_leaf=3)
+    return clf, clf2
 
+
+def extract_features_and_generate_model_predictors(predictor_set, type=util_functions.AlgorithmTypes.regression):
+    """
+    Extracts features and generates predictors based on a given predictor set
+    predictor_set - a PredictorSet object that has been initialized with data
+    type - one of util_functions.AlgorithmType
+    """
+    if(algorithm not in [util_functions.AlgorithmTypes.regression, util_functions.AlgorithmTypes.classification]):
+        algorithm = util_functions.AlgorithmTypes.regression
+
+    f = predictor_extractor.PredictorExtractor()
+    f.initialize_dictionaries(predictor_set)
+
+    train_feats = f.gen_feats(predictor_set)
+
+    clf,clf2 = get_algorithms(type)
     cv_error_results=get_cv_error(clf2,train_feats,predictor_set._target)
 
     try:
@@ -137,7 +156,7 @@ def extract_features_and_generate_model_predictors(predictor_set, type=util_func
     return f, clf, cv_error_results
 
 
-def extract_features_and_generate_model(essays,additional_array=None):
+def extract_features_and_generate_model(essays, type=util_functions.AlgorithmTypes.regression):
     """
     Feed in an essay set to get feature vector and classifier
     essays must be an essay set object
@@ -149,20 +168,18 @@ def extract_features_and_generate_model(essays,additional_array=None):
     f.initialize_dictionaries(essays)
 
     train_feats = f.gen_feats(essays)
-    if(additional_array!=None and type(additional_array)==type(numpy.array([1]))):
-        if(additional_array.shape[0]==train_feats.shape[0]):
-            train_feats=numpy.concatenate((train_feats,additional_array),axis=1)
 
-    clf = sklearn.ensemble.GradientBoostingClassifier(n_estimators=100, learn_rate=.05,
-        max_depth=4, random_state=1,min_samples_leaf=3)
+    set_score = numpy.asarray(essays._score, dtype=numpy.int)
+    if len(util_functions.f7(list(set_score)))>5:
+        type = util_functions.AlgorithmTypes.regression
+    else:
+        type = util_functions.AlgorithmTypes.classification
 
-    clf2=sklearn.ensemble.GradientBoostingClassifier(n_estimators=100, learn_rate=.05,
-        max_depth=4, random_state=1,min_samples_leaf=3)
+    clf,clf2 = get_algorithms(type)
 
     cv_error_results=get_cv_error(clf2,train_feats,essays._score)
 
     try:
-        set_score = numpy.asarray(essays._score, dtype=numpy.int)
         clf.fit(train_feats, set_score)
     except ValueError:
         log.exception("Not enough classes (0,1,etc) in sample.")

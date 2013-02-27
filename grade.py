@@ -161,7 +161,7 @@ def grade_generic(grader_data, numeric_features, textual_features):
 
     return results
 
-def get_confidence_value(algorithm,model,grader_feats,score):
+def get_confidence_value(algorithm,model,grader_feats,score, scores):
     """
     Determines a confidence in a certain score, given proper input parameters
     algorithm- from util_functions.AlgorithmTypes
@@ -169,8 +169,8 @@ def get_confidence_value(algorithm,model,grader_feats,score):
     grader_feats - a row of features used by the model for classification/regression
     score - The score assigned to the submission by a prior model
     """
-    min_score=min(numpy.asarray(score))
-    max_score=max(numpy.asarray(score))
+    min_score=min(numpy.asarray(scores))
+    max_score=max(numpy.asarray(scores))
     if algorithm == util_functions.AlgorithmTypes.classification:
         #If classification, predict with probability, which gives you a matrix of confidences per score point
         raw_confidence=model.predict_proba(grader_feats)[0,(score-min_score)]

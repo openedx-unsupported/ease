@@ -77,7 +77,10 @@ class EssaySet(object):
             self._id.append(max_id + 1)
             self._score.append(essay_score)
             # Clean text by removing non digit/work/punctuation characters
-            essay_text=str(essay_text.encode('ascii', 'ignore'))
+            try:
+                essay_text=str(essay_text.encode('ascii', 'ignore'))
+            except:
+                essay_text = (essay_text.decode('utf-8','replace')).encode('ascii','ignore')
             cleaned_essay=util_functions.sub_chars(essay_text).lower()
             if(len(cleaned_essay)>MAXIMUM_ESSAY_LENGTH):
                 cleaned_essay=cleaned_essay[0:MAXIMUM_ESSAY_LENGTH]

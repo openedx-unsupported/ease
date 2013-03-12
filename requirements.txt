@@ -10,5 +10,4 @@ path.py
 pip
 pylint
 pytz
-scikit-learn
-
+scikit-learn==0.12.1

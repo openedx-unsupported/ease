@@ -46,6 +46,7 @@ def create(text,score,prompt_string):
 
     #Decide what algorithm to use (regression or classification)
     try:
+        #Count the number of unique score points in the score list
         if len(util_functions.f7(list(score)))>5:
             type = util_functions.AlgorithmTypes.regression
         else:

@@ -22,9 +22,6 @@ sys.path.append(os.path.abspath('.'))
 sys.path.append(os.path.abspath('../'))
 sys.path.append(os.path.abspath('../machine-learning'))
 sys.path.append(os.path.abspath('../../'))
-import settings
-from django.core.management import setup_environ
-setup_environ(settings)
 
 # -- General configuration -----------------------------------------------------
 

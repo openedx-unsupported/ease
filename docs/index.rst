@@ -1,9 +1,9 @@
-.. ML API documentation master file, created by
+.. ML documentation master file, created by
    sphinx-quickstart on Fri Mar  1 09:51:10 2013.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-ML API Documentation
+ML Documentation
 ==================================
 
 Overview

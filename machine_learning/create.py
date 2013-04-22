@@ -11,7 +11,7 @@ import numpy
 #Define base path and add to sys path
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
-one_up_path = os.path.abspath(os.path.join(os.path.dirname(__file__),'..'))
+one_up_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..//'))
 sys.path.append(one_up_path)
 
 #Import modules that are dependent on the base path

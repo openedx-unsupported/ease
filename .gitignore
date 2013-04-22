@@ -5,3 +5,8 @@ models/
 *~
 tests/
 _build/
+build/
+dist/
+machine_learning.egg-info/
+*.egg
+

@@ -11,3 +11,5 @@ pip
 pylint==0.26.0
 pytz==2012h
 scikit-learn==0.12.1
+sphinx
+django-sphinx-autodoc

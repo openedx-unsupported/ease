@@ -11,5 +11,6 @@ Notes on how to install:
 5. Activate your virtual env (if you have one)
 6. pip install -r pre-requirements.txt
 7. pip install -r requirements.txt
-8. python -m nltk.downloader maxent_treebank_pos_tagger wordnet
-9. sudo mv /path/to/nltk_data /usr/share
+8. python setup.py install
+9. python -m nltk.downloader maxent_treebank_pos_tagger wordnet
+10. sudo mv /path/to/nltk_data /usr/share

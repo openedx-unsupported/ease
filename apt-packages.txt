@@ -1,4 +1,6 @@
 python-pip
+gcc
+g++
 gfortran
 libblas3gf
 libblas-dev

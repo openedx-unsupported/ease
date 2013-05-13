@@ -20,7 +20,7 @@ import sys, os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.append(os.path.abspath('.'))
 sys.path.append(os.path.abspath('../'))
-sys.path.append(os.path.abspath('../machine-learning'))
+sys.path.append(os.path.abspath('../ease'))
 sys.path.append(os.path.abspath('../../'))
 
 # -- General configuration -----------------------------------------------------

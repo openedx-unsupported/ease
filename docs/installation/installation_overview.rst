@@ -4,7 +4,7 @@ Installation Overview
 
 Notes on how to install:
 
-1. cd DIRECTORY_YOU_INSTALLED_TO.  Make sure that you install to the folder machine-learning!
+1. cd DIRECTORY_YOU_INSTALLED_TO.  Make sure that you install to the folder ease!
 2. sudo apt-get update
 3. sudo apt-get upgrade gcc
 4. sudo xargs -a apt-packages.txt apt-get install

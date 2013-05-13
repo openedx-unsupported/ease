@@ -7,7 +7,6 @@ import pickle
 import os
 import numpy
 import logging
-from statsd import statsd
 
 #Append sys to base path to import the following modules
 base_path = os.path.dirname(__file__)
@@ -26,7 +25,6 @@ import math
 
 log = logging.getLogger(__name__)
 
-@statsd.timed('open_ended_assessment.machine_learning.grader.time')
 def grade(grader_data,submission):
     """
     Grades a specified submission using specified models
@@ -105,10 +103,6 @@ def grade(grader_data,submission):
         #If error, success is False.
         results['success']=False
 
-    #Count number of successful/unsuccessful gradings
-    statsd.increment("open_ended_assessment.machine_learning.grader_count",
-        tags=["success:{0}".format(results['success'])])
-
     return results
 
 def grade_generic(grader_data, numeric_features, textual_features):
@@ -151,10 +145,6 @@ def grade_generic(grader_data, numeric_features, textual_features):
     except:
         #If there is an error getting confidence, it is not a show-stopper, so just log
         log.exception("Problem generating confidence value")
-
-        #Count number of successful/unsuccessful gradings
-    statsd.increment("open_ended_assessment.machine_learning.grader_count",
-        tags=["success:{0}".format(results['success'])])
 
     if not has_error:
         results['success'] = True

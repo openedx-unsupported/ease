@@ -8,5 +8,6 @@ _build/
 build/
 dist/
 machine_learning.egg-info/
+ease.egg-info/
 *.egg
 

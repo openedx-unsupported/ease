@@ -4,9 +4,9 @@ with open('requirements.txt') as f:
     required = f.read().splitlines()
 
 setup(
-    name = "machine-learning",
+    name = "ease",
     version = "0.1",
-    packages=['machine_learning', 'machine_learning.external_code', 'machine_learning.data', 'machine_learning.external_code.fisher'],
+    packages=['ease', 'ease.external_code', 'ease.data', 'ease.external_code.fisher'],
     package_data = {
         '': ['*.txt', '*.rst', '*.p'],
         },
@@ -15,6 +15,6 @@ setup(
     description = "Machine learning based automated text classification for essay scoring.",
     license = "AGPL",
     keywords = "ml machine learning nlp essay education",
-    url = "https://github.com/edx/machine-learning",
+    url = "https://github.com/edx/ease",
     include_package_data = True,
     )

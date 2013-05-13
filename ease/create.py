@@ -5,7 +5,6 @@ Functions that create a machine learning model from training data
 import os
 import sys
 import logging
-from statsd import statsd
 import numpy
 
 #Define base path and add to sys path
@@ -23,7 +22,6 @@ import predictor_extractor
 #Make a log
 log = logging.getLogger(__name__)
 
-@statsd.timed('open_ended_assessment.machine_learning.creator.time')
 def create(text,score,prompt_string):
     """
     Creates a machine learning model from input text, associated scores, a prompt, and a path to the model
@@ -75,10 +73,6 @@ def create(text,score,prompt_string):
         results['errors'].append(msg)
         log.exception(msg)
 
-    #Count number of successful/unsuccessful creations
-    statsd.increment("open_ended_assessment.machine_learning.creator_count",
-        tags=["success:{0}".format(results['success'])])
-
     return results
 
 
@@ -124,9 +118,5 @@ def create_generic(numeric_values, textual_values, target, algorithm = util_func
         msg = "feature extraction and model creation failed."
         results['errors'].append(msg)
         log.exception(msg)
-
-        #Count number of successful/unsuccessful creations
-    statsd.increment("open_ended_assessment.machine_learning.creator_count",
-        tags=["success:{0}".format(results['success'])])
 
     return results

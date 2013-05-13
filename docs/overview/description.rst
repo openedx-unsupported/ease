@@ -2,7 +2,7 @@
 Description
 ===============================================
 
-The ML repo allows anyone to use machine-learning based automated classification.  This automated classification can work on both free text (essays, content, etc), and on numeric values.
+The ML repo allows anyone to use machine learning based automated classification.  This automated classification can work on both free text (essays, content, etc), and on numeric values.
 
 Let's say that you have 10000 user reviews for 15 books (ie "I loved this!", "I didn't like it.", and so on). What you really want to do is use the user reviews to get an aggregate score for each book that indicates how well-received it is. But, in your haste to collect the data, you forgot to get scores from the users.  In this case, the text of the user reviews is your predictor, and the score that you want to collect from each user for each book is the target variable.
 

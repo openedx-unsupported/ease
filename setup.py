@@ -12,7 +12,7 @@ setup(
         },
     author = "Vik Paruchuri",
     author_email = "vik@edx.org",
-    description = "Machine learning based automated text classification for essay scoring.",
+    description = "Machine learning based automated text classification library.  Useful for essay scoring and other tasks.  Please see https://github.com/edx/discern for an API wrapper of this code.",
     license = "AGPL",
     keywords = "ml machine learning nlp essay education",
     url = "https://github.com/edx/ease",

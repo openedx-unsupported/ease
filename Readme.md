@@ -7,8 +7,8 @@ This is a repo with functions that can score arbitrary free text and numeric pre
 This is licensed under the AGPL, please see LICENSE.txt for details.
 The goal here is to provide a high-performance, scalable solution that can predict targets from arbitrary values.
 
-Note that this is a library.  You will need to implement your own code to make it runnable.  The ml-service-api repo in
-the edX github organization is an API wrapper for this code.  See http://github.com/edx/ml-service-api for more information.
+Note that this is a library.  You will need to implement your own code to make it runnable.  The discern repo in
+the edX github organization is an API wrapper for this code.  See http://github.com/edx/discern for more information.
 
 How to Contribute
 -----------------------

@@ -19,4 +19,4 @@ The current backlog is in the issues section. Please feel free to open new issue
 Detailed Information
 -------------------------
 Please look in the docs folder for more detailed documentation.  There is a README there that explains how to build
-and view the docs.
+and view the docs.  You can also find the docs at [ReadtheDocs](http://ease.readthedocs.org/en/latest/).

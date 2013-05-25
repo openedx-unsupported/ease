@@ -6,4 +6,3 @@ path.py==3.0
 pip
 pylint==0.26.0
 pytz==2012h
-scikit-learn==0.12.1

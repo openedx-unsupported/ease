@@ -12,4 +12,4 @@ Notes on how to install:
 6. pip install -r pre-requirements.txt
 7. pip install -r requirements.txt
 8. python setup.py install
-9. sudo cp -r ease/data/nltk_data /usr/share/nltk_data
+9. sudo cp -r ease/data/nltk_data /usr/share

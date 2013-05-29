@@ -9,4 +9,5 @@ dist/
 machine_learning.egg-info/
 ease.egg-info/
 *.egg
+.coverage
 

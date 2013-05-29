@@ -1,0 +1,16 @@
+language: python
+python:
+  - "2.7"
+virtualenv:
+  system_site_packages: true
+before_install:
+  - sudo xargs -a apt-packages.txt apt-get install
+install:
+  - pip install -r base_requirements.txt
+  - sudo apt-get install python-matplotlib python-numpy python-scipy python-sklearn
+  - pip install nltk==2.0.3 scikit-learn==0.12.1
+  - sudo mv nltk_data /usr/share/nltk_data
+before_script:
+  - python manage.py syncdb --settings=edx_ora.settings --pythonpath=. --noinput
+  - python manage.py migrate --settings=edx_ora.settings --pythonpath=. --noinput
+script:  python manage.py test --settings=edx_ora.testsettings --pythonpath=. --noinput

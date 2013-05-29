@@ -10,7 +10,7 @@ ROOT_PATH = os.path.abspath(__file__)
 TEST_PATH = os.path.abspath(os.path.join(ROOT_PATH, ".."))
 
 CHARACTER_LIMIT = 1000
-TRAINING_LIMIT = 10
+TRAINING_LIMIT = 40
 QUICK_TEST_LIMIT = 5
 
 class DataLoader():
@@ -80,7 +80,8 @@ class Grader():
 class GenericTest(object):
     loader = DataLoader
     data_path = ""
-    expected_accuracy = 0
+    expected_kappa_min = 0
+    expected_mae_max = 0
 
     def generic_setup(self):
         data_loader = self.loader(os.path.join(TEST_PATH, self.data_path))
@@ -104,22 +105,29 @@ class GenericTest(object):
         text_subset = self.text[:QUICK_TEST_LIMIT]
         model_creator = ModelCreator(score_subset, text_subset)
         results = model_creator.create_model()
-        self.assertEqual(results['success'], True)
+        self.assertTrue(results['success'])
 
         grader = Grader(results)
         grader.grade(self.text[0])
-        self.assertEqual(results['success'], True)
+        self.assertTrue(results['success'])
 
     def test_scoring_accuracy(self):
         model_creator = ModelCreator(self.scores, self.text)
         results = model_creator.create_model()
-        log.info(results['cv_kappa'])
-        log.info(results['cv_mean_absolute_error'])
-        raise
+        self.assertTrue(results['success'])
+        cv_kappa = results['cv_kappa']
+        cv_mae = results['cv_mean_absolute_error']
+        self.assertGreaterEqual(cv_kappa, self.expected_kappa_min)
+        self.assertLessEqual(cv_mae, self.expected_mae_max)
 
 class PolarityTest(unittest.TestCase,GenericTest):
     loader = PolarityLoader
     data_path = "data/polarity"
+
+    #These will increase if we allow more data in.
+    #I am setting the amount of data low to allow tests to finish quickly (40 training essays, 1000 character max for each)
+    expected_kappa_min = .26
+    expected_mae_max = .15
 
     def setUp(self):
         self.generic_setup()

@@ -3,7 +3,6 @@ __pycache__/
 models/
 *.pyc
 *~
-tests/
 _build/
 build/
 dist/

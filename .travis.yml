@@ -9,5 +9,5 @@ install:
   - pip install -r base_requirements.txt
   - sudo apt-get install python-matplotlib python-numpy python-scipy python-sklearn
   - pip install nltk==2.0.3 scikit-learn==0.12.1
-  - sudo mv nltk_data /usr/share/nltk_data
+  - sudo mv ease/data/nltk_data /usr/share/nltk_data
 script:  nosetests

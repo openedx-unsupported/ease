@@ -1,1 +1,1 @@
-nosetests --with-coverage  --cover-package=ease 
+nosetests --with-coverage  --cover-package=ease

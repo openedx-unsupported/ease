@@ -4,7 +4,8 @@ python:
 virtualenv:
   system_site_packages: true
 before_install:
-  - sudo xargs -a apt-packages.txt apt-get install
+  - sudo apt-get update
+  - sudo xargs -a apt-packages.txt apt-get install --fix-missing
 install:
   - pip install -r base_requirements.txt
   - sudo apt-get install python-matplotlib python-numpy python-scipy python-sklearn

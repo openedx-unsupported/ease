@@ -19,7 +19,7 @@ import feature_extractor
 import logging
 import predictor_extractor
 
-log=logging.getLogger()
+log = logging.getLogger()
 
 
 def read_in_test_data(filename):
@@ -96,14 +96,14 @@ def get_cv_error(clf,feats,scores):
     feats - features to feed into the classified and cross validate over
     scores - scores associated with the features -- feature row 1 associates with score 1, etc.
     """
-    results={'success' : False, 'kappa' : 0, 'mae' : 0}
+    results = {'success' : False, 'kappa' : 0, 'mae' : 0}
     try:
-        cv_preds=util_functions.gen_cv_preds(clf,feats,scores)
-        err=numpy.mean(numpy.abs(numpy.array(cv_preds)-scores))
-        kappa=util_functions.quadratic_weighted_kappa(list(cv_preds),scores)
-        results['mae']=err
-        results['kappa']=kappa
-        results['success']=True
+        cv_preds = util_functions.gen_cv_preds(clf,feats,scores)
+        err = numpy.mean(numpy.abs(numpy.array(cv_preds)-scores))
+        kappa = util_functions.quadratic_weighted_kappa(list(cv_preds),scores)
+        results['mae'] = err
+        results['kappa'] = kappa
+        results['success'] = True
     except ValueError:
         #If this is hit, everything is fine.  It is hard to explain why the error occurs, but it isn't a big deal.
         log.exception("Not enough classes (0,1,etc) in each cross validation fold.")
@@ -121,12 +121,12 @@ def get_algorithms(type):
     if type == util_functions.AlgorithmTypes.classification:
         clf = sklearn.ensemble.GradientBoostingClassifier(n_estimators=100, learn_rate=.05,
             max_depth=4, random_state=1,min_samples_leaf=3)
-        clf2=sklearn.ensemble.GradientBoostingClassifier(n_estimators=100, learn_rate=.05,
+        clf2 = sklearn.ensemble.GradientBoostingClassifier(n_estimators=100, learn_rate=.05,
             max_depth=4, random_state=1,min_samples_leaf=3)
     else:
         clf = sklearn.ensemble.GradientBoostingRegressor(n_estimators=100, learn_rate=.05,
             max_depth=4, random_state=1,min_samples_leaf=3)
-        clf2=sklearn.ensemble.GradientBoostingRegressor(n_estimators=100, learn_rate=.05,
+        clf2 = sklearn.ensemble.GradientBoostingRegressor(n_estimators=100, learn_rate=.05,
             max_depth=4, random_state=1,min_samples_leaf=3)
     return clf, clf2
 
@@ -146,15 +146,15 @@ def extract_features_and_generate_model_predictors(predictor_set, type=util_func
     train_feats = f.gen_feats(predictor_set)
 
     clf,clf2 = get_algorithms(type)
-    cv_error_results=get_cv_error(clf2,train_feats,predictor_set._target)
+    cv_error_results = get_cv_error(clf2,train_feats,predictor_set._target)
 
     try:
         set_score = numpy.asarray(predictor_set._target, dtype=numpy.int)
         clf.fit(train_feats, set_score)
     except ValueError:
         log.exception("Not enough classes (0,1,etc) in sample.")
-        set_score[0]=1
-        set_score[1]=0
+        set_score[0] = 1
+        set_score[1] = 0
         clf.fit(train_feats, set_score)
 
     return f, clf, cv_error_results
@@ -174,21 +174,21 @@ def extract_features_and_generate_model(essays, type=util_functions.AlgorithmTyp
     train_feats = f.gen_feats(essays)
 
     set_score = numpy.asarray(essays._score, dtype=numpy.int)
-    if len(util_functions.f7(list(set_score)))>5:
+    if len(util_functions.f7(list(set_score))) > 5:
         type = util_functions.AlgorithmTypes.regression
     else:
         type = util_functions.AlgorithmTypes.classification
 
     clf,clf2 = get_algorithms(type)
 
-    cv_error_results=get_cv_error(clf2,train_feats,essays._score)
+    cv_error_results = get_cv_error(clf2,train_feats,essays._score)
 
     try:
         clf.fit(train_feats, set_score)
     except ValueError:
         log.exception("Not enough classes (0,1,etc) in sample.")
-        set_score[0]=1
-        set_score[1]=0
+        set_score[0] = 1
+        set_score[1] = 0
         clf.fit(train_feats, set_score)
 
     return f, clf, cv_error_results
@@ -211,6 +211,6 @@ def create_essay_set_and_dump_model(text,score,prompt,model_path,additional_arra
     Function that creates essay set, extracts features, and writes out model
     See above functions for argument descriptions
     """
-    essay_set=create_essay_set(text_score,prompt)
-    feature_ext,clf=extract_features_and_generate_model(essay_set,additional_array)
+    essay_set = create_essay_set(text_score,prompt)
+    feature_ext,clf = extract_features_and_generate_model(essay_set,additional_array)
     dump_model_to_file(prompt,feature_ext,clf,model_path)

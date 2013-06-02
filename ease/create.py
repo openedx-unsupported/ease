@@ -23,7 +23,7 @@ import predictor_extractor
 log = logging.getLogger(__name__)
 
 
-def create(text,score,prompt_string):
+def create(text, score, prompt_string):
     """
     Creates a machine learning model from input text, associated scores, a prompt, and a path to the model
     TODO: Remove model path argument, it is needed for now to support legacy code
@@ -33,7 +33,7 @@ def create(text,score,prompt_string):
     """
 
     #Initialize a results dictionary to return
-    results = {'errors': [],'success' : False, 'cv_kappa' : 0, 'cv_mean_absolute_error': 0,
+    results = {'errors': [], 'success' : False, 'cv_kappa' : 0, 'cv_mean_absolute_error': 0,
                'feature_ext' : "", 'classifier' : "", 'algorithm' : util_functions.AlgorithmTypes.classification,
                'score' : score, 'text' : text, 'prompt' : prompt_string}
 
@@ -88,7 +88,7 @@ def create_generic(numeric_values, textual_values, target, algorithm = util_func
     """
 
     #Initialize a result dictionary to return.
-    results = {'errors': [],'success' : False, 'cv_kappa' : 0, 'cv_mean_absolute_error': 0,
+    results = {'errors': [], 'success' : False, 'cv_kappa' : 0, 'cv_mean_absolute_error': 0,
                'feature_ext' : "", 'classifier' : "", 'algorithm' : algorithm}
 
     if len(numeric_values) != len(textual_values) or len(numeric_values) != len(target):

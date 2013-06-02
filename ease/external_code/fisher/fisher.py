@@ -117,7 +117,7 @@ p = ( choose(a+b, a) * choose(c+d, c) ) / choose(a+b+c+d, a+c)
 Returns a copy of table such that all the values
 are rotated clockwise once.
 """
-        return [ [ table[1][0], table[0][0] ],
+        return [[table[1][0], table[0][0] ],
                 [table[1][1], table[0][1] ] ]
 
     def _min_rotation(self):

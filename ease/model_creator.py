@@ -99,7 +99,7 @@ def get_cv_error(clf,feats,scores):
     results = {'success' : False, 'kappa' : 0, 'mae' : 0}
     try:
         cv_preds = util_functions.gen_cv_preds(clf,feats,scores)
-        err = numpy.mean(numpy.abs(numpy.array(cv_preds)-scores))
+        err = numpy.mean(numpy.abs(numpy.array(cv_preds) -scores))
         kappa = util_functions.quadratic_weighted_kappa(list(cv_preds),scores)
         results['mae'] = err
         results['kappa'] = kappa

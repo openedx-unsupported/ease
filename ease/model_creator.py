@@ -1,4 +1,4 @@
-#Provides interface functions to create and save models
+# Provides interface functions to create and save models
 
 import numpy
 import re
@@ -105,7 +105,7 @@ def get_cv_error(clf, feats, scores):
         results['kappa'] = kappa
         results['success'] = True
     except ValueError:
-        #If this is hit, everything is fine.  It is hard to explain why the error occurs, but it isn't a big deal.
+        # If this is hit, everything is fine.  It is hard to explain why the error occurs, but it isn't a big deal.
         log.exception("Not enough classes (0,1,etc) in each cross validation fold.")
     except:
         log.exception("Error getting cv error estimates.")

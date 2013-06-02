@@ -24,7 +24,7 @@ if not base_path.endswith("/"):
 
 log = logging.getLogger(__name__)
 
-#Paths to needed data files
+# Paths to needed data files
 NGRAM_PATH = base_path + "data/good_pos_ngrams.p"
 ESSAY_CORPUS_PATH = util_functions.ESSAY_CORPUS_PATH
 
@@ -45,26 +45,26 @@ class FeatureExtractor(object):
         """
         if(hasattr(e_set, '_type')):
             if(e_set._type == "train"):
-                #normal text (unstemmed) useful words/bigrams
+                # normal text (unstemmed) useful words/bigrams
                 nvocab = util_functions.get_vocab(e_set._text, e_set._score, max_feats2 = max_feats2)
-                #stemmed and spell corrected vocab useful words/ngrams
+                # stemmed and spell corrected vocab useful words/ngrams
                 svocab = util_functions.get_vocab(e_set._clean_stem_text, e_set._score, max_feats2 = max_feats2)
-                #dictionary trained on proper vocab
+                # dictionary trained on proper vocab
                 self._normal_dict = CountVectorizer(ngram_range=(1, 2), vocabulary=nvocab)
-                #dictionary trained on proper vocab
+                # dictionary trained on proper vocab
                 self._stem_dict = CountVectorizer(ngram_range=(1, 2), vocabulary=svocab)
                 self.dict_initialized = True
-                #Average spelling errors in set. needed later for spelling detection
+                # Average spelling errors in set. needed later for spelling detection
                 self._mean_spelling_errors = sum(e_set._spelling_errors) /float(len(e_set._spelling_errors))
                 self._spell_errors_per_character = sum(e_set._spelling_errors) /float(sum([len(t) for t in e_set._text]))
-                #Gets the number and positions of grammar errors
+                # Gets the number and positions of grammar errors
                 good_pos_tags, bad_pos_positions = self._get_grammar_errors(e_set._pos, e_set._text, e_set._tokens)
                 self._grammar_errors_per_character = (sum(good_pos_tags) /float(sum([len(t) for t in e_set._text])))
-                #Generate bag of words features
+                # Generate bag of words features
                 bag_feats = self.gen_bag_feats(e_set)
-                #Sum of a row of bag of words features (topical words in an essay)
+                # Sum of a row of bag of words features (topical words in an essay)
                 f_row_sum = numpy.sum(bag_feats[:, :])
-                #Average index of how "topical" essays are
+                # Average index of how "topical" essays are
                 self._mean_f_prop = f_row_sum /float(sum([len(t) for t in e_set._text]))
                 ret = "ok"
             else:
@@ -86,7 +86,7 @@ class FeatureExtractor(object):
             good_pos_ngrams = util_functions.regenerate_good_tokens(essay_corpus)
             pickle.dump(good_pos_ngrams, open(NGRAM_PATH, 'wb'))
         else:
-            #Hard coded list in case the needed files cannot be found
+            # Hard coded list in case the needed files cannot be found
             good_pos_ngrams = ['NN PRP', 'NN PRP .', 'NN PRP . DT', 'PRP .', 'PRP . DT', 'PRP . DT NNP', '. DT',
              '. DT NNP', '. DT NNP NNP', 'DT NNP', 'DT NNP NNP', 'DT NNP NNP NNP', 'NNP NNP',
              'NNP NNP NNP', 'NNP NNP NNP NNP', 'NNP NNP NNP .', 'NNP NNP .', 'NNP NNP . TO',
@@ -229,18 +229,18 @@ class FeatureExtractor(object):
         e_set - EssaySet object
         """
 
-        #Set ratio to modify thresholds for grammar/spelling errors
+        # Set ratio to modify thresholds for grammar/spelling errors
         modifier_ratio = 1.05
 
-        #Calc number of grammar and spelling errors per character
+        # Calc number of grammar and spelling errors per character
         set_grammar, bad_pos_positions = self._get_grammar_errors(e_set._pos, e_set._text, e_set._tokens)
         set_grammar_per_character = [set_grammar[m] /float(len(e_set._text[m]) +.1) for m in xrange(0, len(e_set._text))]
         set_spell_errors_per_character = [e_set._spelling_errors[m] /float(len(e_set._text[m]) +.1) for m in xrange(0, len(e_set._text))]
 
-        #Iterate through essays and create a feedback dict for each
+        # Iterate through essays and create a feedback dict for each
         all_feedback = []
         for m in xrange(0, len(e_set._text)):
-            #Be very careful about changing these messages!
+            # Be very careful about changing these messages!
             individual_feedback = {'grammar' : "Grammar: Ok.",
                                  'spelling' : "Spelling: Ok.",
                                  'markup_text' : "",
@@ -250,8 +250,8 @@ class FeatureExtractor(object):
                                  }
             markup_tokens = e_set._markup_text[m].split(" ")
 
-            #This loop ensures that sequences of bad grammar get put together into one sequence instead of staying
-            #disjointed
+            # This loop ensures that sequences of bad grammar get put together into one sequence instead of staying
+            # disjointed
             bad_pos_starts = [z[0] for z in bad_pos_positions[m]]
             bad_pos_ends = [z[1] -1 for z in bad_pos_positions[m]]
             for z in xrange(0, len(markup_tokens)):
@@ -263,14 +263,14 @@ class FeatureExtractor(object):
                 if max(bad_pos_ends) > (len(markup_tokens) -1) and max(bad_pos_starts) < (len(markup_tokens) -1):
                     markup_tokens[len(markup_tokens) -1] += "</bg>"
 
-            #Display messages if grammar/spelling errors greater than average in training set
+            # Display messages if grammar/spelling errors greater than average in training set
             if set_grammar_per_character[m] > (self._grammar_errors_per_character *modifier_ratio):
                 individual_feedback['grammar'] = "Grammar: More grammar errors than average."
             if set_spell_errors_per_character[m] > (self._spell_errors_per_character *modifier_ratio):
                 individual_feedback['spelling'] = "Spelling: More spelling errors than average."
 
-            #Test topicality by calculating # of on topic words per character and comparing to the training set
-            #mean.  Requires features to be passed in
+            # Test topicality by calculating # of on topic words per character and comparing to the training set
+            # mean.  Requires features to be passed in
             if features is not None:
                 f_row_sum = numpy.sum(features[m, 12:])
                 f_row_prop = f_row_sum /len(e_set._text[m])
@@ -282,7 +282,7 @@ class FeatureExtractor(object):
                     individual_feedback['too_similar_to_prompt'] = True
                     log.debug(features[m, 9])
 
-            #Create string representation of markup text
+            # Create string representation of markup text
             markup_string = " ".join(markup_tokens)
             individual_feedback['markup_text'] = markup_string
             all_feedback.append(individual_feedback)

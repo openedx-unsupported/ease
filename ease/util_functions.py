@@ -25,12 +25,14 @@ if not base_path.endswith("/"):
 ESSAY_CORPUS_PATH = base_path + "data/essaycorpus.txt"
 ESSAY_COR_TOKENS_PATH = base_path + "data/essay_cor_tokens.p"
 
+
 class AlgorithmTypes(object):
     """
     Defines what types of algorithm can be used
     """
     regression = "regression"
     classification = "classifiction"
+
 
 def create_model_path(model_path):
     """
@@ -45,6 +47,7 @@ def create_model_path(model_path):
         model_path+=".p"
 
     return model_path
+
 
 def sub_chars(string):
     """
@@ -334,6 +337,7 @@ def calc_list_average(l):
     return total / len(l)
 
 stdev = lambda d: (sum((x - 1. * sum(d) / len(d)) ** 2 for x in d) / (1. * (len(d) - 1))) ** .5
+
 
 def quadratic_weighted_kappa(rater_a, rater_b, min_rating=None, max_rating=None):
     """

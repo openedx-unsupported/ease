@@ -68,7 +68,7 @@ def sub_chars(string):
 
     #Replace text.  Ordering is very important!
     nstring = re.sub(sub_pat, " ", string)
-    nstring = re.sub(char_pat," .", nstring)
+    nstring = re.sub(char_pat, " .", nstring)
     nstring = re.sub(com_pat, " ,", nstring)
     nstring = re.sub(ques_pat, " ?", nstring)
     nstring = re.sub(excl_pat, " !", nstring)
@@ -97,7 +97,7 @@ def spell_correct(string):
     except:
         log.exception("Could not find aspell, so could not spell correct!")
         #Return original string if aspell fails
-        return string,0, string
+        return string, 0, string
     #Aspell returns a list of incorrect words with the above flags
     incorrect = p.readlines()
     p.close()
@@ -129,10 +129,10 @@ def spell_correct(string):
         sub_comp = re.compile(sub_pat)
         newstring = re.sub(sub_comp, correct_spelling[i], newstring)
         if incorrect_words[i] not in already_subbed:
-            markup_string = re.sub(sub_comp,'<bs>' + incorrect_words[i] + "</bs>", markup_string)
+            markup_string = re.sub(sub_comp, '<bs>' + incorrect_words[i] + "</bs>", markup_string)
             already_subbed.append(incorrect_words[i])
 
-    return newstring,len(incorrect_words),markup_string
+    return newstring, len(incorrect_words), markup_string
 
 
 def ngrams(tokens, min_n, max_n):
@@ -195,7 +195,7 @@ def get_vocab(text, score, max_feats=750, max_feats2=200):
     max_feats2 is the maximum number of features to consider in the second (final) pass
     Returns a list of words that constitute the significant vocabulary
     """
-    dict = CountVectorizer(ngram_range=(1,2), max_features=max_feats)
+    dict = CountVectorizer(ngram_range=(1, 2), max_features=max_feats)
     dict_mat = dict.fit_transform(text)
     set_score = numpy.asarray(score, dtype=numpy.int)
     med_score = numpy.median(set_score)

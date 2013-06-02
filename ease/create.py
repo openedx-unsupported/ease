@@ -77,7 +77,7 @@ def create(text, score, prompt_string):
     return results
 
 
-def create_generic(numeric_values, textual_values, target, algorithm = util_functions.AlgorithmTypes.regression):
+def create_generic(numeric_values, textual_values, target, algorithm=util_functions.AlgorithmTypes.regression):
     """
     Creates a model from a generic list numeric values and text values
     numeric_values - A list of lists that are the predictors

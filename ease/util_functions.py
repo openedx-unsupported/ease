@@ -14,12 +14,12 @@ import pickle
 import logging
 import sys
 
-log=logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
 if not base_path.endswith("/"):
-    base_path=base_path+"/"
+    base_path = base_path+"/"
 
 #Paths to needed data files
 ESSAY_CORPUS_PATH = base_path + "data/essaycorpus.txt"
@@ -40,11 +40,11 @@ def create_model_path(model_path):
     model_path - string
     """
     if not model_path.startswith("/") and not model_path.startswith("models/"):
-        model_path="/" + model_path
+        model_path = "/" + model_path
     if not model_path.startswith("models"):
         model_path = "models" + model_path
     if not model_path.endswith(".p"):
-        model_path+=".p"
+        model_path += ".p"
 
     return model_path
 
@@ -123,13 +123,13 @@ def spell_correct(string):
     #Create markup based on spelling errors
     newstring = string
     markup_string = string
-    already_subbed=[]
+    already_subbed = []
     for i in range(0, len(incorrect_words)):
         sub_pat = r"\b" + incorrect_words[i] + r"\b"
         sub_comp = re.compile(sub_pat)
         newstring = re.sub(sub_comp, correct_spelling[i], newstring)
         if incorrect_words[i] not in already_subbed:
-            markup_string=re.sub(sub_comp,'<bs>' + incorrect_words[i] + "</bs>", markup_string)
+            markup_string = re.sub(sub_comp,'<bs>' + incorrect_words[i] + "</bs>", markup_string)
             already_subbed.append(incorrect_words[i])
 
     return newstring,len(incorrect_words),markup_string

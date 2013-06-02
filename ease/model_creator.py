@@ -21,6 +21,7 @@ import predictor_extractor
 
 log=logging.getLogger()
 
+
 def read_in_test_data(filename):
     """
     Reads in test data file found at filename.
@@ -48,6 +49,7 @@ def read_in_test_prompt(filename):
     """
     prompt_string = open(filename).read()
     return prompt_string
+
 
 def read_in_test_data_twocolumn(filename,sep=","):
     """
@@ -86,6 +88,7 @@ def create_essay_set(text, score, prompt_string, generate_additional=True):
 
     return x
 
+
 def get_cv_error(clf,feats,scores):
     """
     Gets cross validated error for a given classifier, set of features, and scores
@@ -108,6 +111,7 @@ def get_cv_error(clf,feats,scores):
         log.exception("Error getting cv error estimates.")
 
     return results
+
 
 def get_algorithms(type):
     """
@@ -189,6 +193,7 @@ def extract_features_and_generate_model(essays, type=util_functions.AlgorithmTyp
 
     return f, clf, cv_error_results
 
+
 def dump_model_to_file(prompt_string, feature_ext, classifier, text, score, model_path):
     """
     Writes out a model to a file.
@@ -199,6 +204,7 @@ def dump_model_to_file(prompt_string, feature_ext, classifier, text, score, mode
     """
     model_file = {'prompt': prompt_string, 'extractor': feature_ext, 'model': classifier, 'text' : text, 'score' : score}
     pickle.dump(model_file, file=open(model_path, "w"))
+
 
 def create_essay_set_and_dump_model(text,score,prompt,model_path,additional_array=None):
     """

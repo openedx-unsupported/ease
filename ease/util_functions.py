@@ -19,7 +19,7 @@ log = logging.getLogger(__name__)
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
 if not base_path.endswith("/"):
-    base_path = base_path+"/"
+    base_path = base_path +"/"
 
 #Paths to needed data files
 ESSAY_CORPUS_PATH = base_path + "data/essaycorpus.txt"

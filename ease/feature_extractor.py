@@ -241,12 +241,12 @@ class FeatureExtractor(object):
         all_feedback = []
         for m in xrange(0, len(e_set._text)):
             # Be very careful about changing these messages!
-            individual_feedback = {'grammar' : "Grammar: Ok.",
-                                 'spelling' : "Spelling: Ok.",
-                                 'markup_text' : "",
-                                 'grammar_per_char' : set_grammar_per_character[m],
-                                 'spelling_per_char' : set_spell_errors_per_character[m],
-                                 'too_similar_to_prompt' : False,
+            individual_feedback = {'grammar': "Grammar: Ok.",
+                                 'spelling': "Spelling: Ok.",
+                                 'markup_text': "",
+                                 'grammar_per_char': set_grammar_per_character[m],
+                                 'spelling_per_char': set_spell_errors_per_character[m],
+                                 'too_similar_to_prompt': False,
                                  }
             markup_tokens = e_set._markup_text[m].split(" ")
 

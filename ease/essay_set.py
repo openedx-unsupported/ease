@@ -74,7 +74,7 @@ class EssaySet(object):
             log.exception("Invalid type for essay score : {0} or essay text : {1}".format(type(essay_score), type(essay_text)))
 
         if isinstance(essay_score, int) and isinstance(essay_text, basestring)\
-            and (essay_generated == 0 or essay_generated == 1):
+                and (essay_generated == 0 or essay_generated == 1):
             self._id.append(max_id + 1)
             self._score.append(essay_score)
             # Clean text by removing non digit/work/punctuation characters

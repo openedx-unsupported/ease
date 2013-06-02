@@ -247,7 +247,7 @@ class FeatureExtractor(object):
                                  'grammar_per_char': set_grammar_per_character[m],
                                  'spelling_per_char': set_spell_errors_per_character[m],
                                  'too_similar_to_prompt': False,
-                                 }
+                                   }
             markup_tokens = e_set._markup_text[m].split(" ")
 
             # This loop ensures that sequences of bad grammar get put together into one sequence instead of staying

@@ -23,7 +23,7 @@ from essay_set import EssaySet
 import util_functions
 
 if not base_path.endswith("/"):
-    base_path=base_path+"/"
+    base_path = base_path+"/"
 
 log = logging.getLogger(__name__)
 
@@ -49,9 +49,9 @@ class PredictorExtractor(object):
             log.exception(error_message)
             raise util_functions.InputError(p_set, error_message)
 
-        div_length=len(p_set._essay_sets)
-        if div_length==0:
-            div_length=1
+        div_length = len(p_set._essay_sets)
+        if div_length == 0:
+            div_length = 1
 
         #Ensures that even with a large amount of input textual features, training time stays reasonable
         max_feats2 = int(math.floor(200/div_length))
@@ -67,7 +67,7 @@ class PredictorExtractor(object):
         Generates features based on an iput p_set
         p_set - PredictorSet
         """
-        if self._initialized!=True:
+        if self._initialized != True:
             error_message = "Dictionaries have not been initialized."
             log.exception(error_message)
             raise util_functions.InputError(p_set, error_message)

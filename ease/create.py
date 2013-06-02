@@ -33,9 +33,9 @@ def create(text, score, prompt_string):
     """
 
     # Initialize a results dictionary to return
-    results = {'errors': [], 'success' : False, 'cv_kappa' : 0, 'cv_mean_absolute_error': 0,
-               'feature_ext' : "", 'classifier' : "", 'algorithm' : util_functions.AlgorithmTypes.classification,
-               'score' : score, 'text' : text, 'prompt' : prompt_string}
+    results = {'errors': [], 'success': False, 'cv_kappa': 0, 'cv_mean_absolute_error': 0,
+               'feature_ext': "", 'classifier': "", 'algorithm': util_functions.AlgorithmTypes.classification,
+               'score': score, 'text': text, 'prompt': prompt_string}
 
     if len(text) != len(score):
         msg = "Target and text lists must be same length."
@@ -88,8 +88,8 @@ def create_generic(numeric_values, textual_values, target, algorithm=util_functi
     """
 
     # Initialize a result dictionary to return.
-    results = {'errors': [], 'success' : False, 'cv_kappa' : 0, 'cv_mean_absolute_error': 0,
-               'feature_ext' : "", 'classifier' : "", 'algorithm' : algorithm}
+    results = {'errors': [], 'success': False, 'cv_kappa': 0, 'cv_mean_absolute_error': 0,
+               'feature_ext': "", 'classifier': "", 'algorithm': algorithm}
 
     if len(numeric_values) != len(textual_values) or len(numeric_values) != len(target):
         msg = "Target, numeric features, and text features must all be the same length."

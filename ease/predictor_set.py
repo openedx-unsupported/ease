@@ -97,4 +97,3 @@ class PredictorSet(object):
         #Add textual features to essay sets
         for i in xrange(0,len(textual_features)):
             self._essay_sets[i].add_essay(textual_features[i], target)
-

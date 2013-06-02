@@ -40,7 +40,7 @@ def grade(grader_data, submission):
     """
 
     # Initialize result dictionary
-    results = {'errors': [], 'tests': [], 'score': 0, 'feedback' : "", 'success' : False, 'confidence' : 0}
+    results = {'errors': [], 'tests': [], 'score': 0, 'feedback': "", 'success': False, 'confidence': 0}
     has_error = False
 
     grader_set = EssaySet(type="test")
@@ -62,7 +62,7 @@ def grade(grader_data, submission):
         grader_feats = grader_data['extractor'].gen_feats(grader_set)
         feedback = grader_data['extractor'].gen_feedback(grader_set, grader_feats)[0]
         results['score'] = int(grader_data['model'].predict(grader_feats)[0])
-    except :
+    except:
         results['errors'].append("Could not extract features and score essay.")
         has_error = True
 
@@ -88,15 +88,15 @@ def grade(grader_data, submission):
         results['feedback'] = {}
         if 'topicality' in feedback and 'prompt_overlap' in feedback:
             results['feedback'].update({
-                'topicality' : feedback['topicality'],
-                'prompt-overlap' : feedback['prompt_overlap'],
+                'topicality': feedback['topicality'],
+                'prompt-overlap': feedback['prompt_overlap'],
             })
 
         results['feedback'].update(
             {
-                'spelling' : feedback['spelling'],
-                'grammar' : feedback['grammar'],
-                'markup-text' : feedback['markup_text'],
+                'spelling': feedback['spelling'],
+                'grammar': feedback['grammar'],
+                'markup-text': feedback['markup_text'],
             }
         )
 
@@ -118,7 +118,7 @@ def grade_generic(grader_data, numeric_features, textual_features):
     textual_features - list of textual feature to predict on
 
     """
-    results = {'errors': [], 'tests': [], 'score': 0, 'success' : False, 'confidence' : 0}
+    results = {'errors': [], 'tests': [], 'score': 0, 'success': False, 'confidence': 0}
 
     has_error = False
 
@@ -137,7 +137,7 @@ def grade_generic(grader_data, numeric_features, textual_features):
     try:
         grader_feats = grader_data['extractor'].gen_feats(grader_set)
         results['score'] = grader_data['model'].predict(grader_feats)[0]
-    except :
+    except:
         results['errors'].append("Could not extract features and score essay.")
         has_error = True
 

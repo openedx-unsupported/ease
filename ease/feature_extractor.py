@@ -151,7 +151,7 @@ class FeatureExtractor(object):
         good_pos_tag_prop = [good_pos_tags[m] / float(word_counts[m]) for m in xrange(0, len(text))]
 
         length_arr = numpy.array((
-        lengths, word_counts, comma_count, ap_count, punc_count, chars_per_word, good_pos_tags,
+                                 lengths, word_counts, comma_count, ap_count, punc_count, chars_per_word, good_pos_tags,
         good_pos_tag_prop)).transpose()
 
         return length_arr.copy()

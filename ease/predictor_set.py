@@ -49,7 +49,7 @@ class PredictorSet(object):
 
         #Do some length checking for parameters
         if len(self._numeric_features)>0:
-            numeric_length  = len(self._numeric_features[-1])
+            numeric_length = len(self._numeric_features[-1])
             current_numeric_length = len(numeric_features)
             if numeric_length != current_numeric_length:
                 error_message = "Numeric features are an improper length."
@@ -57,7 +57,7 @@ class PredictorSet(object):
                 raise util_functions.InputError(numeric_features, error_message)
 
         if len(self._textual_features)>0:
-            textual_length  = len(self._textual_features[-1])
+            textual_length = len(self._textual_features[-1])
             current_textual_length = len(textual_features)
             if textual_length != current_textual_length:
                 error_message = "Textual features are an improper length."

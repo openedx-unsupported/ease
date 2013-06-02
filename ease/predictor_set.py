@@ -11,7 +11,7 @@ sys.path.append(base_path)
 import util_functions
 
 if not base_path.endswith("/"):
-    base_path = base_path +"/"
+    base_path = base_path + "/"
 
 log = logging.getLogger(__name__)
 

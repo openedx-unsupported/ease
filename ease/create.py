@@ -7,19 +7,19 @@ import sys
 import logging
 import numpy
 
-#Define base path and add to sys path
+# Define base path and add to sys path
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
 one_up_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..//'))
 sys.path.append(one_up_path)
 
-#Import modules that are dependent on the base path
+# Import modules that are dependent on the base path
 import model_creator
 import util_functions
 import predictor_set
 import predictor_extractor
 
-#Make a log
+# Make a log
 log = logging.getLogger(__name__)
 
 
@@ -32,7 +32,7 @@ def create(text, score, prompt_string):
     prompt_string - the common prompt for the set of essays
     """
 
-    #Initialize a results dictionary to return
+    # Initialize a results dictionary to return
     results = {'errors': [], 'success' : False, 'cv_kappa' : 0, 'cv_mean_absolute_error': 0,
                'feature_ext' : "", 'classifier' : "", 'algorithm' : util_functions.AlgorithmTypes.classification,
                'score' : score, 'text' : text, 'prompt' : prompt_string}
@@ -43,9 +43,9 @@ def create(text, score, prompt_string):
         log.exception(msg)
         return results
 
-    #Decide what algorithm to use (regression or classification)
+    # Decide what algorithm to use (regression or classification)
     try:
-        #Count the number of unique score points in the score list
+        # Count the number of unique score points in the score list
         if len(util_functions.f7(list(score))) > 5:
             type = util_functions.AlgorithmTypes.regression
         else:
@@ -54,14 +54,14 @@ def create(text, score, prompt_string):
         type = util_functions.AlgorithmTypes.regression
 
     try:
-        #Create an essay set object that encapsulates all the essays and alternate representations (tokens, etc)
+        # Create an essay set object that encapsulates all the essays and alternate representations (tokens, etc)
         e_set = model_creator.create_essay_set(text, score, prompt_string)
     except:
         msg = "essay set creation failed."
         results['errors'].append(msg)
         log.exception(msg)
     try:
-        #Gets features from the essay set and computes error
+        # Gets features from the essay set and computes error
         feature_ext, classifier, cv_error_results = model_creator.extract_features_and_generate_model(e_set, type=type)
         results['cv_kappa'] = cv_error_results['kappa']
         results['cv_mean_absolute_error'] = cv_error_results['mae']
@@ -87,7 +87,7 @@ def create_generic(numeric_values, textual_values, target, algorithm = util_func
     algorithm - the type of algorithm that will be used
     """
 
-    #Initialize a result dictionary to return.
+    # Initialize a result dictionary to return.
     results = {'errors': [], 'success' : False, 'cv_kappa' : 0, 'cv_mean_absolute_error': 0,
                'feature_ext' : "", 'classifier' : "", 'algorithm' : algorithm}
 
@@ -98,7 +98,7 @@ def create_generic(numeric_values, textual_values, target, algorithm = util_func
         return results
 
     try:
-        #Initialize a predictor set object that encapsulates all of the text and numeric predictors
+        # Initialize a predictor set object that encapsulates all of the text and numeric predictors
         pset = predictor_set.PredictorSet(type="train")
         for i in xrange(0, len(numeric_values)):
             pset.add_row(numeric_values[i], textual_values[i], target[i])
@@ -108,7 +108,7 @@ def create_generic(numeric_values, textual_values, target, algorithm = util_func
         log.exception(msg)
 
     try:
-        #Extract all features and then train a classifier with the features
+        # Extract all features and then train a classifier with the features
         feature_ext, classifier, cv_error_results = model_creator.extract_features_and_generate_model_predictors(pset, algorithm)
         results['cv_kappa'] = cv_error_results['kappa']
         results['cv_mean_absolute_error'] = cv_error_results['mae']

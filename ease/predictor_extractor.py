@@ -23,7 +23,7 @@ from essay_set import EssaySet
 import util_functions
 
 if not base_path.endswith("/"):
-    base_path = base_path+"/"
+    base_path = base_path +"/"
 
 log = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ class PredictorExtractor(object):
             div_length = 1
 
         #Ensures that even with a large amount of input textual features, training time stays reasonable
-        max_feats2 = int(math.floor(200/div_length))
+        max_feats2 = int(math.floor(200 /div_length))
         for i in xrange(0,len(p_set._essay_sets)):
             self._extractors.append(FeatureExtractor())
             self._extractors[i].initialize_dictionaries(p_set._essay_sets[i], max_feats2=max_feats2)

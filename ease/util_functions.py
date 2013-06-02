@@ -482,4 +482,4 @@ def getMedian(numericValues):
         lower = theValues[len(theValues) / 2 - 1]
         upper = theValues[len(theValues) / 2]
 
-        return (float(lower + upper)) / 2 
+        return (float(lower + upper)) / 2

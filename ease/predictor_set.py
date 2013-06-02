@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 
 
 class PredictorSet(object):
-    def __init__(self, type = "train"):
+    def __init__(self, type="train"):
         """
         Initialize variables and check essay set type
         """

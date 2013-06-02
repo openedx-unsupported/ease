@@ -1,5 +1,5 @@
-#Collection of misc functions needed to support essay_set.py and feature_extractor.py.
-#Requires aspell to be installed and added to the path
+# Collection of misc functions needed to support essay_set.py and feature_extractor.py.
+# Requires aspell to be installed and added to the path
 from external_code.fisher import fisher
 
 aspell_path = "aspell"
@@ -14,16 +14,17 @@ import pickle
 import logging
 import sys
 
-log=logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
 if not base_path.endswith("/"):
-    base_path=base_path+"/"
+    base_path = base_path + "/"
 
-#Paths to needed data files
+# Paths to needed data files
 ESSAY_CORPUS_PATH = base_path + "data/essaycorpus.txt"
 ESSAY_COR_TOKENS_PATH = base_path + "data/essay_cor_tokens.p"
+
 
 class AlgorithmTypes(object):
     """
@@ -32,19 +33,21 @@ class AlgorithmTypes(object):
     regression = "regression"
     classification = "classifiction"
 
+
 def create_model_path(model_path):
     """
     Creates a path to model files
     model_path - string
     """
     if not model_path.startswith("/") and not model_path.startswith("models/"):
-        model_path="/" + model_path
+        model_path = "/" + model_path
     if not model_path.startswith("models"):
         model_path = "models" + model_path
     if not model_path.endswith(".p"):
-        model_path+=".p"
+        model_path += ".p"
 
     return model_path
+
 
 def sub_chars(string):
     """
@@ -53,7 +56,7 @@ def sub_chars(string):
     Returns sanitized string.
     string - string
     """
-    #Define replacement patterns
+    # Define replacement patterns
     sub_pat = r"[^A-Za-z\.\?!,';:]"
     char_pat = r"\."
     com_pat = r","
@@ -63,9 +66,9 @@ def sub_chars(string):
     col_pat = r":"
     whitespace_pat = r"\s{1,}"
 
-    #Replace text.  Ordering is very important!
+    # Replace text.  Ordering is very important!
     nstring = re.sub(sub_pat, " ", string)
-    nstring = re.sub(char_pat," .", nstring)
+    nstring = re.sub(char_pat, " .", nstring)
     nstring = re.sub(com_pat, " ,", nstring)
     nstring = re.sub(ques_pat, " ?", nstring)
     nstring = re.sub(excl_pat, " !", nstring)
@@ -84,7 +87,7 @@ def spell_correct(string):
     string - string
     """
 
-    #Create a temp file so that aspell could be used
+    # Create a temp file so that aspell could be used
     f = open('tmpfile', 'w')
     f.write(string)
     f_path = os.path.abspath(f.name)
@@ -93,16 +96,16 @@ def spell_correct(string):
         p = os.popen(aspell_path + " -a < " + f_path + " --sug-mode=ultra")
     except:
         log.exception("Could not find aspell, so could not spell correct!")
-        #Return original string if aspell fails
-        return string,0, string
-    #Aspell returns a list of incorrect words with the above flags
+        # Return original string if aspell fails
+        return string, 0, string
+    # Aspell returns a list of incorrect words with the above flags
     incorrect = p.readlines()
     p.close()
     incorrect_words = list()
     correct_spelling = list()
     for i in range(1, len(incorrect)):
         if(len(incorrect[i]) > 10):
-            #Reformat aspell output to make sense
+            # Reformat aspell output to make sense
             match = re.search(":", incorrect[i])
             if hasattr(match, "start"):
                 begstring = incorrect[i][2:match.start()]
@@ -117,19 +120,19 @@ def spell_correct(string):
                     incorrect_words.append(begword)
                     correct_spelling.append(sug)
 
-    #Create markup based on spelling errors
+    # Create markup based on spelling errors
     newstring = string
     markup_string = string
-    already_subbed=[]
+    already_subbed = []
     for i in range(0, len(incorrect_words)):
         sub_pat = r"\b" + incorrect_words[i] + r"\b"
         sub_comp = re.compile(sub_pat)
         newstring = re.sub(sub_comp, correct_spelling[i], newstring)
         if incorrect_words[i] not in already_subbed:
-            markup_string=re.sub(sub_comp,'<bs>' + incorrect_words[i] + "</bs>", markup_string)
+            markup_string = re.sub(sub_comp, '<bs>' + incorrect_words[i] + "</bs>", markup_string)
             already_subbed.append(incorrect_words[i])
 
-    return newstring,len(incorrect_words),markup_string
+    return newstring, len(incorrect_words), markup_string
 
 
 def ngrams(tokens, min_n, max_n):
@@ -192,7 +195,7 @@ def get_vocab(text, score, max_feats=750, max_feats2=200):
     max_feats2 is the maximum number of features to consider in the second (final) pass
     Returns a list of words that constitute the significant vocabulary
     """
-    dict = CountVectorizer(ngram_range=(1,2), max_features=max_feats)
+    dict = CountVectorizer(ngram_range=(1, 2), max_features=max_feats)
     dict_mat = dict.fit_transform(text)
     set_score = numpy.asarray(score, dtype=numpy.int)
     med_score = numpy.median(set_score)
@@ -246,12 +249,12 @@ def edit_distance(s1, s2):
             else:
                 cost = 1
             d[(i, j)] = min(
-                d[(i - 1, j)] + 1, # deletion
-                d[(i, j - 1)] + 1, # insertion
-                d[(i - 1, j - 1)] + cost, # substitution
+                d[(i - 1, j)] + 1,  # deletion
+                d[(i, j - 1)] + 1,  # insertion
+                d[(i - 1, j - 1)] + cost,  # substitution
             )
             if i and j and s1[i] == s2[j - 1] and s1[i - 1] == s2[j]:
-                d[(i, j)] = min(d[(i, j)], d[i - 2, j - 2] + cost) # transposition
+                d[(i, j)] = min(d[(i, j)], d[i - 2, j - 2] + cost)  # transposition
 
     return d[lenstr1 - 1, lenstr2 - 1]
 
@@ -335,6 +338,7 @@ def calc_list_average(l):
 
 stdev = lambda d: (sum((x - 1. * sum(d) / len(d)) ** 2 for x in d) / (1. * (len(d) - 1))) ** .5
 
+
 def quadratic_weighted_kappa(rater_a, rater_b, min_rating=None, max_rating=None):
     """
     Calculates kappa correlation between rater_a and rater_b.
@@ -351,7 +355,7 @@ def quadratic_weighted_kappa(rater_a, rater_b, min_rating=None, max_rating=None)
     if max_rating is None:
         max_rating = max(rater_a + rater_b)
     conf_mat = confusion_matrix(rater_a, rater_b,
-        min_rating, max_rating)
+                                min_rating, max_rating)
     num_ratings = len(conf_mat)
     num_scored_items = float(len(rater_a))
 
@@ -482,4 +486,4 @@ def getMedian(numericValues):
         lower = theValues[len(theValues) / 2 - 1]
         upper = theValues[len(theValues) / 2]
 
-        return (float(lower + upper)) / 2 
+        return (float(lower + upper)) / 2

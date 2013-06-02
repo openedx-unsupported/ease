@@ -21,6 +21,7 @@ log=logging.getLogger(__name__)
 
 MAXIMUM_ESSAY_LENGTH=20000
 
+
 class EssaySet(object):
     def __init__(self, type="train"):
         """

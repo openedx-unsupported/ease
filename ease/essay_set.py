@@ -15,11 +15,11 @@ sys.path.append(base_path)
 import util_functions
 
 if not base_path.endswith("/"):
-    base_path=base_path+"/"
+    base_path = base_path+"/"
 
-log=logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
-MAXIMUM_ESSAY_LENGTH=20000
+MAXIMUM_ESSAY_LENGTH = 20000
 
 
 class EssaySet(object):
@@ -31,17 +31,17 @@ class EssaySet(object):
             type = "train"
 
         self._type = type
-        self._score=[]
-        self._text=[]
-        self._id=[]
-        self._clean_text=[]
-        self._tokens=[]
-        self._pos=[]
-        self._clean_stem_text=[]
+        self._score = []
+        self._text = []
+        self._id = []
+        self._clean_text = []
+        self._tokens = []
+        self._pos = []
+        self._clean_stem_text = []
         self._generated = []
         self._prompt = ""
-        self._spelling_errors=[]
-        self._markup_text=[]
+        self._spelling_errors = []
+        self._markup_text = []
 
     def add_essay(self, essay_text, essay_score, essay_generated=0):
         """
@@ -59,16 +59,16 @@ class EssaySet(object):
             # Verify that essay_score is an int, essay_text is a string, and essay_generated equals 0 or 1
 
         try:
-            essay_text=essay_text.encode('ascii', 'ignore')
-            if len(essay_text)<5:
-                essay_text="Invalid essay."
+            essay_text = essay_text.encode('ascii', 'ignore')
+            if len(essay_text) < 5:
+                essay_text = "Invalid essay."
         except:
             log.exception("Could not parse essay into ascii.")
 
         try:
             #Try conversion of types
-            essay_score=int(essay_score)
-            essay_text=str(essay_text)
+            essay_score = int(essay_score)
+            essay_text = str(essay_text)
         except:
             #Nothing needed here, will return error in any case.
             log.exception("Invalid type for essay score : {0} or essay text : {1}".format(type(essay_score),type(essay_text)))
@@ -79,15 +79,15 @@ class EssaySet(object):
             self._score.append(essay_score)
             # Clean text by removing non digit/work/punctuation characters
             try:
-                essay_text=str(essay_text.encode('ascii', 'ignore'))
+                essay_text = str(essay_text.encode('ascii', 'ignore'))
             except:
                 essay_text = (essay_text.decode('utf-8','replace')).encode('ascii','ignore')
-            cleaned_essay=util_functions.sub_chars(essay_text).lower()
-            if(len(cleaned_essay)>MAXIMUM_ESSAY_LENGTH):
-                cleaned_essay=cleaned_essay[0:MAXIMUM_ESSAY_LENGTH]
+            cleaned_essay = util_functions.sub_chars(essay_text).lower()
+            if(len(cleaned_essay) > MAXIMUM_ESSAY_LENGTH):
+                cleaned_essay = cleaned_essay[0:MAXIMUM_ESSAY_LENGTH]
             self._text.append(cleaned_essay)
             # Spell correct text using aspell
-            cleaned_text,spell_errors,markup_text=util_functions.spell_correct(self._text[len(self._text) - 1])
+            cleaned_text,spell_errors,markup_text = util_functions.spell_correct(self._text[len(self._text) - 1])
             self._clean_text.append(cleaned_text)
             self._spelling_errors.append(spell_errors)
             self._markup_text.append(markup_text)

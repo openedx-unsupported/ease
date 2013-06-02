@@ -13,6 +13,7 @@ CHARACTER_LIMIT = 1000
 TRAINING_LIMIT = 100
 QUICK_TEST_LIMIT = 5
 
+
 class DataLoader():
     def load_text_files(self, pathname):
         filenames = os.listdir(pathname)
@@ -27,6 +28,7 @@ class DataLoader():
         Override when inheriting
         """
         pass
+
 
 class PolarityLoader(DataLoader):
     def __init__(self, pathname):
@@ -50,6 +52,7 @@ class PolarityLoader(DataLoader):
 
         return scores, text
 
+
 class ModelCreator():
     def __init__(self, scores, text):
         self.scores = scores
@@ -67,6 +70,7 @@ class ModelCreator():
         else:
             return create.create_generic(self.text.get('numeric_values', []), self.text.get('textual_values', []), self.scores)
 
+
 class Grader():
     def __init__(self, model_data):
         self.model_data = model_data
@@ -76,6 +80,7 @@ class Grader():
             return grade.grade(self.model_data, submission)
         else:
             return grade.grade_generic(self.model_data, submission.get('numeric_features', []), submission.get('textual_features', []))
+
 
 class GenericTest(object):
     loader = DataLoader
@@ -120,6 +125,7 @@ class GenericTest(object):
         cv_mae = results['cv_mean_absolute_error']
         self.assertGreaterEqual(cv_kappa, self.expected_kappa_min)
         self.assertLessEqual(cv_mae, self.expected_mae_max)
+
 
 class PolarityTest(unittest.TestCase,GenericTest):
     loader = PolarityLoader

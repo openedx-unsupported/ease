@@ -74,7 +74,6 @@ class PredictorSet(object):
                 log.exception(error_message)
                 raise util_functions.InputError(numeric_features, error_message)
 
-
         for i in xrange(0,len(textual_features)):
             try:
                 textual_features[i] = str(textual_features[i].encode('ascii', 'ignore'))

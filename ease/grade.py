@@ -26,7 +26,7 @@ import math
 log = logging.getLogger(__name__)
 
 
-def grade(grader_data,submission):
+def grade(grader_data, submission):
     """
     Grades a specified submission using specified models
     grader_data - A dictionary:
@@ -40,7 +40,7 @@ def grade(grader_data,submission):
     """
 
     #Initialize result dictionary
-    results = {'errors': [],'tests': [],'score': 0, 'feedback' : "", 'success' : False, 'confidence' : 0}
+    results = {'errors': [], 'tests': [], 'score': 0, 'feedback' : "", 'success' : False, 'confidence' : 0}
     has_error = False
 
     grader_set = EssaySet(type="test")
@@ -51,7 +51,7 @@ def grade(grader_data,submission):
 
     try:
         #Try to add essay to essay set object
-        grader_set.add_essay(str(submission),0)
+        grader_set.add_essay(str(submission), 0)
         grader_set.update_prompt(str(grader_data['prompt']))
     except:
         results['errors'].append("Essay could not be added to essay set:{0}".format(submission))
@@ -60,7 +60,7 @@ def grade(grader_data,submission):
     #Try to extract features from submission and assign score via the model
     try:
         grader_feats = grader_data['extractor'].gen_feats(grader_set)
-        feedback = grader_data['extractor'].gen_feedback(grader_set,grader_feats)[0]
+        feedback = grader_data['extractor'].gen_feedback(grader_set, grader_feats)[0]
         results['score'] = int(grader_data['model'].predict(grader_feats)[0])
     except :
         results['errors'].append("Could not extract features and score essay.")
@@ -118,7 +118,7 @@ def grade_generic(grader_data, numeric_features, textual_features):
     textual_features - list of textual feature to predict on
 
     """
-    results = {'errors': [],'tests': [],'score': 0, 'success' : False, 'confidence' : 0}
+    results = {'errors': [], 'tests': [], 'score': 0, 'success' : False, 'confidence' : 0}
 
     has_error = False
 
@@ -128,7 +128,7 @@ def grade_generic(grader_data, numeric_features, textual_features):
 
     #Try to add essays to essay set object
     try:
-        grader_set.add_row(numeric_features, textual_features,0)
+        grader_set.add_row(numeric_features, textual_features, 0)
     except:
         results['errors'].append("Row could not be added to predictor set:{0} {1}".format(numeric_features, textual_features))
         has_error = True
@@ -154,7 +154,7 @@ def grade_generic(grader_data, numeric_features, textual_features):
     return results
 
 
-def get_confidence_value(algorithm,model,grader_feats,score, scores):
+def get_confidence_value(algorithm, model, grader_feats, score, scores):
     """
     Determines a confidence in a certain score, given proper input parameters
     algorithm- from util_functions.AlgorithmTypes
@@ -166,7 +166,7 @@ def get_confidence_value(algorithm,model,grader_feats,score, scores):
     max_score = max(numpy.asarray(scores))
     if algorithm == util_functions.AlgorithmTypes.classification:
         #If classification, predict with probability, which gives you a matrix of confidences per score point
-        raw_confidence = model.predict_proba(grader_feats)[0,(float(score) -float(min_score))]
+        raw_confidence = model.predict_proba(grader_feats)[0, (float(score) -float(min_score))]
         #TODO: Normalize confidence somehow here
         confidence = raw_confidence
     else:

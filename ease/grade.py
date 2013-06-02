@@ -171,4 +171,3 @@ def get_confidence_value(algorithm,model,grader_feats,score, scores):
         confidence = max(float(raw_confidence) - math.floor(float(raw_confidence)), math.ceil(float(raw_confidence)) - float(raw_confidence))
 
     return confidence
-

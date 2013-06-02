@@ -55,7 +55,7 @@ class PredictorExtractor(object):
 
         #Ensures that even with a large amount of input textual features, training time stays reasonable
         max_feats2 = int(math.floor(200 /div_length))
-        for i in xrange(0,len(p_set._essay_sets)):
+        for i in xrange(0, len(p_set._essay_sets)):
             self._extractors.append(FeatureExtractor())
             self._extractors[i].initialize_dictionaries(p_set._essay_sets[i], max_feats2=max_feats2)
             self._initialized = True
@@ -73,7 +73,7 @@ class PredictorExtractor(object):
             raise util_functions.InputError(p_set, error_message)
 
         textual_features = []
-        for i in xrange(0,len(p_set._essay_sets)):
+        for i in xrange(0, len(p_set._essay_sets)):
             textual_features.append(self._extractors[i].gen_feats(p_set._essay_sets[i]))
 
         textual_matrix = numpy.concatenate(textual_features, axis=1)

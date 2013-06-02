@@ -21,6 +21,8 @@
 import math
 
 ## From dendropy.mathlib.probability
+
+
 def hypergeometric_pmf(x, m, n, k):
     """
 Given a population consisting of `m` items of class M and `n` items of class N,
@@ -38,6 +40,8 @@ p(x) = (choose(m, x) * choose(n, k-x)) / choose(m+n, k)
     return math.exp(a+b-c)
 
 ## From dendropy.mathlib.probability
+
+
 def binomial_coefficient(population, sample):
     "Returns `population` choose `sample`."
     s = max(sample, population - sample)
@@ -53,6 +57,8 @@ def binomial_coefficient(population, sample):
     return numerator/denominator
 
 ## From dendropy.mathlib.statistics
+
+
 class FishersExactTest(object):
     """
 Given a 2x2 table:
@@ -240,6 +246,7 @@ extreme.
             if p <= p0:
                 p_vals.append(p)
         return sum(p_vals) + p0
+
 
 def assert_almost_equal(v1, v2, prec=8):
     if abs(v1-v2) <= 10**(-prec):

@@ -37,7 +37,7 @@ def create(text,score,prompt_string):
                'feature_ext' : "", 'classifier' : "", 'algorithm' : util_functions.AlgorithmTypes.classification,
                'score' : score, 'text' : text, 'prompt' : prompt_string}
 
-    if len(text)!=len(score):
+    if len(text) != len(score):
         msg = "Target and text lists must be same length."
         results['errors'].append(msg)
         log.exception(msg)
@@ -46,7 +46,7 @@ def create(text,score,prompt_string):
     #Decide what algorithm to use (regression or classification)
     try:
         #Count the number of unique score points in the score list
-        if len(util_functions.f7(list(score)))>5:
+        if len(util_functions.f7(list(score))) > 5:
             type = util_functions.AlgorithmTypes.regression
         else:
             type = util_functions.AlgorithmTypes.classification
@@ -63,12 +63,12 @@ def create(text,score,prompt_string):
     try:
         #Gets features from the essay set and computes error
         feature_ext, classifier, cv_error_results = model_creator.extract_features_and_generate_model(e_set, type=type)
-        results['cv_kappa']=cv_error_results['kappa']
-        results['cv_mean_absolute_error']=cv_error_results['mae']
-        results['feature_ext']=feature_ext
-        results['classifier']=classifier
+        results['cv_kappa'] = cv_error_results['kappa']
+        results['cv_mean_absolute_error'] = cv_error_results['mae']
+        results['feature_ext'] = feature_ext
+        results['classifier'] = classifier
         results['algorithm'] = type
-        results['success']=True
+        results['success'] = True
     except:
         msg = "feature extraction and model creation failed."
         results['errors'].append(msg)
@@ -91,7 +91,7 @@ def create_generic(numeric_values, textual_values, target, algorithm = util_func
     results = {'errors': [],'success' : False, 'cv_kappa' : 0, 'cv_mean_absolute_error': 0,
                'feature_ext' : "", 'classifier' : "", 'algorithm' : algorithm}
 
-    if len(numeric_values)!=len(textual_values) or len(numeric_values)!=len(target):
+    if len(numeric_values) != len(textual_values) or len(numeric_values) != len(target):
         msg = "Target, numeric features, and text features must all be the same length."
         results['errors'].append(msg)
         log.exception(msg)
@@ -110,11 +110,11 @@ def create_generic(numeric_values, textual_values, target, algorithm = util_func
     try:
         #Extract all features and then train a classifier with the features
         feature_ext, classifier, cv_error_results = model_creator.extract_features_and_generate_model_predictors(pset, algorithm)
-        results['cv_kappa']=cv_error_results['kappa']
-        results['cv_mean_absolute_error']=cv_error_results['mae']
-        results['feature_ext']=feature_ext
-        results['classifier']=classifier
-        results['success']=True
+        results['cv_kappa'] = cv_error_results['kappa']
+        results['cv_mean_absolute_error'] = cv_error_results['mae']
+        results['feature_ext'] = feature_ext
+        results['classifier'] = classifier
+        results['success'] = True
     except:
         msg = "feature extraction and model creation failed."
         results['errors'].append(msg)

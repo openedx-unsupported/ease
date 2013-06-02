@@ -16,7 +16,7 @@ import logging
 import math
 from feature_extractor import FeatureExtractor
 
-#Append to path and then import things that depend on path
+# Append to path and then import things that depend on path
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
 from essay_set import EssaySet
@@ -53,7 +53,7 @@ class PredictorExtractor(object):
         if div_length == 0:
             div_length = 1
 
-        #Ensures that even with a large amount of input textual features, training time stays reasonable
+        # Ensures that even with a large amount of input textual features, training time stays reasonable
         max_feats2 = int(math.floor(200 /div_length))
         for i in xrange(0, len(p_set._essay_sets)):
             self._extractors.append(FeatureExtractor())

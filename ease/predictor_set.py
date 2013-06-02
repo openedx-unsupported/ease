@@ -15,6 +15,7 @@ if not base_path.endswith("/"):
 
 log=logging.getLogger(__name__)
 
+
 class PredictorSet(object):
     def __init__(self, type = "train"):
         """

@@ -1,5 +1,5 @@
-#Collection of misc functions needed to support essay_set.py and feature_extractor.py.
-#Requires aspell to be installed and added to the path
+# Collection of misc functions needed to support essay_set.py and feature_extractor.py.
+# Requires aspell to be installed and added to the path
 from external_code.fisher import fisher
 
 aspell_path = "aspell"
@@ -21,7 +21,7 @@ sys.path.append(base_path)
 if not base_path.endswith("/"):
     base_path = base_path +"/"
 
-#Paths to needed data files
+# Paths to needed data files
 ESSAY_CORPUS_PATH = base_path + "data/essaycorpus.txt"
 ESSAY_COR_TOKENS_PATH = base_path + "data/essay_cor_tokens.p"
 
@@ -56,7 +56,7 @@ def sub_chars(string):
     Returns sanitized string.
     string - string
     """
-    #Define replacement patterns
+    # Define replacement patterns
     sub_pat = r"[^A-Za-z\.\?!,';:]"
     char_pat = r"\."
     com_pat = r","
@@ -66,7 +66,7 @@ def sub_chars(string):
     col_pat = r":"
     whitespace_pat = r"\s{1,}"
 
-    #Replace text.  Ordering is very important!
+    # Replace text.  Ordering is very important!
     nstring = re.sub(sub_pat, " ", string)
     nstring = re.sub(char_pat, " .", nstring)
     nstring = re.sub(com_pat, " ,", nstring)
@@ -87,7 +87,7 @@ def spell_correct(string):
     string - string
     """
 
-    #Create a temp file so that aspell could be used
+    # Create a temp file so that aspell could be used
     f = open('tmpfile', 'w')
     f.write(string)
     f_path = os.path.abspath(f.name)
@@ -96,16 +96,16 @@ def spell_correct(string):
         p = os.popen(aspell_path + " -a < " + f_path + " --sug-mode=ultra")
     except:
         log.exception("Could not find aspell, so could not spell correct!")
-        #Return original string if aspell fails
+        # Return original string if aspell fails
         return string, 0, string
-    #Aspell returns a list of incorrect words with the above flags
+    # Aspell returns a list of incorrect words with the above flags
     incorrect = p.readlines()
     p.close()
     incorrect_words = list()
     correct_spelling = list()
     for i in range(1, len(incorrect)):
         if(len(incorrect[i]) > 10):
-            #Reformat aspell output to make sense
+            # Reformat aspell output to make sense
             match = re.search(":", incorrect[i])
             if hasattr(match, "start"):
                 begstring = incorrect[i][2:match.start()]
@@ -120,7 +120,7 @@ def spell_correct(string):
                     incorrect_words.append(begword)
                     correct_spelling.append(sug)
 
-    #Create markup based on spelling errors
+    # Create markup based on spelling errors
     newstring = string
     markup_string = string
     already_subbed = []
@@ -249,12 +249,12 @@ def edit_distance(s1, s2):
             else:
                 cost = 1
             d[(i, j)] = min(
-                d[(i - 1, j)] + 1, # deletion
-                d[(i, j - 1)] + 1, # insertion
-                d[(i - 1, j - 1)] + cost, # substitution
+                d[(i - 1, j)] + 1,  # deletion
+                d[(i, j - 1)] + 1,  # insertion
+                d[(i - 1, j - 1)] + cost,  # substitution
             )
             if i and j and s1[i] == s2[j - 1] and s1[i - 1] == s2[j]:
-                d[(i, j)] = min(d[(i, j)], d[i - 2, j - 2] + cost) # transposition
+                d[(i, j)] = min(d[(i, j)], d[i - 2, j - 2] + cost)  # transposition
 
     return d[lenstr1 - 1, lenstr2 - 1]
 

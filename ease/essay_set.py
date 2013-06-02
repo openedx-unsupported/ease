@@ -113,7 +113,7 @@ class EssaySet(object):
         prompt_text should be a string.
         Returns the prompt as a confirmation.
         """
-        if(type(prompt_text) == type("text")):
+        if(isinstance(prompt_text, type("text"))):
             self._prompt = util_functions.sub_chars(prompt_text)
             ret = self._prompt
         else:

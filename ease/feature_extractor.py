@@ -36,7 +36,7 @@ class FeatureExtractor(object):
         self._spell_errors_per_character = 0
         self._grammar_errors_per_character = 0
 
-    def initialize_dictionaries(self, e_set, max_feats2 = 200):
+    def initialize_dictionaries(self, e_set, max_feats2=200):
         """
         Initializes dictionaries from an essay set object
         Dictionaries must be initialized prior to using this to extract features
@@ -46,9 +46,9 @@ class FeatureExtractor(object):
         if(hasattr(e_set, '_type')):
             if(e_set._type == "train"):
                 # normal text (unstemmed) useful words/bigrams
-                nvocab = util_functions.get_vocab(e_set._text, e_set._score, max_feats2 = max_feats2)
+                nvocab = util_functions.get_vocab(e_set._text, e_set._score, max_feats2=max_feats2)
                 # stemmed and spell corrected vocab useful words/ngrams
-                svocab = util_functions.get_vocab(e_set._clean_stem_text, e_set._score, max_feats2 = max_feats2)
+                svocab = util_functions.get_vocab(e_set._clean_stem_text, e_set._score, max_feats2=max_feats2)
                 # dictionary trained on proper vocab
                 self._normal_dict = CountVectorizer(ngram_range=(1, 2), vocabulary=nvocab)
                 # dictionary trained on proper vocab

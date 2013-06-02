@@ -355,7 +355,7 @@ def quadratic_weighted_kappa(rater_a, rater_b, min_rating=None, max_rating=None)
     if max_rating is None:
         max_rating = max(rater_a + rater_b)
     conf_mat = confusion_matrix(rater_a, rater_b,
-        min_rating, max_rating)
+                                min_rating, max_rating)
     num_ratings = len(conf_mat)
     num_scored_items = float(len(rater_a))
 

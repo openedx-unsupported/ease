@@ -8,17 +8,17 @@ import os
 import numpy
 import logging
 
-#Append sys to base path to import the following modules
+# Append sys to base path to import the following modules
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
 
-#Depend on base path to be imported
+# Depend on base path to be imported
 from essay_set import EssaySet
 import predictor_extractor
 import predictor_set
 import util_functions
 
-#Imports needed to unpickle grader data
+# Imports needed to unpickle grader data
 import feature_extractor
 import sklearn.ensemble
 import math
@@ -39,25 +39,25 @@ def grade(grader_data, submission):
     submission - The student submission (string)
     """
 
-    #Initialize result dictionary
+    # Initialize result dictionary
     results = {'errors': [], 'tests': [], 'score': 0, 'feedback' : "", 'success' : False, 'confidence' : 0}
     has_error = False
 
     grader_set = EssaySet(type="test")
 
-    #This is to preserve legacy functionality
+    # This is to preserve legacy functionality
     if 'algorithm' not in grader_data:
         grader_data['algorithm'] = util_functions.AlgorithmTypes.classification
 
     try:
-        #Try to add essay to essay set object
+        # Try to add essay to essay set object
         grader_set.add_essay(str(submission), 0)
         grader_set.update_prompt(str(grader_data['prompt']))
     except:
         results['errors'].append("Essay could not be added to essay set:{0}".format(submission))
         has_error = True
 
-    #Try to extract features from submission and assign score via the model
+    # Try to extract features from submission and assign score via the model
     try:
         grader_feats = grader_data['extractor'].gen_feats(grader_set)
         feedback = grader_data['extractor'].gen_feedback(grader_set, grader_feats)[0]
@@ -66,25 +66,25 @@ def grade(grader_data, submission):
         results['errors'].append("Could not extract features and score essay.")
         has_error = True
 
-    #Try to determine confidence level
+    # Try to determine confidence level
     try:
         results['confidence'] = get_confidence_value(grader_data['algorithm'], grader_data['model'], grader_feats, results['score'], grader_data['score'])
     except:
-        #If there is an error getting confidence, it is not a show-stopper, so just log
+        # If there is an error getting confidence, it is not a show-stopper, so just log
         log.exception("Problem generating confidence value")
 
     if not has_error:
 
-        #If the essay is just a copy of the prompt, return a 0 as the score
+        # If the essay is just a copy of the prompt, return a 0 as the score
         if(feedback['too_similar_to_prompt']):
             results['score'] = 0
             results['correct'] = False
 
         results['success'] = True
 
-        #Generate short form output--number of problem areas identified in feedback
+        # Generate short form output--number of problem areas identified in feedback
 
-        #Add feedback to results if available
+        # Add feedback to results if available
         results['feedback'] = {}
         if 'topicality' in feedback and 'prompt_overlap' in feedback:
             results['feedback'].update({
@@ -101,7 +101,7 @@ def grade(grader_data, submission):
         )
 
     else:
-        #If error, success is False.
+        # If error, success is False.
         results['success'] = False
 
     return results
@@ -122,18 +122,18 @@ def grade_generic(grader_data, numeric_features, textual_features):
 
     has_error = False
 
-    #Try to find and load the model file
+    # Try to find and load the model file
 
     grader_set = predictor_set.PredictorSet(type="test")
 
-    #Try to add essays to essay set object
+    # Try to add essays to essay set object
     try:
         grader_set.add_row(numeric_features, textual_features, 0)
     except:
         results['errors'].append("Row could not be added to predictor set:{0} {1}".format(numeric_features, textual_features))
         has_error = True
 
-    #Try to extract features from submission and assign score via the model
+    # Try to extract features from submission and assign score via the model
     try:
         grader_feats = grader_data['extractor'].gen_feats(grader_set)
         results['score'] = grader_data['model'].predict(grader_feats)[0]
@@ -141,11 +141,11 @@ def grade_generic(grader_data, numeric_features, textual_features):
         results['errors'].append("Could not extract features and score essay.")
         has_error = True
 
-    #Try to determine confidence level
+    # Try to determine confidence level
     try:
         results['confidence'] = get_confidence_value(grader_data['algorithm'], grader_data['model'], grader_feats, results['score'])
     except:
-        #If there is an error getting confidence, it is not a show-stopper, so just log
+        # If there is an error getting confidence, it is not a show-stopper, so just log
         log.exception("Problem generating confidence value")
 
     if not has_error:
@@ -165,9 +165,9 @@ def get_confidence_value(algorithm, model, grader_feats, score, scores):
     min_score = min(numpy.asarray(scores))
     max_score = max(numpy.asarray(scores))
     if algorithm == util_functions.AlgorithmTypes.classification:
-        #If classification, predict with probability, which gives you a matrix of confidences per score point
+        # If classification, predict with probability, which gives you a matrix of confidences per score point
         raw_confidence = model.predict_proba(grader_feats)[0, (float(score) -float(min_score))]
-        #TODO: Normalize confidence somehow here
+        # TODO: Normalize confidence somehow here
         confidence = raw_confidence
     else:
         raw_confidence = model.predict(grader_feats)[0]

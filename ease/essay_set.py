@@ -66,11 +66,11 @@ class EssaySet(object):
             log.exception("Could not parse essay into ascii.")
 
         try:
-            #Try conversion of types
+            # Try conversion of types
             essay_score = int(essay_score)
             essay_text = str(essay_text)
         except:
-            #Nothing needed here, will return error in any case.
+            # Nothing needed here, will return error in any case.
             log.exception("Invalid type for essay score : {0} or essay text : {1}".format(type(essay_score), type(essay_text)))
 
         if isinstance(essay_score, int) and isinstance(essay_text, basestring)\

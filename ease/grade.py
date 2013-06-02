@@ -25,6 +25,7 @@ import math
 
 log = logging.getLogger(__name__)
 
+
 def grade(grader_data,submission):
     """
     Grades a specified submission using specified models
@@ -105,6 +106,7 @@ def grade(grader_data,submission):
 
     return results
 
+
 def grade_generic(grader_data, numeric_features, textual_features):
     """
     Grades a set of numeric and textual features using a generic model
@@ -150,6 +152,7 @@ def grade_generic(grader_data, numeric_features, textual_features):
         results['success'] = True
 
     return results
+
 
 def get_confidence_value(algorithm,model,grader_feats,score, scores):
     """

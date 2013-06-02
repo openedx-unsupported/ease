@@ -22,6 +22,7 @@ import predictor_extractor
 #Make a log
 log = logging.getLogger(__name__)
 
+
 def create(text,score,prompt_string):
     """
     Creates a machine learning model from input text, associated scores, a prompt, and a path to the model

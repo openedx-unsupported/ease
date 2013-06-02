@@ -66,7 +66,7 @@ class PredictorSet(object):
 
         #Now check to see if text features and numeric features are individually correct
 
-        for i in xrange(0,len(numeric_features)):
+        for i in xrange(0, len(numeric_features)):
             try:
                 numeric_features[i] = float(numeric_features[i])
             except:
@@ -74,7 +74,7 @@ class PredictorSet(object):
                 log.exception(error_message)
                 raise util_functions.InputError(numeric_features, error_message)
 
-        for i in xrange(0,len(textual_features)):
+        for i in xrange(0, len(textual_features)):
             try:
                 textual_features[i] = str(textual_features[i].encode('ascii', 'ignore'))
             except:
@@ -84,7 +84,7 @@ class PredictorSet(object):
 
         #Create essay sets for textual features if needed
         if len(self._textual_features) == 0:
-            for i in xrange(0,len(textual_features)):
+            for i in xrange(0, len(textual_features)):
                 self._essay_sets.append(essay_set.EssaySet(type=self._type))
 
         #Add numeric and textual features
@@ -95,5 +95,5 @@ class PredictorSet(object):
         self._target.append(target)
 
         #Add textual features to essay sets
-        for i in xrange(0,len(textual_features)):
+        for i in xrange(0, len(textual_features)):
             self._essay_sets[i].add_essay(textual_features[i], target)

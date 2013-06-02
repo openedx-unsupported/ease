@@ -88,10 +88,10 @@ class FeatureExtractor(object):
         else:
             # Hard coded list in case the needed files cannot be found
             good_pos_ngrams = ['NN PRP', 'NN PRP .', 'NN PRP . DT', 'PRP .', 'PRP . DT', 'PRP . DT NNP', '. DT',
-             '. DT NNP', '. DT NNP NNP', 'DT NNP', 'DT NNP NNP', 'DT NNP NNP NNP', 'NNP NNP',
-             'NNP NNP NNP', 'NNP NNP NNP NNP', 'NNP NNP NNP .', 'NNP NNP .', 'NNP NNP . TO',
-             'NNP .', 'NNP . TO', 'NNP . TO NNP', '. TO', '. TO NNP', '. TO NNP NNP',
-             'TO NNP', 'TO NNP NNP']
+                               '. DT NNP', '. DT NNP NNP', 'DT NNP', 'DT NNP NNP', 'DT NNP NNP NNP', 'NNP NNP',
+                               'NNP NNP NNP', 'NNP NNP NNP NNP', 'NNP NNP NNP .', 'NNP NNP .', 'NNP NNP . TO',
+                               'NNP .', 'NNP . TO', 'NNP . TO NNP', '. TO', '. TO NNP', '. TO NNP NNP',
+                               'TO NNP', 'TO NNP NNP']
 
         return good_pos_ngrams
 
@@ -152,7 +152,7 @@ class FeatureExtractor(object):
 
         length_arr = numpy.array((
                                  lengths, word_counts, comma_count, ap_count, punc_count, chars_per_word, good_pos_tags,
-        good_pos_tag_prop)).transpose()
+                                 good_pos_tag_prop)).transpose()
 
         return length_arr.copy()
 
@@ -242,11 +242,11 @@ class FeatureExtractor(object):
         for m in xrange(0, len(e_set._text)):
             # Be very careful about changing these messages!
             individual_feedback = {'grammar': "Grammar: Ok.",
-                                 'spelling': "Spelling: Ok.",
-                                 'markup_text': "",
-                                 'grammar_per_char': set_grammar_per_character[m],
-                                 'spelling_per_char': set_spell_errors_per_character[m],
-                                 'too_similar_to_prompt': False,
+                                   'spelling': "Spelling: Ok.",
+                                   'markup_text': "",
+                                   'grammar_per_char': set_grammar_per_character[m],
+                                   'spelling_per_char': set_spell_errors_per_character[m],
+                                   'too_similar_to_prompt': False,
                                    }
             markup_tokens = e_set._markup_text[m].split(" ")
 

@@ -96,7 +96,7 @@ def get_cv_error(clf, feats, scores):
     feats - features to feed into the classified and cross validate over
     scores - scores associated with the features -- feature row 1 associates with score 1, etc.
     """
-    results = {'success' : False, 'kappa' : 0, 'mae' : 0}
+    results = {'success': False, 'kappa': 0, 'mae': 0}
     try:
         cv_preds = util_functions.gen_cv_preds(clf, feats, scores)
         err = numpy.mean(numpy.abs(numpy.array(cv_preds) -scores))
@@ -202,7 +202,7 @@ def dump_model_to_file(prompt_string, feature_ext, classifier, text, score, mode
     classifier is a trained classifier
     model_path is the path of write out the model file to
     """
-    model_file = {'prompt': prompt_string, 'extractor': feature_ext, 'model': classifier, 'text' : text, 'score' : score}
+    model_file = {'prompt': prompt_string, 'extractor': feature_ext, 'model': classifier, 'text': text, 'score': score}
     pickle.dump(model_file, file=open(model_path, "w"))
 
 

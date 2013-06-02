@@ -51,7 +51,7 @@ def read_in_test_prompt(filename):
     return prompt_string
 
 
-def read_in_test_data_twocolumn(filename,sep=","):
+def read_in_test_data_twocolumn(filename, sep=","):
     """
     Reads in a two column version of the test data.
     Filename must point to a delimited file.
@@ -89,7 +89,7 @@ def create_essay_set(text, score, prompt_string, generate_additional=True):
     return x
 
 
-def get_cv_error(clf,feats,scores):
+def get_cv_error(clf, feats, scores):
     """
     Gets cross validated error for a given classifier, set of features, and scores
     clf - classifier
@@ -98,9 +98,9 @@ def get_cv_error(clf,feats,scores):
     """
     results = {'success' : False, 'kappa' : 0, 'mae' : 0}
     try:
-        cv_preds = util_functions.gen_cv_preds(clf,feats,scores)
+        cv_preds = util_functions.gen_cv_preds(clf, feats, scores)
         err = numpy.mean(numpy.abs(numpy.array(cv_preds) -scores))
-        kappa = util_functions.quadratic_weighted_kappa(list(cv_preds),scores)
+        kappa = util_functions.quadratic_weighted_kappa(list(cv_preds), scores)
         results['mae'] = err
         results['kappa'] = kappa
         results['success'] = True
@@ -120,14 +120,14 @@ def get_algorithms(type):
     """
     if type == util_functions.AlgorithmTypes.classification:
         clf = sklearn.ensemble.GradientBoostingClassifier(n_estimators=100, learn_rate=.05,
-            max_depth=4, random_state=1,min_samples_leaf=3)
+            max_depth=4, random_state=1, min_samples_leaf=3)
         clf2 = sklearn.ensemble.GradientBoostingClassifier(n_estimators=100, learn_rate=.05,
-            max_depth=4, random_state=1,min_samples_leaf=3)
+            max_depth=4, random_state=1, min_samples_leaf=3)
     else:
         clf = sklearn.ensemble.GradientBoostingRegressor(n_estimators=100, learn_rate=.05,
-            max_depth=4, random_state=1,min_samples_leaf=3)
+            max_depth=4, random_state=1, min_samples_leaf=3)
         clf2 = sklearn.ensemble.GradientBoostingRegressor(n_estimators=100, learn_rate=.05,
-            max_depth=4, random_state=1,min_samples_leaf=3)
+            max_depth=4, random_state=1, min_samples_leaf=3)
     return clf, clf2
 
 
@@ -145,8 +145,8 @@ def extract_features_and_generate_model_predictors(predictor_set, type=util_func
 
     train_feats = f.gen_feats(predictor_set)
 
-    clf,clf2 = get_algorithms(type)
-    cv_error_results = get_cv_error(clf2,train_feats,predictor_set._target)
+    clf, clf2 = get_algorithms(type)
+    cv_error_results = get_cv_error(clf2, train_feats, predictor_set._target)
 
     try:
         set_score = numpy.asarray(predictor_set._target, dtype=numpy.int)
@@ -179,9 +179,9 @@ def extract_features_and_generate_model(essays, type=util_functions.AlgorithmTyp
     else:
         type = util_functions.AlgorithmTypes.classification
 
-    clf,clf2 = get_algorithms(type)
+    clf, clf2 = get_algorithms(type)
 
-    cv_error_results = get_cv_error(clf2,train_feats,essays._score)
+    cv_error_results = get_cv_error(clf2, train_feats, essays._score)
 
     try:
         clf.fit(train_feats, set_score)
@@ -206,11 +206,11 @@ def dump_model_to_file(prompt_string, feature_ext, classifier, text, score, mode
     pickle.dump(model_file, file=open(model_path, "w"))
 
 
-def create_essay_set_and_dump_model(text,score,prompt,model_path,additional_array=None):
+def create_essay_set_and_dump_model(text, score, prompt, model_path, additional_array=None):
     """
     Function that creates essay set, extracts features, and writes out model
     See above functions for argument descriptions
     """
-    essay_set = create_essay_set(text_score,prompt)
-    feature_ext,clf = extract_features_and_generate_model(essay_set,additional_array)
-    dump_model_to_file(prompt,feature_ext,clf,model_path)
+    essay_set = create_essay_set(text_score, prompt)
+    feature_ext, clf = extract_features_and_generate_model(essay_set, additional_array)
+    dump_model_to_file(prompt, feature_ext, clf, model_path)

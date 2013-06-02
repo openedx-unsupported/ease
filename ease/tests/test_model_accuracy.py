@@ -41,7 +41,7 @@ class PolarityLoader(DataLoader):
         #Sort so neg is first
         directories.sort()
         #We need to have both a postive and a negative folder to classify
-        if len(directories)!=2:
+        if len(directories) != 2:
             raise Exception("Need a pos and a neg directory in {0}".format(self.pathname))
 
         neg = self.load_text_files(directories[0])

@@ -36,7 +36,7 @@ class PolarityLoader(DataLoader):
 
     def load_data(self):
         filenames = os.listdir(self.pathname)
-        directories = [os.path.abspath(os.path.join(self.pathname,f)) for f in filenames if not os.path.isfile(os.path.join(self.pathname,f)) and f in ["neg", "pos"]]
+        directories = [os.path.abspath(os.path.join(self.pathname, f)) for f in filenames if not os.path.isfile(os.path.join(self.pathname, f)) and f in ["neg", "pos"]]
 
         #Sort so neg is first
         directories.sort()
@@ -47,7 +47,7 @@ class PolarityLoader(DataLoader):
         neg = self.load_text_files(directories[0])
         pos = self.load_text_files(directories[1])
 
-        scores = [0 for i in xrange(0,len(neg))] + [1 for i in xrange(0,len(pos))]
+        scores = [0 for i in xrange(0, len(neg))] + [1 for i in xrange(0, len(pos))]
         text = neg + pos
 
         return scores, text
@@ -96,7 +96,7 @@ class GenericTest(object):
         random.seed(1)
         shuffled_scores = []
         shuffled_text = []
-        indices = [i for i in xrange(0,len(scores))]
+        indices = [i for i in xrange(0, len(scores))]
         random.shuffle(indices)
         for i in indices:
             shuffled_scores.append(scores[i])
@@ -127,7 +127,7 @@ class GenericTest(object):
         self.assertLessEqual(cv_mae, self.expected_mae_max)
 
 
-class PolarityTest(unittest.TestCase,GenericTest):
+class PolarityTest(unittest.TestCase, GenericTest):
     loader = PolarityLoader
     data_path = "data/polarity"
 

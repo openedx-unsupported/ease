@@ -38,9 +38,9 @@ class PolarityLoader(DataLoader):
         filenames = os.listdir(self.pathname)
         directories = [os.path.abspath(os.path.join(self.pathname, f)) for f in filenames if not os.path.isfile(os.path.join(self.pathname, f)) and f in ["neg", "pos"]]
 
-        #Sort so neg is first
+        # Sort so neg is first
         directories.sort()
-        #We need to have both a postive and a negative folder to classify
+        # We need to have both a postive and a negative folder to classify
         if len(directories) != 2:
             raise Exception("Need a pos and a neg directory in {0}".format(self.pathname))
 
@@ -58,7 +58,7 @@ class ModelCreator():
         self.scores = scores
         self.text = text
 
-        #Governs which creation function in the ease.create module to use.  See module for info.
+        # Governs which creation function in the ease.create module to use.  See module for info.
         if isinstance(text[0], basestring):
             self.create_model_generic = False
         else:
@@ -92,7 +92,7 @@ class GenericTest(object):
         data_loader = self.loader(os.path.join(TEST_PATH, self.data_path))
         scores, text = data_loader.load_data()
 
-        #Shuffle to mix up the classes, set seed to make it repeatable
+        # Shuffle to mix up the classes, set seed to make it repeatable
         random.seed(1)
         shuffled_scores = []
         shuffled_text = []
@@ -131,8 +131,8 @@ class PolarityTest(unittest.TestCase, GenericTest):
     loader = PolarityLoader
     data_path = "data/polarity"
 
-    #These will increase if we allow more data in.
-    #I am setting the amount of data low to allow tests to finish quickly (40 training essays, 1000 character max for each)
+    # These will increase if we allow more data in.
+    # I am setting the amount of data low to allow tests to finish quickly (40 training essays, 1000 character max for each)
     expected_kappa_min = -.2
     expected_mae_max = 1
 

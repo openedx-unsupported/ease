@@ -41,9 +41,9 @@ def grade(grader_data,submission):
 
     #Initialize result dictionary
     results = {'errors': [],'tests': [],'score': 0, 'feedback' : "", 'success' : False, 'confidence' : 0}
-    has_error=False
+    has_error = False
 
-    grader_set=EssaySet(type="test")
+    grader_set = EssaySet(type="test")
 
     #This is to preserve legacy functionality
     if 'algorithm' not in grader_data:
@@ -55,16 +55,16 @@ def grade(grader_data,submission):
         grader_set.update_prompt(str(grader_data['prompt']))
     except:
         results['errors'].append("Essay could not be added to essay set:{0}".format(submission))
-        has_error=True
+        has_error = True
 
     #Try to extract features from submission and assign score via the model
     try:
-        grader_feats=grader_data['extractor'].gen_feats(grader_set)
-        feedback=grader_data['extractor'].gen_feedback(grader_set,grader_feats)[0]
-        results['score']=int(grader_data['model'].predict(grader_feats)[0])
+        grader_feats = grader_data['extractor'].gen_feats(grader_set)
+        feedback = grader_data['extractor'].gen_feedback(grader_set,grader_feats)[0]
+        results['score'] = int(grader_data['model'].predict(grader_feats)[0])
     except :
         results['errors'].append("Could not extract features and score essay.")
-        has_error=True
+        has_error = True
 
     #Try to determine confidence level
     try:
@@ -77,10 +77,10 @@ def grade(grader_data,submission):
 
         #If the essay is just a copy of the prompt, return a 0 as the score
         if(feedback['too_similar_to_prompt']):
-            results['score']=0
-            results['correct']=False
+            results['score'] = 0
+            results['correct'] = False
 
-        results['success']=True
+        results['success'] = True
 
         #Generate short form output--number of problem areas identified in feedback
 
@@ -102,7 +102,7 @@ def grade(grader_data,submission):
 
     else:
         #If error, success is False.
-        results['success']=False
+        results['success'] = False
 
     return results
 
@@ -120,26 +120,26 @@ def grade_generic(grader_data, numeric_features, textual_features):
     """
     results = {'errors': [],'tests': [],'score': 0, 'success' : False, 'confidence' : 0}
 
-    has_error=False
+    has_error = False
 
     #Try to find and load the model file
 
-    grader_set=predictor_set.PredictorSet(type="test")
+    grader_set = predictor_set.PredictorSet(type="test")
 
     #Try to add essays to essay set object
     try:
         grader_set.add_row(numeric_features, textual_features,0)
     except:
         results['errors'].append("Row could not be added to predictor set:{0} {1}".format(numeric_features, textual_features))
-        has_error=True
+        has_error = True
 
     #Try to extract features from submission and assign score via the model
     try:
-        grader_feats=grader_data['extractor'].gen_feats(grader_set)
-        results['score']=grader_data['model'].predict(grader_feats)[0]
+        grader_feats = grader_data['extractor'].gen_feats(grader_set)
+        results['score'] = grader_data['model'].predict(grader_feats)[0]
     except :
         results['errors'].append("Could not extract features and score essay.")
-        has_error=True
+        has_error = True
 
     #Try to determine confidence level
     try:
@@ -162,13 +162,13 @@ def get_confidence_value(algorithm,model,grader_feats,score, scores):
     grader_feats - a row of features used by the model for classification/regression
     score - The score assigned to the submission by a prior model
     """
-    min_score=min(numpy.asarray(scores))
-    max_score=max(numpy.asarray(scores))
+    min_score = min(numpy.asarray(scores))
+    max_score = max(numpy.asarray(scores))
     if algorithm == util_functions.AlgorithmTypes.classification:
         #If classification, predict with probability, which gives you a matrix of confidences per score point
-        raw_confidence=model.predict_proba(grader_feats)[0,(float(score)-float(min_score))]
+        raw_confidence = model.predict_proba(grader_feats)[0,(float(score)-float(min_score))]
         #TODO: Normalize confidence somehow here
-        confidence=raw_confidence
+        confidence = raw_confidence
     else:
         raw_confidence = model.predict(grader_feats)[0]
         confidence = max(float(raw_confidence) - math.floor(float(raw_confidence)), math.ceil(float(raw_confidence)) - float(raw_confidence))

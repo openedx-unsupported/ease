@@ -11,4 +11,6 @@ ease.egg-info/
 *.egg
 .coverage
 *.orig
+!.vc
+data/json_data/*
 

@@ -21,6 +21,8 @@
 import math
 
 ## From dendropy.mathlib.probability
+
+
 def hypergeometric_pmf(x, m, n, k):
     """
 Given a population consisting of `m` items of class M and `n` items of class N,
@@ -33,11 +35,13 @@ p(x) = (choose(m, x) * choose(n, k-x)) / choose(m+n, k)
     # float' with large numbers
     # return float(binomial_coefficient(m, x) * binomial_coefficient(n, k-x))/binomial_coefficient(m+n, k)
     a = math.log(binomial_coefficient(m, x))
-    b = math.log(binomial_coefficient(n, k-x))
-    c = math.log(binomial_coefficient(m+n, k))
-    return math.exp(a+b-c)
+    b = math.log(binomial_coefficient(n, k - x))
+    c = math.log(binomial_coefficient(m + n, k))
+    return math.exp(a + b - c)
 
 ## From dendropy.mathlib.probability
+
+
 def binomial_coefficient(population, sample):
     "Returns `population` choose `sample`."
     s = max(sample, population - sample)
@@ -47,12 +51,14 @@ def binomial_coefficient(population, sample):
         return 1
     numerator = 1
     denominator = 1
-    for i in xrange(s+1, population + 1):
+    for i in xrange(s + 1, population + 1):
         numerator *= i
         denominator *= (i - s)
-    return numerator/denominator
+    return numerator / denominator
 
 ## From dendropy.mathlib.statistics
+
+
 class FishersExactTest(object):
     """
 Given a 2x2 table:
@@ -97,7 +103,7 @@ p = ( choose(a+b, a) * choose(c+d, c) ) / choose(a+b+c+d, a+c)
         b = table[0][1]
         c = table[1][0]
         d = table[1][1]
-        return hypergeometric_pmf(a, a+b, c+d, a+c)
+        return hypergeometric_pmf(a, a + b, c + d, a + c)
     probability_of_table = staticmethod(probability_of_table)
 
     def __init__(self, table):
@@ -111,8 +117,8 @@ p = ( choose(a+b, a) * choose(c+d, c) ) / choose(a+b+c+d, a+c)
 Returns a copy of table such that all the values
 are rotated clockwise once.
 """
-        return [ [ table[1][0], table[0][0] ],
-                [table[1][1], table[0][1] ] ]
+        return [[table[1][0], table[0][0]],
+                [table[1][1], table[0][1]]]
 
     def _min_rotation(self):
         """
@@ -241,8 +247,9 @@ extreme.
                 p_vals.append(p)
         return sum(p_vals) + p0
 
+
 def assert_almost_equal(v1, v2, prec=8):
-    if abs(v1-v2) <= 10**(-prec):
+    if abs(v1 - v2) <= 10 ** (-prec):
         print "OK: {} == {}".format(v1, v2)
     else:
         print "FAIL: {} != {}".format(v1, v2)

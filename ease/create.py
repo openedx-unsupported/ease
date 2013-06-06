@@ -31,9 +31,10 @@ def create(text,score,prompt_string):
     prompt_string - the common prompt for the set of essays
     """
 
+    algorithm = select_algorithm(score)
     #Initialize a results dictionary to return
     results = {'errors': [],'success' : False, 'cv_kappa' : 0, 'cv_mean_absolute_error': 0,
-               'feature_ext' : "", 'classifier' : "", 'algorithm' : util_functions.AlgorithmTypes.classification,
+               'feature_ext' : "", 'classifier' : "", 'algorithm' : algorithm,
                'score' : score, 'text' : text, 'prompt' : prompt_string}
 
     if len(text)!=len(score):
@@ -41,16 +42,6 @@ def create(text,score,prompt_string):
         results['errors'].append(msg)
         log.exception(msg)
         return results
-
-    #Decide what algorithm to use (regression or classification)
-    try:
-        #Count the number of unique score points in the score list
-        if len(util_functions.f7(list(score)))>5:
-            type = util_functions.AlgorithmTypes.regression
-        else:
-            type = util_functions.AlgorithmTypes.classification
-    except:
-        type = util_functions.AlgorithmTypes.regression
 
     try:
         #Create an essay set object that encapsulates all the essays and alternate representations (tokens, etc)
@@ -61,12 +52,12 @@ def create(text,score,prompt_string):
         log.exception(msg)
     try:
         #Gets features from the essay set and computes error
-        feature_ext, classifier, cv_error_results = model_creator.extract_features_and_generate_model(e_set, type=type)
+        feature_ext, classifier, cv_error_results = model_creator.extract_features_and_generate_model(e_set, algorithm = algorithm)
         results['cv_kappa']=cv_error_results['kappa']
         results['cv_mean_absolute_error']=cv_error_results['mae']
         results['feature_ext']=feature_ext
         results['classifier']=classifier
-        results['algorithm'] = type
+        results['algorithm'] = algorithm
         results['success']=True
     except:
         msg = "feature extraction and model creation failed."
@@ -86,6 +77,7 @@ def create_generic(numeric_values, textual_values, target, algorithm = util_func
     algorithm - the type of algorithm that will be used
     """
 
+    algorithm = select_algorithm(target)
     #Initialize a result dictionary to return.
     results = {'errors': [],'success' : False, 'cv_kappa' : 0, 'cv_mean_absolute_error': 0,
                'feature_ext' : "", 'classifier' : "", 'algorithm' : algorithm}
@@ -98,7 +90,7 @@ def create_generic(numeric_values, textual_values, target, algorithm = util_func
 
     try:
         #Initialize a predictor set object that encapsulates all of the text and numeric predictors
-        pset = predictor_set.PredictorSet(type="train")
+        pset = predictor_set.PredictorSet(essaytype="train")
         for i in xrange(0, len(numeric_values)):
             pset.add_row(numeric_values[i], textual_values[i], target[i])
     except:
@@ -120,3 +112,16 @@ def create_generic(numeric_values, textual_values, target, algorithm = util_func
         log.exception(msg)
 
     return results
+
+def select_algorithm(score_list):
+    #Decide what algorithm to use (regression or classification)
+    try:
+        #Count the number of unique score points in the score list
+        if len(util_functions.f7(list(score_list)))>5:
+            algorithm = util_functions.AlgorithmTypes.regression
+        else:
+            algorithm = util_functions.AlgorithmTypes.classification
+    except:
+        algorithm = util_functions.AlgorithmTypes.regression
+
+    return algorithm

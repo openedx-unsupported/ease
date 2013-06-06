@@ -4,3 +4,4 @@ nose==1.2.1
 path.py==3.0
 pylint==0.26.0
 pytz==2012h
+fisher==0.1.4

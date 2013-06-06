@@ -56,7 +56,7 @@ class ModelCreator():
         self.text = text
 
         #Governs which creation function in the ease.create module to use.  See module for info.
-        if isinstance(text[0], basestring):
+        if isinstance(text, list):
             self.create_model_generic = False
         else:
             self.create_model_generic = True
@@ -75,7 +75,7 @@ class Grader():
         if isinstance(submission, basestring):
             return grade.grade(self.model_data, submission)
         else:
-            return grade.grade_generic(self.model_data, submission.get('numeric_features', []), submission.get('textual_features', []))
+            return grade.grade_generic(self.model_data, submission.get('numeric_values', []), submission.get('textual_values', []))
 
 class GenericTest(object):
     loader = DataLoader
@@ -121,6 +121,25 @@ class GenericTest(object):
         self.assertGreaterEqual(cv_kappa, self.expected_kappa_min)
         self.assertLessEqual(cv_mae, self.expected_mae_max)
 
+    def test_generic_model_creation_and_grading(self):
+        score_subset = [random.randint(0,100) for i in xrange(0,min([QUICK_TEST_LIMIT, len(self.scores)]))]
+        text_subset = self.text[:QUICK_TEST_LIMIT]
+        text_subset = {
+            'textual_values' : [[t] for t in text_subset],
+            'numeric_values' : [[1] for i in xrange(0,len(text_subset))]
+        }
+        model_creator = ModelCreator(score_subset, text_subset)
+        results = model_creator.create_model()
+        self.assertTrue(results['success'])
+
+        grader = Grader(results)
+        test_text = {
+            'textual_values' : [[self.text[0]]],
+            'numeric_values' : [[1]]
+        }
+        grader.grade(test_text)
+        self.assertTrue(results['success'])
+
 class PolarityTest(unittest.TestCase,GenericTest):
     loader = PolarityLoader
     data_path = "data/polarity"
@@ -132,3 +151,5 @@ class PolarityTest(unittest.TestCase,GenericTest):
 
     def setUp(self):
         self.generic_setup()
+
+

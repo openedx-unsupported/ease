@@ -10,7 +10,7 @@ ROOT_PATH = os.path.abspath(__file__)
 TEST_PATH = os.path.abspath(os.path.join(ROOT_PATH, ".."))
 
 CHARACTER_LIMIT = 1000
-TRAINING_LIMIT = 100
+TRAINING_LIMIT = 50
 QUICK_TEST_LIMIT = 5
 
 class DataLoader():

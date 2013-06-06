@@ -11,8 +11,11 @@ Note that this is a library.  You will need to implement your own code to make i
 the edX github organization is an API wrapper for this code.  See http://github.com/edx/discern for more information.
 
 How to Contribute
------------------------
-Contributions are very welcome.  The easiest way is to fork this repo, and then make a pull request from your fork.
+-----------------
+
+Contributions are very welcome. The easiest way is to fork this repo, and then
+make a pull request from your fork. The first time you make a pull request, you
+may be asked to sign a Contributor Agreement.
 
 The current backlog is in the issues section. Please feel free to open new issues or work on existing ones.
 

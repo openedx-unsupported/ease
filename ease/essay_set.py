@@ -113,21 +113,21 @@ class EssaySet(object):
         prompt_text should be a string.
         Returns the prompt as a confirmation.
         """
-        if(isinstance(prompt_text, type("text"))):
+        if(isinstance(prompt_text, basestring)):
             self._prompt = util_functions.sub_chars(prompt_text)
             ret = self._prompt
         else:
             raise util_functions.InputError(prompt_text, "Invalid prompt. Need to enter a string value.")
         return ret
 
-    def generate_additional_essays(self, e_text, e_score, dict=None, max_syns=3):
+    def generate_additional_essays(self, e_text, e_score, dictionary=None, max_syns=3):
         """
         Substitute synonyms to generate extra essays from existing ones.
         This is done to increase the amount of training data.
         Should only be used with lowest scoring essays.
         e_text is the text of the original essay.
         e_score is the score of the original essay.
-        dict is a fixed dictionary (list) of words to replace.
+        dictionary is a fixed dictionary (list) of words to replace.
         max_syns defines the maximum number of additional essays to generate.  Do not set too high.
         """
         random.seed(1)
@@ -142,7 +142,7 @@ class EssaySet(object):
         for i in range(0, max_syns):
             syn_toks = e_toks
             for z in range(0, len(e_toks)):
-                if len(all_syns[z]) > i and (dict == None or e_toks[z] in dict):
+                if len(all_syns[z]) > i and (dictionary == None or e_toks[z] in dictionary):
                     syn_toks[z] = all_syns[z][i]
             new_essays.append(" ".join(syn_toks))
         for z in xrange(0, len(new_essays)):

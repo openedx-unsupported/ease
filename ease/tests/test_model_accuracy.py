@@ -3,6 +3,7 @@ import os
 from ease import create, grade
 import random
 import logging
+import json
 
 log = logging.getLogger(__name__)
 
@@ -21,6 +22,11 @@ class DataLoader():
             data = open(os.path.join(pathname, filename)).read()
             text.append(data[:CHARACTER_LIMIT])
         return text
+
+    def load_json_file(self, filename):
+        datafile = open(os.path.join(filename))
+        data = json.load(datafile)
+        return data
 
     def load_data(self):
         """
@@ -49,6 +55,47 @@ class PolarityLoader(DataLoader):
         text = neg + pos
 
         return scores, text
+
+class JSONLoader(DataLoader):
+    def __init__(self, pathname):
+        self.pathname = pathname
+
+    def load_data(self):
+        filenames = os.listdir(self.pathname)
+        files = [os.path.abspath(os.path.join(self.pathname,f)) for f in filenames if os.path.isfile(os.path.join(self.pathname,f)) if f.endswith(".json")]
+
+        files.sort()
+        #We need to have both a postive and a negative folder to classify
+        if len(files) == 0:
+            return [], []
+
+        data = []
+        for f in files:
+            f_data = self.load_json_file(f)
+            data.append(f_data)
+
+        all_scores = []
+        all_text = []
+        for i in xrange(0,len(data)):
+            scores = [d['score'] for d in data[i]]
+            text = [d['text'] for d in data[i]]
+
+            if isinstance(scores[0], list):
+                new_text = []
+                new_scores = []
+                for i in xrange(0,len(scores)):
+                    text = scores[i]
+                    s = scores[i]
+                    for j in s:
+                        new_text.append(text)
+                        new_scores.append(j)
+                text = new_text
+                scores = new_scores
+
+            all_scores.append(scores)
+            all_text.append(text)
+
+        return all_scores, all_text
 
 class ModelCreator():
     def __init__(self, scores, text):
@@ -83,10 +130,13 @@ class GenericTest(object):
     expected_kappa_min = 0
     expected_mae_max = 0
 
-    def generic_setup(self):
+
+    def load_data(self):
         data_loader = self.loader(os.path.join(TEST_PATH, self.data_path))
         scores, text = data_loader.load_data()
+        return scores, text
 
+    def generic_setup(self, scores, text):
         #Shuffle to mix up the classes, set seed to make it repeatable
         random.seed(1)
         shuffled_scores = []
@@ -100,28 +150,30 @@ class GenericTest(object):
         self.text = shuffled_text[:TRAINING_LIMIT]
         self.scores = shuffled_scores[:TRAINING_LIMIT]
 
-    def test_model_creation_and_grading(self):
+    def model_creation_and_grading(self):
         score_subset = self.scores[:QUICK_TEST_LIMIT]
         text_subset = self.text[:QUICK_TEST_LIMIT]
         model_creator = ModelCreator(score_subset, text_subset)
         results = model_creator.create_model()
-        self.assertTrue(results['success'])
+        assert results['success'] == True
 
         grader = Grader(results)
         results = grader.grade(self.text[0])
-        self.assertTrue(results['success'])
+        assert results['success']==True
 
-    def test_scoring_accuracy(self):
+    def scoring_accuracy(self):
         random.seed(1)
         model_creator = ModelCreator(self.scores, self.text)
         results = model_creator.create_model()
-        self.assertTrue(results['success'])
+        assert results['success']==True
         cv_kappa = results['cv_kappa']
         cv_mae = results['cv_mean_absolute_error']
-        self.assertGreaterEqual(cv_kappa, self.expected_kappa_min)
-        self.assertLessEqual(cv_mae, self.expected_mae_max)
+        assert cv_kappa>=self.expected_kappa_min
+        assert cv_mae <=self.expected_mae_max
 
-    def test_generic_model_creation_and_grading(self):
+    def generic_model_creation_and_grading(self):
+        log.info(self.scores)
+        log.info(self.text)
         score_subset = [random.randint(0,100) for i in xrange(0,min([QUICK_TEST_LIMIT, len(self.scores)]))]
         text_subset = self.text[:QUICK_TEST_LIMIT]
         text_subset = {
@@ -130,7 +182,7 @@ class GenericTest(object):
         }
         model_creator = ModelCreator(score_subset, text_subset)
         results = model_creator.create_model()
-        self.assertTrue(results['success'])
+        assert results['success']==True
 
         grader = Grader(results)
         test_text = {
@@ -138,7 +190,7 @@ class GenericTest(object):
             'numeric_values' : [1]
         }
         results = grader.grade(test_text)
-        self.assertTrue(results['success'])
+        assert results['success']==True
 
 class PolarityTest(unittest.TestCase,GenericTest):
     loader = PolarityLoader
@@ -150,6 +202,37 @@ class PolarityTest(unittest.TestCase,GenericTest):
     expected_mae_max = 1
 
     def setUp(self):
-        self.generic_setup()
+        scores, text = self.load_data()
+        self.generic_setup(scores, text)
 
+    def test_model_creation_and_grading(self):
+        self.model_creation_and_grading()
+
+    def test_scoring_accuracy(self):
+        self.scoring_accuracy()
+
+    def test_generic_model_creation_and_grading(self):
+        self.generic_model_creation_and_grading()
+
+class JSONTest(GenericTest):
+    loader = JSONLoader
+    data_path = "data/json_data"
+
+    #These will increase if we allow more data in.
+    #I am setting the amount of data low to allow tests to finish quickly (40 training essays, 1000 character max for each)
+    expected_kappa_min = -.2
+    expected_mae_max = 1
+
+    def setUp(self):
+        self.scores, self.text = self.load_data()
+        return self.scores, self.text
+
+def test_loop():
+    json_test = JSONTest()
+    scores, text = json_test.setUp()
+    for i in xrange(0,len(scores)):
+        json_test.generic_setup(scores[i], text[i])
+        yield json_test.model_creation_and_grading
+        yield json_test.scoring_accuracy
+        yield json_test.generic_model_creation_and_grading
 

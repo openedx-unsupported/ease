@@ -25,7 +25,6 @@ import math
 
 log = logging.getLogger(__name__)
 
-
 def grade(grader_data,submission):
     """
     Grades a specified submission using specified models

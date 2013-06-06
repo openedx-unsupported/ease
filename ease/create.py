@@ -18,11 +18,28 @@ import model_creator
 import util_functions
 import predictor_set
 import predictor_extractor
+from datetime import datetime
+import json
 
 #Make a log
 log = logging.getLogger(__name__)
 
-def create(text,score,prompt_string):
+def dump_input_data(text, score):
+    try:
+        file_path = base_path + "/tests/data/json_data/"
+        time_suffix = datetime.now().strftime("%H%M%S%d%m%Y")
+        prefix = "test-case-"
+        filename = prefix + time_suffix + ".json"
+        json_data = []
+        for i in xrange(0, len(text)):
+            json_data.append({'text' : text[i], 'score' : score[i]})
+        with open(file_path + filename, 'w+') as outfile:
+            json.dump(json_data, outfile)
+    except:
+        error = "Could not dump data to file."
+        log.exception(error)
+
+def create(text,score,prompt_string, dump_data=False):
     """
     Creates a machine learning model from input text, associated scores, a prompt, and a path to the model
     TODO: Remove model path argument, it is needed for now to support legacy code
@@ -30,6 +47,9 @@ def create(text,score,prompt_string):
     score - a list of integers containing score values
     prompt_string - the common prompt for the set of essays
     """
+
+    if dump_data:
+        dump_input_data(text, score)
 
     algorithm = select_algorithm(score)
     #Initialize a results dictionary to return

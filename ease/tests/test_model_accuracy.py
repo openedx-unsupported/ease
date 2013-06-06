@@ -13,6 +13,7 @@ CHARACTER_LIMIT = 1000
 TRAINING_LIMIT = 100
 QUICK_TEST_LIMIT = 5
 
+
 class DataLoader():
     def load_text_files(self, pathname):
         filenames = os.listdir(pathname)
@@ -28,34 +29,36 @@ class DataLoader():
         """
         pass
 
+
 class PolarityLoader(DataLoader):
     def __init__(self, pathname):
         self.pathname = pathname
 
     def load_data(self):
         filenames = os.listdir(self.pathname)
-        directories = [os.path.abspath(os.path.join(self.pathname,f)) for f in filenames if not os.path.isfile(os.path.join(self.pathname,f)) and f in ["neg", "pos"]]
+        directories = [os.path.abspath(os.path.join(self.pathname, f)) for f in filenames if not os.path.isfile(os.path.join(self.pathname, f)) and f in ["neg", "pos"]]
 
-        #Sort so neg is first
+        # Sort so neg is first
         directories.sort()
-        #We need to have both a postive and a negative folder to classify
-        if len(directories)!=2:
+        # We need to have both a postive and a negative folder to classify
+        if len(directories) != 2:
             raise Exception("Need a pos and a neg directory in {0}".format(self.pathname))
 
         neg = self.load_text_files(directories[0])
         pos = self.load_text_files(directories[1])
 
-        scores = [0 for i in xrange(0,len(neg))] + [1 for i in xrange(0,len(pos))]
+        scores = [0 for i in xrange(0, len(neg))] + [1 for i in xrange(0, len(pos))]
         text = neg + pos
 
         return scores, text
+
 
 class ModelCreator():
     def __init__(self, scores, text):
         self.scores = scores
         self.text = text
 
-        #Governs which creation function in the ease.create module to use.  See module for info.
+        # Governs which creation function in the ease.create module to use.  See module for info.
         if isinstance(text[0], basestring):
             self.create_model_generic = False
         else:
@@ -67,6 +70,7 @@ class ModelCreator():
         else:
             return create.create_generic(self.text.get('numeric_values', []), self.text.get('textual_values', []), self.scores)
 
+
 class Grader():
     def __init__(self, model_data):
         self.model_data = model_data
@@ -76,6 +80,7 @@ class Grader():
             return grade.grade(self.model_data, submission)
         else:
             return grade.grade_generic(self.model_data, submission.get('numeric_features', []), submission.get('textual_features', []))
+
 
 class GenericTest(object):
     loader = DataLoader
@@ -87,11 +92,11 @@ class GenericTest(object):
         data_loader = self.loader(os.path.join(TEST_PATH, self.data_path))
         scores, text = data_loader.load_data()
 
-        #Shuffle to mix up the classes, set seed to make it repeatable
+        # Shuffle to mix up the classes, set seed to make it repeatable
         random.seed(1)
         shuffled_scores = []
         shuffled_text = []
-        indices = [i for i in xrange(0,len(scores))]
+        indices = [i for i in xrange(0, len(scores))]
         random.shuffle(indices)
         for i in indices:
             shuffled_scores.append(scores[i])
@@ -121,12 +126,13 @@ class GenericTest(object):
         self.assertGreaterEqual(cv_kappa, self.expected_kappa_min)
         self.assertLessEqual(cv_mae, self.expected_mae_max)
 
-class PolarityTest(unittest.TestCase,GenericTest):
+
+class PolarityTest(unittest.TestCase, GenericTest):
     loader = PolarityLoader
     data_path = "data/polarity"
 
-    #These will increase if we allow more data in.
-    #I am setting the amount of data low to allow tests to finish quickly (40 training essays, 1000 character max for each)
+    # These will increase if we allow more data in.
+    # I am setting the amount of data low to allow tests to finish quickly (40 training essays, 1000 character max for each)
     expected_kappa_min = -.2
     expected_mae_max = 1
 

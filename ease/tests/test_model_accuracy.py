@@ -108,7 +108,7 @@ class GenericTest(object):
         self.assertTrue(results['success'])
 
         grader = Grader(results)
-        grader.grade(self.text[0])
+        results = grader.grade(self.text[0])
         self.assertTrue(results['success'])
 
     def test_scoring_accuracy(self):
@@ -134,10 +134,10 @@ class GenericTest(object):
 
         grader = Grader(results)
         test_text = {
-            'textual_values' : [[self.text[0]]],
-            'numeric_values' : [[1]]
+            'textual_values' : [self.text[0]],
+            'numeric_values' : [1]
         }
-        grader.grade(test_text)
+        results = grader.grade(test_text)
         self.assertTrue(results['success'])
 
 class PolarityTest(unittest.TestCase,GenericTest):

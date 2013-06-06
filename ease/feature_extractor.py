@@ -128,7 +128,10 @@ class FeatureExtractor(object):
                 divisor=len(pos_ngrams)/len(pos_seq)
             else:
                 divisor=1
-            good_pos_tags.append((len(pos_ngrams)-len(overlap_ngrams))/divisor)
+            if divisor == 0:
+                divisor=1
+            good_grammar_ratio = (len(pos_ngrams)-len(overlap_ngrams))/divisor
+            good_pos_tags.append(good_grammar_ratio)
         return good_pos_tags,bad_pos_positions
 
     def gen_length_feats(self, e_set):

@@ -27,12 +27,12 @@ def read_in_test_data(filename):
     filename must be a tab delimited file with columns id, dummy number column, score, dummy score, text
     returns the score and the text
     """
-    id, e_set, score, score2, text = [], [], [], [], []
+    tid, e_set, score, score2, text = [], [], [], [], []
     combined_raw = open(filename).read()
     raw_lines = combined_raw.splitlines()
     for row in xrange(1, len(raw_lines)):
-        id1, set1, score1, score12, text1 = raw_lines[row].strip().split("\t")
-        id.append(int(id1))
+        tid1, set1, score1, score12, text1 = raw_lines[row].strip().split("\t")
+        tid.append(int(tid1))
         text.append(text1)
         e_set.append(int(set1))
         score.append(int(score1))
@@ -109,12 +109,12 @@ def get_cv_error(clf,feats,scores):
 
     return results
 
-def get_algorithms(type):
+def get_algorithms(algorithm):
     """
     Gets two classifiers for each type of algorithm, and returns them.  First for predicting, second for cv error.
     type - one of util_functions.AlgorithmTypes
     """
-    if type == util_functions.AlgorithmTypes.classification:
+    if algorithm == util_functions.AlgorithmTypes.classification:
         clf = sklearn.ensemble.GradientBoostingClassifier(n_estimators=100, learn_rate=.05,
             max_depth=4, random_state=1,min_samples_leaf=3)
         clf2=sklearn.ensemble.GradientBoostingClassifier(n_estimators=100, learn_rate=.05,
@@ -127,7 +127,7 @@ def get_algorithms(type):
     return clf, clf2
 
 
-def extract_features_and_generate_model_predictors(predictor_set, type=util_functions.AlgorithmTypes.regression):
+def extract_features_and_generate_model_predictors(predictor_set, algorithm=util_functions.AlgorithmTypes.regression):
     """
     Extracts features and generates predictors based on a given predictor set
     predictor_set - a PredictorSet object that has been initialized with data
@@ -141,7 +141,7 @@ def extract_features_and_generate_model_predictors(predictor_set, type=util_func
 
     train_feats = f.gen_feats(predictor_set)
 
-    clf,clf2 = get_algorithms(type)
+    clf,clf2 = get_algorithms(algorithm)
     cv_error_results=get_cv_error(clf2,train_feats,predictor_set._target)
 
     try:
@@ -149,6 +149,7 @@ def extract_features_and_generate_model_predictors(predictor_set, type=util_func
         clf.fit(train_feats, set_score)
     except ValueError:
         log.exception("Not enough classes (0,1,etc) in sample.")
+        set_score = predictor_set._target
         set_score[0]=1
         set_score[1]=0
         clf.fit(train_feats, set_score)
@@ -156,7 +157,7 @@ def extract_features_and_generate_model_predictors(predictor_set, type=util_func
     return f, clf, cv_error_results
 
 
-def extract_features_and_generate_model(essays, type=util_functions.AlgorithmTypes.regression):
+def extract_features_and_generate_model(essays, algorithm=util_functions.AlgorithmTypes.regression):
     """
     Feed in an essay set to get feature vector and classifier
     essays must be an essay set object
@@ -171,11 +172,11 @@ def extract_features_and_generate_model(essays, type=util_functions.AlgorithmTyp
 
     set_score = numpy.asarray(essays._score, dtype=numpy.int)
     if len(util_functions.f7(list(set_score)))>5:
-        type = util_functions.AlgorithmTypes.regression
+        algorithm = util_functions.AlgorithmTypes.regression
     else:
-        type = util_functions.AlgorithmTypes.classification
+        algorithm = util_functions.AlgorithmTypes.classification
 
-    clf,clf2 = get_algorithms(type)
+    clf,clf2 = get_algorithms(algorithm)
 
     cv_error_results=get_cv_error(clf2,train_feats,essays._score)
 
@@ -205,7 +206,7 @@ def create_essay_set_and_dump_model(text,score,prompt,model_path,additional_arra
     Function that creates essay set, extracts features, and writes out model
     See above functions for argument descriptions
     """
-    essay_set=create_essay_set(text_score,prompt)
+    essay_set=create_essay_set(text,score,prompt)
     feature_ext,clf=extract_features_and_generate_model(essay_set,additional_array)
     dump_model_to_file(prompt,feature_ext,clf,model_path)
 

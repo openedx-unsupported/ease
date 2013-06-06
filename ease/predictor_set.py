@@ -16,14 +16,14 @@ if not base_path.endswith("/"):
 log=logging.getLogger(__name__)
 
 class PredictorSet(object):
-    def __init__(self, type = "train"):
+    def __init__(self, essaytype = "train"):
         """
         Initialize variables and check essay set type
         """
-        if(type != "train" and type != "test"):
-            type = "train"
+        if(essaytype != "train" and essaytype != "test"):
+            essaytype = "train"
 
-        self._type = type
+        self._type = essaytype
         self._target=[]
         self._textual_features=[]
         self._numeric_features=[]
@@ -85,7 +85,7 @@ class PredictorSet(object):
         #Create essay sets for textual features if needed
         if len(self._textual_features)==0:
             for i in xrange(0,len(textual_features)):
-                self._essay_sets.append(essay_set.EssaySet(type=self._type))
+                self._essay_sets.append(essay_set.EssaySet(essaytype=self._type))
 
         #Add numeric and textual features
         self._numeric_features.append(numeric_features)

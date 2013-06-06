@@ -1,6 +1,6 @@
 #Collection of misc functions needed to support essay_set.py and feature_extractor.py.
 #Requires aspell to be installed and added to the path
-from external_code.fisher import fisher
+from fisher import pvalue
 
 aspell_path = "aspell"
 import re
@@ -211,8 +211,7 @@ def get_vocab(text, score, max_feats=750, max_feats2=200):
         good_loop_missing = len(good_loop_vec[good_loop_vec == 0])
         bad_loop_present = len(bad_loop_vec[bad_loop_vec > 0])
         bad_loop_missing = len(bad_loop_vec[bad_loop_vec == 0])
-        fish_val = fisher.FishersExactTest.probability_of_table(
-            [[good_loop_present, bad_loop_present], [good_loop_missing, bad_loop_missing]])
+        fish_val = pvalue(good_loop_present, bad_loop_present, good_loop_missing, bad_loop_missing).two_tail
         fish_vals.append(fish_val)
 
     cutoff = 1
@@ -382,6 +381,8 @@ def confusion_matrix(rater_a, rater_b, min_rating=None, max_rating=None):
     See quadratic_weighted_kappa for argument descriptions
     """
     assert(len(rater_a) == len(rater_b))
+    rater_a = [int(a) for a in rater_a]
+    rater_b = [int(b) for b in rater_b]
     if min_rating is None:
         min_rating = min(rater_a)
     if max_rating is None:
@@ -400,6 +401,7 @@ def histogram(ratings, min_rating=None, max_rating=None):
     ratings is a list of scores
     Returns a list of frequencies
     """
+    ratings = [int(r) for r in ratings]
     if min_rating is None:
         min_rating = min(ratings)
     if max_rating is None:
@@ -450,8 +452,7 @@ def get_separator_words(toks1):
             tok1_total = tab_toks1._N
             tok2_present = toks2[word]
             tok2_total = toks2._N
-            fish_val = fisher.FishersExactTest.probability_of_table(
-                [[tok1_present, tok2_present], [tok1_total, tok2_total]])
+            fish_val = pvalue(tok1_present, tok2_present, tok1_total, tok2_total).two_tail
             if(fish_val < .001 and tok1_present / float(tok1_total) > (tok2_present / float(tok2_total)) * 2):
                 sep_words.append(word)
     sep_words = [w for w in sep_words if not w in nltk.corpus.stopwords.words("english") and len(w) > 5]

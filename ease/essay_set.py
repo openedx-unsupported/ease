@@ -15,32 +15,33 @@ sys.path.append(base_path)
 import util_functions
 
 if not base_path.endswith("/"):
-    base_path=base_path+"/"
+    base_path = base_path + "/"
 
-log=logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
-MAXIMUM_ESSAY_LENGTH=20000
+MAXIMUM_ESSAY_LENGTH = 20000
+
 
 class EssaySet(object):
-    def __init__(self, type="train"):
+    def __init__(self, essaytype="train"):
         """
         Initialize variables and check essay set type
         """
-        if(type != "train" and type != "test"):
-            type = "train"
+        if(essaytype != "train" and essaytype != "test"):
+            essaytype = "train"
 
-        self._type = type
-        self._score=[]
-        self._text=[]
-        self._id=[]
-        self._clean_text=[]
-        self._tokens=[]
-        self._pos=[]
-        self._clean_stem_text=[]
+        self._type = essaytype
+        self._score = []
+        self._text = []
+        self._id = []
+        self._clean_text = []
+        self._tokens = []
+        self._pos = []
+        self._clean_stem_text = []
         self._generated = []
         self._prompt = ""
-        self._spelling_errors=[]
-        self._markup_text=[]
+        self._spelling_errors = []
+        self._markup_text = []
 
     def add_essay(self, essay_text, essay_score, essay_generated=0):
         """
@@ -58,35 +59,35 @@ class EssaySet(object):
             # Verify that essay_score is an int, essay_text is a string, and essay_generated equals 0 or 1
 
         try:
-            essay_text=essay_text.encode('ascii', 'ignore')
-            if len(essay_text)<5:
-                essay_text="Invalid essay."
+            essay_text = essay_text.encode('ascii', 'ignore')
+            if len(essay_text) < 5:
+                essay_text = "Invalid essay."
         except:
             log.exception("Could not parse essay into ascii.")
 
         try:
-            #Try conversion of types
-            essay_score=int(essay_score)
-            essay_text=str(essay_text)
+            # Try conversion of types
+            essay_score = int(essay_score)
+            essay_text = str(essay_text)
         except:
-            #Nothing needed here, will return error in any case.
-            log.exception("Invalid type for essay score : {0} or essay text : {1}".format(type(essay_score),type(essay_text)))
+            # Nothing needed here, will return error in any case.
+            log.exception("Invalid type for essay score : {0} or essay text : {1}".format(type(essay_score), type(essay_text)))
 
-        if isinstance(essay_score,int) and isinstance(essay_text, basestring)\
-        and (essay_generated == 0 or essay_generated == 1):
+        if isinstance(essay_score, int) and isinstance(essay_text, basestring)\
+                and (essay_generated == 0 or essay_generated == 1):
             self._id.append(max_id + 1)
             self._score.append(essay_score)
             # Clean text by removing non digit/work/punctuation characters
             try:
-                essay_text=str(essay_text.encode('ascii', 'ignore'))
+                essay_text = str(essay_text.encode('ascii', 'ignore'))
             except:
-                essay_text = (essay_text.decode('utf-8','replace')).encode('ascii','ignore')
-            cleaned_essay=util_functions.sub_chars(essay_text).lower()
-            if(len(cleaned_essay)>MAXIMUM_ESSAY_LENGTH):
-                cleaned_essay=cleaned_essay[0:MAXIMUM_ESSAY_LENGTH]
+                essay_text = (essay_text.decode('utf-8', 'replace')).encode('ascii', 'ignore')
+            cleaned_essay = util_functions.sub_chars(essay_text).lower()
+            if(len(cleaned_essay) > MAXIMUM_ESSAY_LENGTH):
+                cleaned_essay = cleaned_essay[0:MAXIMUM_ESSAY_LENGTH]
             self._text.append(cleaned_essay)
             # Spell correct text using aspell
-            cleaned_text,spell_errors,markup_text=util_functions.spell_correct(self._text[len(self._text) - 1])
+            cleaned_text, spell_errors, markup_text = util_functions.spell_correct(self._text[len(self._text) - 1])
             self._clean_text.append(cleaned_text)
             self._spelling_errors.append(spell_errors)
             self._markup_text.append(markup_text)
@@ -112,21 +113,21 @@ class EssaySet(object):
         prompt_text should be a string.
         Returns the prompt as a confirmation.
         """
-        if(type(prompt_text) == type("text")):
+        if(isinstance(prompt_text, basestring)):
             self._prompt = util_functions.sub_chars(prompt_text)
             ret = self._prompt
         else:
             raise util_functions.InputError(prompt_text, "Invalid prompt. Need to enter a string value.")
         return ret
 
-    def generate_additional_essays(self, e_text, e_score, dict=None, max_syns=3):
+    def generate_additional_essays(self, e_text, e_score, dictionary=None, max_syns=3):
         """
         Substitute synonyms to generate extra essays from existing ones.
         This is done to increase the amount of training data.
         Should only be used with lowest scoring essays.
         e_text is the text of the original essay.
         e_score is the score of the original essay.
-        dict is a fixed dictionary (list) of words to replace.
+        dictionary is a fixed dictionary (list) of words to replace.
         max_syns defines the maximum number of additional essays to generate.  Do not set too high.
         """
         random.seed(1)
@@ -141,7 +142,7 @@ class EssaySet(object):
         for i in range(0, max_syns):
             syn_toks = e_toks
             for z in range(0, len(e_toks)):
-                if len(all_syns[z]) > i and (dict == None or e_toks[z] in dict):
+                if len(all_syns[z]) > i and (dictionary == None or e_toks[z] in dictionary):
                     syn_toks[z] = all_syns[z][i]
             new_essays.append(" ".join(syn_toks))
         for z in xrange(0, len(new_essays)):

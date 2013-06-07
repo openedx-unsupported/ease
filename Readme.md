@@ -15,7 +15,7 @@ Questions? (Mailing List/IRC Channel)
 Feel free to open an issue in the issue tracker, or use [this link](http://webchat.freenode.net/?channels=#edx-discern) to access an IRC chat room for real time
 communication with some of the edX developers.  Alternatively, you can use your own IRC chat client and point it at freenode(chat.freenode.net).  The channel is #edx-discern.
 
-We also have a (mailing list)[https://groups.google.com/forum/#!forum/edx-discern].  Feel free to ask questions and discuss the code there.  If you find an issue (unless it is a security issue, see below), please mention it on our issue tracker.
+We also have a [mailing list](https://groups.google.com/forum/#!forum/edx-discern).  Feel free to ask questions and discuss the code there.  If you find an issue (unless it is a security issue, see below), please mention it on our issue tracker.
 
 How to Contribute
 -----------------

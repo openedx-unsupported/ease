@@ -5,7 +5,7 @@ with open('requirements.txt') as f:
 
 setup(
     name = "ease",
-    version = "0.1",
+    version = "0.1.1",
     packages=['ease', 'ease.external_code', 'ease.data', 'ease.data.nltk_data'],
     package_data = {
         '': ['*.txt', '*.rst', '*.p', '*.zip'],

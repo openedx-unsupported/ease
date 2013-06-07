@@ -345,6 +345,8 @@ def quadratic_weighted_kappa(rater_a, rater_b, min_rating=None, max_rating=None)
     Returns a float corresponding to the kappa correlation
     """
     assert(len(rater_a) == len(rater_b))
+    rater_a = [int(a) for a in rater_a]
+    rater_b = [int(b) for b in rater_b]
     if min_rating is None:
         min_rating = min(rater_a + rater_b)
     if max_rating is None:
@@ -383,6 +385,8 @@ def confusion_matrix(rater_a, rater_b, min_rating=None, max_rating=None):
     assert(len(rater_a) == len(rater_b))
     rater_a = [int(a) for a in rater_a]
     rater_b = [int(b) for b in rater_b]
+    min_rating = int(min_rating)
+    max_rating = int(max_rating)
     if min_rating is None:
         min_rating = min(rater_a)
     if max_rating is None:
@@ -391,7 +395,7 @@ def confusion_matrix(rater_a, rater_b, min_rating=None, max_rating=None):
     conf_mat = [[0 for i in range(num_ratings)]
                 for j in range(num_ratings)]
     for a, b in zip(rater_a, rater_b):
-        conf_mat[a - min_rating][b - min_rating] += 1
+        conf_mat[int(a - min_rating)][int(b - min_rating)] += 1
     return conf_mat
 
 

@@ -13,6 +13,7 @@ import nltk
 import pickle
 import logging
 import sys
+import tempfile
 
 log=logging.getLogger(__name__)
 
@@ -84,20 +85,27 @@ def spell_correct(string):
     string - string
     """
 
-    #Create a temp file so that aspell could be used
-    f = open('tmpfile', 'w')
+    # Create a temp file so that aspell could be used
+    # By default, tempfile will delete this file when the file handle is closed.
+    f = tempfile.NamedTemporaryFile(mode='w')
     f.write(string)
+    f.flush()
     f_path = os.path.abspath(f.name)
-    f.close()
     try:
         p = os.popen(aspell_path + " -a < " + f_path + " --sug-mode=ultra")
-    except:
-        log.exception("Could not find aspell, so could not spell correct!")
-        #Return original string if aspell fails
+
+        # Aspell returns a list of incorrect words with the above flags
+        incorrect = p.readlines()
+        p.close()
+
+    except Exception:
+        log.exception("aspell process failed; could not spell check")
+        # Return original string if aspell fails
         return string,0, string
-    #Aspell returns a list of incorrect words with the above flags
-    incorrect = p.readlines()
-    p.close()
+
+    finally:
+        f.close()
+
     incorrect_words = list()
     correct_spelling = list()
     for i in range(1, len(incorrect)):

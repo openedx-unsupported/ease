@@ -130,7 +130,6 @@ class EssaySet(object):
         dictionary is a fixed dictionary (list) of words to replace.
         max_syns defines the maximum number of additional essays to generate.  Do not set too high.
         """
-        random.seed(1)
         e_toks = nltk.word_tokenize(e_text)
         all_syns = []
         for word in e_toks:

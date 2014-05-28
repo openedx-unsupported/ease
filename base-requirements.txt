@@ -1,0 +1,10 @@
+# Most of the requirements, except for the ones
+# that take a long time to install and have pre-built
+# binaries on Ubuntu.  This allows us to speed up the
+# test builds, since we don't need to recompile numpy/scipy/nltk/scikit
+# every time.
+
+lxml==3.0.1
+path.py==3.0
+pytz==2012h
+fisher==0.1.4

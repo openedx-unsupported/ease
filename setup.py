@@ -18,15 +18,18 @@ def is_requirement(line):
         line.startswith('git+')
     )
 
-
-REQUIREMENTS = [
-    line.strip() for line in (
-        open("pre-requirements.txt").readlines() +
-        open("requirements.txt").readlines() +
-        open("base_requirements.txt").readlines()
-    )
-    if is_requirement(line)
-]
+def load_requirements(*requirements_paths):
+    """
+    Load all requirements from the specified requirements files.
+    Returns a list of requirement strings.
+    """
+    requirements = set()
+    for path in requirements_paths:
+        requirements.update(
+            line.strip() for line in open(path).readlines()
+            if is_requirement(line)
+        )
+    return list(requirements)
 
 
 setup(
@@ -43,5 +46,6 @@ setup(
     keywords = "ml machine learning nlp essay education",
     url = "https://github.com/edx/ease",
     include_package_data = True,
-    install_requires=REQUIREMENTS,
+    install_requires=load_requirements("pre-requirements.txt", "requirements.txt"),
+    tests_require=load_requirements("dev-requirements.txt"),
 )

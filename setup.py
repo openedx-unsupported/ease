@@ -1,32 +1,8 @@
 from setuptools import setup, find_packages
 
 
-def is_requirement(line):
-    """
-    Return True if the requirement line is a package requirement;
-    that is, it is not blank, a comment, or editable.
-    """
-    # Remove whitespace at the start/end of the line
-    line = line.strip()
-
-    # Skip blank lines, comments, and editable installs
-    return not (
-        line == '' or
-        line.startswith('-r') or
-        line.startswith('#') or
-        line.startswith('-e') or
-        line.startswith('git+')
-    )
-
-
-REQUIREMENTS = [
-    line.strip() for line in (
-        open("pre-requirements.txt").readlines() +
-        open("requirements.txt").readlines() +
-        open("base_requirements.txt").readlines()
-    )
-    if is_requirement(line)
-]
+REQUIREMENTS = [line.strip() for line in open("requirements.txt").readlines()]
+DEV_REQUIREMENTS = [line.strip() for line in open("dev-requirements.txt").readlines()]
 
 
 setup(
@@ -44,4 +20,5 @@ setup(
     url = "https://github.com/edx/ease",
     include_package_data = True,
     install_requires=REQUIREMENTS,
+    tests_require=DEV_REQUIREMENTS,
 )

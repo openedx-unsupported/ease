@@ -35,7 +35,7 @@ def load_requirements(*requirements_paths):
 setup(
     name = "ease",
     version = "0.1.2",
-    packages=['ease', 'ease.external_code', 'ease.data', 'ease.data.nltk_data'],
+    packages=['ease'],
     package_data = {
         '': ['*.txt', '*.rst', '*.p', '*.zip'],
         },

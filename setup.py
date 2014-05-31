@@ -46,6 +46,8 @@ setup(
     keywords = "ml machine learning nlp essay education",
     url = "https://github.com/edx/ease",
     include_package_data = True,
-    install_requires=load_requirements("pre-requirements.txt", "requirements.txt"),
+    install_requires=load_requirements(
+        "pre-requirements.txt", "base-requirements.txt", "requirements.txt"
+    ),
     tests_require=load_requirements("dev-requirements.txt"),
 )

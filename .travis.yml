@@ -7,9 +7,9 @@ before_install:
   - sudo apt-get update
   - sudo xargs -a apt-packages.txt apt-get install --fix-missing
 install:
-  - travis_retry ./download-nltk-corpus.sh
   - pip install -r base-requirements.txt
   - pip install -r dev-requirements.txt
   - sudo apt-get install python-matplotlib python-numpy python-scipy python-sklearn
   - pip install nltk==2.0.3 scikit-learn==0.12.1
+  - travis_retry ./download-nltk-corpus.sh
 script:  nosetests

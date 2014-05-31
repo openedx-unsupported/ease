@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-curl -o /tmp/nltk.tmp.tar.tz http://edx-static.s3.amazonaws.com/nltk/nltk-data-20131113.tar.gz
-cd /usr/share && sudo tar zxf /tmp/nltk.tmp.tar.tz
+PYTHON=`which python`
+sudo $PYTHON -m nltk.downloader stopwords maxent_treebank_pos_tagger wordnet -d /usr/local/share/nltk_data

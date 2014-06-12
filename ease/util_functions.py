@@ -1,4 +1,4 @@
-#Collection of misc functions needed to support essay_set.py and feature_extractor.py.
+# Collection of misc functions needed to support essay_set.py and feature_extractor.py.
 #Requires aspell to be installed and added to the path
 from fisher import pvalue
 
@@ -15,16 +15,17 @@ import logging
 import sys
 import tempfile
 
-log=logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
 if not base_path.endswith("/"):
-    base_path=base_path+"/"
+    base_path = base_path + "/"
 
 #Paths to needed data files
 ESSAY_CORPUS_PATH = base_path + "data/essaycorpus.txt"
 ESSAY_COR_TOKENS_PATH = base_path + "data/essay_cor_tokens.p"
+
 
 class AlgorithmTypes(object):
     """
@@ -33,19 +34,21 @@ class AlgorithmTypes(object):
     regression = "regression"
     classification = "classifiction"
 
+
 def create_model_path(model_path):
     """
     Creates a path to model files
     model_path - string
     """
     if not model_path.startswith("/") and not model_path.startswith("models/"):
-        model_path="/" + model_path
+        model_path = "/" + model_path
     if not model_path.startswith("models"):
         model_path = "models" + model_path
     if not model_path.endswith(".p"):
-        model_path+=".p"
+        model_path += ".p"
 
     return model_path
+
 
 def sub_chars(string):
     """
@@ -66,7 +69,7 @@ def sub_chars(string):
 
     #Replace text.  Ordering is very important!
     nstring = re.sub(sub_pat, " ", string)
-    nstring = re.sub(char_pat," .", nstring)
+    nstring = re.sub(char_pat, " .", nstring)
     nstring = re.sub(com_pat, " ,", nstring)
     nstring = re.sub(ques_pat, " ?", nstring)
     nstring = re.sub(excl_pat, " !", nstring)
@@ -101,7 +104,7 @@ def spell_correct(string):
     except Exception:
         log.exception("aspell process failed; could not spell check")
         # Return original string if aspell fails
-        return string,0, string
+        return string, 0, string
 
     finally:
         f.close()
@@ -109,7 +112,7 @@ def spell_correct(string):
     incorrect_words = list()
     correct_spelling = list()
     for i in range(1, len(incorrect)):
-        if(len(incorrect[i]) > 10):
+        if (len(incorrect[i]) > 10):
             #Reformat aspell output to make sense
             match = re.search(":", incorrect[i])
             if hasattr(match, "start"):
@@ -128,16 +131,16 @@ def spell_correct(string):
     #Create markup based on spelling errors
     newstring = string
     markup_string = string
-    already_subbed=[]
+    already_subbed = []
     for i in range(0, len(incorrect_words)):
         sub_pat = r"\b" + incorrect_words[i] + r"\b"
         sub_comp = re.compile(sub_pat)
         newstring = re.sub(sub_comp, correct_spelling[i], newstring)
         if incorrect_words[i] not in already_subbed:
-            markup_string=re.sub(sub_comp,'<bs>' + incorrect_words[i] + "</bs>", markup_string)
+            markup_string = re.sub(sub_comp, '<bs>' + incorrect_words[i] + "</bs>", markup_string)
             already_subbed.append(incorrect_words[i])
 
-    return newstring,len(incorrect_words),markup_string
+    return newstring, len(incorrect_words), markup_string
 
 
 def ngrams(tokens, min_n, max_n):
@@ -162,6 +165,7 @@ def f7(seq):
     """
     seen = set()
     seen_add = seen.add
+    #TODO Potential Improvment Here
     return [x for x in seq if x not in seen and not seen_add(x)]
 
 
@@ -200,12 +204,12 @@ def get_vocab(text, score, max_feats=750, max_feats2=200):
     max_feats2 is the maximum number of features to consider in the second (final) pass
     Returns a list of words that constitute the significant vocabulary
     """
-    dict = CountVectorizer(ngram_range=(1,2), max_features=max_feats)
+    dict = CountVectorizer(ngram_range=(1, 2), max_features=max_feats)
     dict_mat = dict.fit_transform(text)
     set_score = numpy.asarray(score, dtype=numpy.int)
     med_score = numpy.median(set_score)
     new_score = set_score
-    if(med_score == 0):
+    if (med_score == 0):
         med_score = 1
     new_score[set_score < med_score] = 0
     new_score[set_score >= med_score] = 1
@@ -223,7 +227,7 @@ def get_vocab(text, score, max_feats=750, max_feats2=200):
         fish_vals.append(fish_val)
 
     cutoff = 1
-    if(len(fish_vals) > max_feats2):
+    if (len(fish_vals) > max_feats2):
         cutoff = sorted(fish_vals)[max_feats2]
     good_cols = numpy.asarray([num for num in range(0, dict_mat.shape[1]) if fish_vals[num] <= cutoff])
 
@@ -253,12 +257,12 @@ def edit_distance(s1, s2):
             else:
                 cost = 1
             d[(i, j)] = min(
-                d[(i - 1, j)] + 1, # deletion
-                d[(i, j - 1)] + 1, # insertion
-                d[(i - 1, j - 1)] + cost, # substitution
+                d[(i - 1, j)] + 1,  # deletion
+                d[(i, j - 1)] + 1,  # insertion
+                d[(i - 1, j - 1)] + cost,  # substitution
             )
             if i and j and s1[i] == s2[j - 1] and s1[i - 1] == s2[j]:
-                d[(i, j)] = min(d[(i, j)], d[i - 2, j - 2] + cost) # transposition
+                d[(i, j)] = min(d[(i, j)], d[i - 2, j - 2] + cost)  # transposition
 
     return d[lenstr1 - 1, lenstr2 - 1]
 
@@ -299,7 +303,7 @@ def gen_cv_preds(clf, arr, sel_score, num_chunks=3):
         sim_fit = clf.fit(arr[loop_inds], set_score[loop_inds])
         preds.append(list(sim_fit.predict(arr[chunks[i]])))
     all_preds = list(chain(*preds))
-    return(all_preds)
+    return (all_preds)
 
 
 def gen_model(clf, arr, sel_score):
@@ -312,7 +316,7 @@ def gen_model(clf, arr, sel_score):
     """
     set_score = numpy.asarray(sel_score, dtype=numpy.int)
     sim_fit = clf.fit(arr, set_score)
-    return(sim_fit)
+    return (sim_fit)
 
 
 def gen_preds(clf, arr):
@@ -322,7 +326,7 @@ def gen_preds(clf, arr):
     arr is a data array identical in dimension to the array clf was trained on
     Returns the array of predictions.
     """
-    if(hasattr(clf, "predict_proba")):
+    if (hasattr(clf, "predict_proba")):
         ret = clf.predict(arr)
         # pred_score=preds.argmax(1)+min(x._score)
     else:
@@ -340,7 +344,9 @@ def calc_list_average(l):
         total += value
     return total / len(l)
 
+
 stdev = lambda d: (sum((x - 1. * sum(d) / len(d)) ** 2 for x in d) / (1. * (len(d) - 1))) ** .5
+
 
 def quadratic_weighted_kappa(rater_a, rater_b, min_rating=None, max_rating=None):
     """
@@ -352,7 +358,7 @@ def quadratic_weighted_kappa(rater_a, rater_b, min_rating=None, max_rating=None)
     max_rating is an optional argument describing the maximum rating possible on the data set
     Returns a float corresponding to the kappa correlation
     """
-    assert(len(rater_a) == len(rater_b))
+    assert (len(rater_a) == len(rater_b))
     rater_a = [int(a) for a in rater_a]
     rater_b = [int(b) for b in rater_b]
     if min_rating is None:
@@ -360,7 +366,7 @@ def quadratic_weighted_kappa(rater_a, rater_b, min_rating=None, max_rating=None)
     if max_rating is None:
         max_rating = max(rater_a + rater_b)
     conf_mat = confusion_matrix(rater_a, rater_b,
-        min_rating, max_rating)
+                                min_rating, max_rating)
     num_ratings = len(conf_mat)
     num_scored_items = float(len(rater_a))
 
@@ -370,7 +376,7 @@ def quadratic_weighted_kappa(rater_a, rater_b, min_rating=None, max_rating=None)
     numerator = 0.0
     denominator = 0.0
 
-    if(num_ratings > 1):
+    if (num_ratings > 1):
         for i in range(num_ratings):
             for j in range(num_ratings):
                 expected_count = (hist_rater_a[i] * hist_rater_b[j]
@@ -390,7 +396,7 @@ def confusion_matrix(rater_a, rater_b, min_rating=None, max_rating=None):
     A confusion matrix shows how often 2 values agree and disagree
     See quadratic_weighted_kappa for argument descriptions
     """
-    assert(len(rater_a) == len(rater_b))
+    assert (len(rater_a) == len(rater_b))
     rater_a = [int(a) for a in rater_a]
     rater_b = [int(b) for b in rater_b]
     min_rating = int(min_rating)
@@ -450,7 +456,7 @@ def get_separator_words(toks1):
     Returns a list of separator words
     """
     tab_toks1 = nltk.FreqDist(word.lower() for word in toks1)
-    if(os.path.isfile(ESSAY_COR_TOKENS_PATH)):
+    if (os.path.isfile(ESSAY_COR_TOKENS_PATH)):
         toks2 = pickle.load(open(ESSAY_COR_TOKENS_PATH, 'rb'))
     else:
         essay_corpus = open(ESSAY_CORPUS_PATH).read()
@@ -460,12 +466,12 @@ def get_separator_words(toks1):
     sep_words = []
     for word in tab_toks1.keys():
         tok1_present = tab_toks1[word]
-        if(tok1_present > 2):
+        if (tok1_present > 2):
             tok1_total = tab_toks1._N
             tok2_present = toks2[word]
             tok2_total = toks2._N
             fish_val = pvalue(tok1_present, tok2_present, tok1_total, tok2_total).two_tail
-            if(fish_val < .001 and tok1_present / float(tok1_total) > (tok2_present / float(tok2_total)) * 2):
+            if (fish_val < .001 and tok1_present / float(tok1_total) > (tok2_present / float(tok2_total)) * 2):
                 sep_words.append(word)
     sep_words = [w for w in sep_words if not w in nltk.corpus.stopwords.words("english") and len(w) > 5]
     return sep_words

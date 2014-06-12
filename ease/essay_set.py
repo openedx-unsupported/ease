@@ -27,7 +27,7 @@ class EssaySet(object):
         """
         Initialize variables and check essay set type
         """
-        if(essaytype != "train" and essaytype != "test"):
+        if (essaytype != "train" and essaytype != "test"):
             essaytype = "train"
 
         self._type = essaytype
@@ -52,7 +52,7 @@ class EssaySet(object):
         Returns a confirmation that essay was added.
         """
         # Get maximum current essay id, or set to 0 if this is the first essay added
-        if(len(self._id) > 0):
+        if (len(self._id) > 0):
             max_id = max(self._id)
         else:
             max_id = 0
@@ -71,9 +71,10 @@ class EssaySet(object):
             essay_text = str(essay_text)
         except:
             # Nothing needed here, will return error in any case.
-            log.exception("Invalid type for essay score : {0} or essay text : {1}".format(type(essay_score), type(essay_text)))
+            log.exception(
+                "Invalid type for essay score : {0} or essay text : {1}".format(type(essay_score), type(essay_text)))
 
-        if isinstance(essay_score, int) and isinstance(essay_text, basestring)\
+        if isinstance(essay_score, int) and isinstance(essay_text, basestring) \
                 and (essay_generated == 0 or essay_generated == 1):
             self._id.append(max_id + 1)
             self._score.append(essay_score)
@@ -83,7 +84,7 @@ class EssaySet(object):
             except:
                 essay_text = (essay_text.decode('utf-8', 'replace')).encode('ascii', 'ignore')
             cleaned_essay = util_functions.sub_chars(essay_text).lower()
-            if(len(cleaned_essay) > MAXIMUM_ESSAY_LENGTH):
+            if (len(cleaned_essay) > MAXIMUM_ESSAY_LENGTH):
                 cleaned_essay = cleaned_essay[0:MAXIMUM_ESSAY_LENGTH]
             self._text.append(cleaned_essay)
             # Spell correct text using aspell
@@ -113,7 +114,7 @@ class EssaySet(object):
         prompt_text should be a string.
         Returns the prompt as a confirmation.
         """
-        if(isinstance(prompt_text, basestring)):
+        if (isinstance(prompt_text, basestring)):
             self._prompt = util_functions.sub_chars(prompt_text)
             ret = self._prompt
         else:
@@ -134,7 +135,7 @@ class EssaySet(object):
         all_syns = []
         for word in e_toks:
             synonyms = util_functions.get_wordnet_syns(word)
-            if(len(synonyms) > max_syns):
+            if (len(synonyms) > max_syns):
                 synonyms = random.sample(synonyms, max_syns)
             all_syns.append(synonyms)
         new_essays = []

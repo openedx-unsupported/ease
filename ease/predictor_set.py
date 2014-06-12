@@ -83,7 +83,7 @@ class PredictorSet(object):
             except UnicodeError:
                 raise log_error(textual_features,"Textual feature {} could not be decoded.".format(textual_features[i]))
 
-        # Create essay sets for textual features if needed
+        # Create essay sets for textual features
         # TODO Understand this logic and change it, I don't think it is right.
         if len(self._textual_features) == 0:
             for i in xrange(0, len(textual_features)):

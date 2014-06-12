@@ -25,9 +25,18 @@ log = logging.getLogger()
 
 def read_in_test_data(filename):
     """
-    Reads in test data file found at filename.
+    Reads in tab delimited test data file found at filename for training purposes.
+
     filename must be a tab delimited file with columns id, dummy number column, score, dummy score, text
-    returns the score and the text
+
+    Args:
+        filename (str): The path to the data
+
+    Return:
+        Tuple of the form (score, text), where:
+            The former is the list of scores assigned to the essays in the file (int)
+            The latter is the list of essays in the file
+
     """
     tid, e_set, score, score2, text = [], [], [], [], []
     combined_raw = open(filename).read()
@@ -45,8 +54,13 @@ def read_in_test_data(filename):
 
 def read_in_test_prompt(filename):
     """
-    Reads in the prompt from a text file
-    Returns string
+    Reads in the prompt from a file.
+
+    Args:
+        filename (str): the name of the file
+
+    Returns:
+        (str): the prompt as a string.
     """
     prompt_string = open(filename).read()
     return prompt_string
@@ -55,10 +69,16 @@ def read_in_test_prompt(filename):
 def read_in_test_data_twocolumn(filename, sep=","):
     """
     Reads in a two column version of the test data.
-    Filename must point to a delimited file.
+
     In filename, the first column should be integer score data.
     The second column should be string text data.
     Sep specifies the type of separator between fields.
+
+    Return:
+        Tuple of the form (score, text), where:
+            The former is the list of scores assigned to the essays in the file (int)
+            The latter is the list of essays in the file
+
     """
     score, text = [], []
     combined_raw = open(filename).read()
@@ -132,8 +152,7 @@ def get_algorithms(algorithm):
                                                           max_depth=4, random_state=1, min_samples_leaf=3)
     return clf, clf2
 
-#TODO RENAME train_from_predictors
-def extract_features_and_generate_model_predictors(predictor_set, algorithm=util_functions.AlgorithmTypes.regression):
+def extract_features_and_generate_model_from_predictors(predictor_set, algorithm=util_functions.AlgorithmTypes.regression):
     """
     Extracts features and generates predictors based on a given predictor set
     predictor_set - a PredictorSet object that has been initialized with data
@@ -162,40 +181,49 @@ def extract_features_and_generate_model_predictors(predictor_set, algorithm=util
     return f, clf, cv_error_results
 
 
-def extract_features_and_generate_model(essays, algorithm=util_functions.AlgorithmTypes.regression):
+def extract_features_and_generate_model(essays):
     """
     Feed in an essay set to get feature vector and classifier
-    essays must be an essay set object
-    additional array is an optional argument that can specify
-    a numpy array of values to add in
-    returns a trained FeatureExtractor object and a trained classifier
-    """
-    f = feature_extractor.FeatureExtractor()
-    f.initialize_dictionaries(essays)
 
-    train_feats = f.generate_features(essays)
+    Args:
+        essays (EssaySet): The essay set to construct the feature extractor and model off of
+
+    Returns:
+        A tuple with the following elements in the following order:
+            - The Trained Feature extractor
+            - The Trained Classifier
+            - Any Cross Validation results
+    """
+    feat_extractor = feature_extractor.FeatureExtractor(essays)
+
+    features = feat_extractor.generate_features(essays)
 
     set_score = numpy.asarray(essays._score, dtype=numpy.int)
     algorithm = create.select_algorithm(set_score)
 
-    clf, clf2 = get_algorithms(algorithm)
+    predict_classifier, cv_error_classifier = get_algorithms(algorithm)
 
-    cv_error_results = get_cv_error(clf2, train_feats, essays._score)
+    cv_error_results = get_cv_error(cv_error_classifier, features, essays._score)
 
     try:
-        clf.fit(train_feats, set_score)
-    except ValueError:
+        predict_classifier.fit(features, set_score)
+    except:
         log.exception("Not enough classes (0,1,etc) in sample.")
         set_score[0] = 1
         set_score[1] = 0
-        clf.fit(train_feats, set_score)
+        predict_classifier.fit(features, set_score)
 
-    return f, clf, cv_error_results
+    return feat_extractor, predict_classifier, cv_error_results
 
 
 def dump_model_to_file(prompt_string, feature_ext, classifier, text, score, model_path):
     """
     Writes out a model to a file.
+
+    Args:
+        prompt_string (str): The prompt for the set of essays
+        feature_ext (FeatureExtractor): a trained FeatureExtractor Object
+        classifier : a trained Classifier Object
     prompt string is a string containing the prompt
     feature_ext is a trained FeatureExtractor object
     classifier is a trained classifier

@@ -95,7 +95,7 @@ def create(examples, scores, prompt_string, dump_data=False):
     # Gets the features and classifiers from the essay set and computes the error
     try:
         feature_ext, classifier, cv_error_results = model_creator.extract_features_and_generate_model(
-            essay_set, algorithm=algorithm
+            essay_set
         )
         results['cv_kappa'] = cv_error_results['kappa']
         results['cv_mean_absolute_error'] = cv_error_results['mae']
@@ -103,10 +103,11 @@ def create(examples, scores, prompt_string, dump_data=False):
         results['classifier'] = classifier
         results['algorithm'] = algorithm
         results['success'] = True
-    except:
+    except Exception as ex:
         msg = "feature extraction and model creation failed."
         results['errors'].append(msg)
         log.exception(msg)
+        log.exception(ex)
 
     return results
 
@@ -153,7 +154,7 @@ def create_generic(numeric_values, textual_values, target, algorithm=util_functi
     # Gets the features and classifiers from the essay set and computes the error
     try:
         feature_ext, classifier, cv_error_results = \
-            model_creator.extract_features_and_generate_model_predictors(predictor, algorithm)
+            model_creator.extract_features_and_generate_model_from_predictors(predictor, algorithm)
         results['cv_kappa'] = cv_error_results['kappa']
         results['cv_mean_absolute_error'] = cv_error_results['mae']
         results['feature_ext'] = feature_ext

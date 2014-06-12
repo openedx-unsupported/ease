@@ -1,5 +1,9 @@
-# Collection of misc functions needed to support essay_set.py and feature_extractor.py.
-#Requires aspell to be installed and added to the path
+"""
+Collection of misc functions needed to support essay_set.py and feature_extractor.py.
+Requires aspell to be installed and added to the path
+
+The cleanup of this file is far beyond the scope of this hackathon --GBW--
+"""
 from fisher import pvalue
 
 aspell_path = "aspell"

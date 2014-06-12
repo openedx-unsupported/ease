@@ -17,6 +17,7 @@ sys.path.append(one_up_path)
 import model_creator
 import util_functions
 import predictor_set
+from errors import *
 import predictor_extractor
 from datetime import datetime
 import json
@@ -41,41 +42,61 @@ def dump_input_data(text, score):
         log.exception(error)
 
 
-def create(text, score, prompt_string, dump_data=False):
+def create(examples, scores, prompt_string, dump_data=False):
     """
-    Creates a machine learning model from input text, associated scores, a prompt, and a path to the model
-    TODO: Remove model path argument, it is needed for now to support legacy code
-    text - A list of strings containing the text of the essays
-    score - a list of integers containing score values
-    prompt_string - the common prompt for the set of essays
+    Creates a machine learning model from basic inputs (essays, associated scores and a prompt)
+
+    The previous version of this function took an additional argument which specified the path to the model.
+
+    Args:
+        examples (list of str): the example essays that have been assigned to train the AI.
+        scores (list of int): the associated scores that correspond to the essays.
+        prompt_string (str): the common prompt for all of the example essays.
+
+    Kwargs:
+        dump_data (bool): whether or not a examples and scores should be set via a data input dump
+
+    Returns:
+        (dict): Has the following keys:
+            'errors' (list of Exception): List of all errors that occurred during training
+            'cv_kappa' (float): cv_error, measured in terms of kappa.
+            'cv_mean_absolute_error' (float): cv_error, measured as the mean absolute value
+            'feature_ext': feature_extractor to be used for grading
+            'classifier': the classifier object which can be used to score future essays
+            'success' (bool): Whether or not the training of the classifier was successful.
     """
 
+    # If dump_data is true, then the examples and scores are loaded from json data.
     if dump_data:
-        dump_input_data(text, score)
+        dump_input_data(examples, scores)
 
-    algorithm = select_algorithm(score)
+    # Selects the appropriate ML algorithm to use to train the classifier
+    algorithm = select_algorithm(scores)
+
     #Initialize a results dictionary to return
     results = {'errors': [], 'success': False, 'cv_kappa': 0, 'cv_mean_absolute_error': 0,
                'feature_ext': "", 'classifier': "", 'algorithm': algorithm,
-               'score': score, 'text': text, 'prompt': prompt_string}
+               'score': scores, 'text': examples, 'prompt': prompt_string}
 
-    if len(text) != len(score):
-        msg = "Target and text lists must be same length."
+    if len(examples) != len(scores):
+        results['errors'].append("Target and text lists must be same length.")
+        log.exception("Target and text lists must be same length.")
+        return results
+
+    # Create an essay set object that encapsulates all the essays and alternate representations (tokens, etc)
+    try:
+        essay_set = model_creator.create_essay_set(examples, scores, prompt_string)
+    except (ExampleCreationRequestError, ExampleCreationInternalError) as ex:
+        msg = "essay set creation failed due to an error in the create_essay_set method. {}".format(ex)
         results['errors'].append(msg)
         log.exception(msg)
         return results
 
+    # Gets the features and classifiers from the essay set and computes the error
     try:
-        #Create an essay set object that encapsulates all the essays and alternate representations (tokens, etc)
-        e_set = model_creator.create_essay_set(text, score, prompt_string)
-    except:
-        msg = "essay set creation failed."
-        results['errors'].append(msg)
-        log.exception(msg)
-    try:
-        #Gets features from the essay set and computes error
-        feature_ext, classifier, cv_error_results = model_creator.extract_features_and_generate_model(e_set,
-                                                                                                      algorithm=algorithm)
+        feature_ext, classifier, cv_error_results = model_creator.extract_features_and_generate_model(
+            essay_set, algorithm=algorithm
+        )
         results['cv_kappa'] = cv_error_results['kappa']
         results['cv_mean_absolute_error'] = cv_error_results['mae']
         results['feature_ext'] = feature_ext
@@ -92,16 +113,23 @@ def create(text, score, prompt_string, dump_data=False):
 
 def create_generic(numeric_values, textual_values, target, algorithm=util_functions.AlgorithmTypes.regression):
     """
-    Creates a model from a generic list numeric values and text values
-    numeric_values - A list of lists that are the predictors
-    textual_values - A list of lists that are the predictors
-    (each item in textual_values corresponds to the similarly indexed counterpart in numeric_values)
-    target - The variable that we are trying to predict.  A list of integers.
-    algorithm - the type of algorithm that will be used
+    Constructs a model from a generic list of numeric values and text values.
+
+    Generates this through a predictor set, rather than an essay set.
+
+    Args:
+        numeric_values:
+        textual_values:
+        target:
+
+    Kwargs:
+        GBW DELETED KWARG ALGORITHM (it was never used)
     """
 
+    # Selects the appropriate ML algorithm to use to train the classifier
     algorithm = select_algorithm(target)
-    #Initialize a result dictionary to return.
+
+    # Initialize a result dictionary to return.
     results = {'errors': [], 'success': False, 'cv_kappa': 0, 'cv_mean_absolute_error': 0,
                'feature_ext': "", 'classifier': "", 'algorithm': algorithm}
 
@@ -111,20 +139,21 @@ def create_generic(numeric_values, textual_values, target, algorithm=util_functi
         log.exception(msg)
         return results
 
+    # Initialize a predictor set object that encapsulates all of the text and numeric predictors
     try:
-        #Initialize a predictor set object that encapsulates all of the text and numeric predictors
-        pset = predictor_set.PredictorSet(essaytype="train")
+        predictor = predictor_set.PredictorSet(essaytype="train")
         for i in xrange(0, len(numeric_values)):
-            pset.add_row(numeric_values[i], textual_values[i], target[i])
+            predictor.add_row(numeric_values[i], textual_values[i], target[i])
     except:
         msg = "predictor set creation failed."
         results['errors'].append(msg)
         log.exception(msg)
+        return results
 
+    # Gets the features and classifiers from the essay set and computes the error
     try:
-        #Extract all features and then train a classifier with the features
-        feature_ext, classifier, cv_error_results = model_creator.extract_features_and_generate_model_predictors(pset,
-                                                                                                                 algorithm)
+        feature_ext, classifier, cv_error_results = \
+            model_creator.extract_features_and_generate_model_predictors(predictor, algorithm)
         results['cv_kappa'] = cv_error_results['kappa']
         results['cv_mean_absolute_error'] = cv_error_results['mae']
         results['feature_ext'] = feature_ext
@@ -139,14 +168,21 @@ def create_generic(numeric_values, textual_values, target, algorithm=util_functi
 
 
 def select_algorithm(score_list):
-    #Decide what algorithm to use (regression or classification)
-    try:
-        #Count the number of unique score points in the score list
-        if len(util_functions.f7(list(score_list))) > 5:
-            algorithm = util_functions.AlgorithmTypes.regression
-        else:
-            algorithm = util_functions.AlgorithmTypes.classification
-    except:
-        algorithm = util_functions.AlgorithmTypes.regression
+    """
+    Decides whether to use regression or classification as the ML algorithm based on the number of unique scores
 
-    return algorithm
+    If there are more than 5 unique scores give, regression is used, if fewer than 5 unique scores are produced
+    then classification is used.
+
+    Args:
+        score_list (list of int): The number of scores awarded to example essays for a given question
+
+    Return:
+        The ML algorithm used to train the classifier set and feature extractor
+    """
+
+    #Count the number of unique score points in the score list
+    if len(set(score_list)) > 5:
+        return util_functions.AlgorithmTypes.regression
+    else:
+        return util_functions.AlgorithmTypes.classification

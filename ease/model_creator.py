@@ -18,6 +18,7 @@ import util_functions
 import feature_extractor
 import logging
 import predictor_extractor
+import create
 
 log = logging.getLogger()
 
@@ -131,7 +132,7 @@ def get_algorithms(algorithm):
                                                           max_depth=4, random_state=1, min_samples_leaf=3)
     return clf, clf2
 
-
+#TODO RENAME train_from_predictors
 def extract_features_and_generate_model_predictors(predictor_set, algorithm=util_functions.AlgorithmTypes.regression):
     """
     Extracts features and generates predictors based on a given predictor set
@@ -176,10 +177,7 @@ def extract_features_and_generate_model(essays, algorithm=util_functions.Algorit
     train_feats = f.gen_feats(essays)
 
     set_score = numpy.asarray(essays._score, dtype=numpy.int)
-    if len(util_functions.f7(list(set_score))) > 5:
-        algorithm = util_functions.AlgorithmTypes.regression
-    else:
-        algorithm = util_functions.AlgorithmTypes.classification
+    algorithm = create.select_algorithm(set_score)
 
     clf, clf2 = get_algorithms(algorithm)
 

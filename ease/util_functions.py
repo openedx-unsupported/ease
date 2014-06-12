@@ -159,14 +159,17 @@ def ngrams(tokens, min_n, max_n):
     return all_ngrams
 
 
-def f7(seq):
+def make_unique(sequence):
     """
-    Makes a list unique
+    Makes a list of elements unique
+
+    Args:
+        sequence (list of any comparable): A sequence to make unique
+
+    Return:
+        the list without any duplicates.  May be out of order.
     """
-    seen = set()
-    seen_add = seen.add
-    #TODO Potential Improvment Here
-    return [x for x in seq if x not in seen and not seen_add(x)]
+    return list(set(sequence))
 
 
 def count_list(the_list):
@@ -190,7 +193,8 @@ def regenerate_good_tokens(string):
     pos_string = nltk.pos_tag(toks)
     pos_seq = [tag[1] for tag in pos_string]
     pos_ngrams = ngrams(pos_seq, 2, 4)
-    sel_pos_ngrams = f7(pos_ngrams)
+    # TODO POTENTIAL ISSUE WITH NON STABLE ALGORITHM F7!?!
+    sel_pos_ngrams = make_unique(pos_ngrams)
     return sel_pos_ngrams
 
 
@@ -444,7 +448,7 @@ def get_wordnet_syns(word):
     for ss in synset:
         for swords in ss.lemma_names:
             synonyms.append(pat.sub(" ", swords.lower()))
-    synonyms = f7(synonyms)
+    synonyms = make_unique(synonyms)
     return synonyms
 
 

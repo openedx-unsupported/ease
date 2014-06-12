@@ -3,7 +3,6 @@ Functions to score specified data using specified ML models
 """
 
 import sys
-import pickle
 import os
 import numpy
 import logging
@@ -14,14 +13,11 @@ sys.path.append(base_path)
 
 #Depend on base path to be imported
 from essay_set import EssaySet
-import predictor_extractor
 import predictor_set
 import util_functions
 from errors import *
 
 #Imports needed to unpickle grader data
-import feature_extractor
-import sklearn.ensemble
 import math
 
 log = logging.getLogger(__name__)

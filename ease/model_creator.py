@@ -142,10 +142,9 @@ def extract_features_and_generate_model_predictors(predictor_set, algorithm=util
     if (algorithm not in [util_functions.AlgorithmTypes.regression, util_functions.AlgorithmTypes.classification]):
         algorithm = util_functions.AlgorithmTypes.regression
 
-    f = predictor_extractor.PredictorExtractor()
-    f.initialize_dictionaries(predictor_set)
+    f = predictor_extractor.PredictorExtractor(predictor_set)
 
-    train_feats = f.gen_feats(predictor_set)
+    train_feats = f.generate_features(predictor_set)
 
     clf, clf2 = get_algorithms(algorithm)
     cv_error_results = get_cv_error(clf2, train_feats, predictor_set._target)

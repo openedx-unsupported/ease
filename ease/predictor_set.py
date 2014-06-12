@@ -85,7 +85,7 @@ class PredictorSet(object):
         #Create essay sets for textual features if needed
         if len(self._textual_features) == 0:
             for i in xrange(0, len(textual_features)):
-                self._essay_sets.append(essay_set.EssaySet(essaytype=self._type))
+                self._essay_sets.append(essay_set.EssaySet(essay_type=self._type))
 
         #Add numeric and textual features
         self._numeric_features.append(numeric_features)

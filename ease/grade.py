@@ -43,7 +43,7 @@ def grade(grader_data, submission):
     results = {'errors': [], 'tests': [], 'score': 0, 'feedback': "", 'success': False, 'confidence': 0}
     has_error = False
 
-    grader_set = EssaySet(essaytype="test")
+    grader_set = EssaySet(essay_type="test")
     feedback = {}
 
     model, extractor = get_classifier_and_ext(grader_data)

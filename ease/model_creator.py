@@ -82,7 +82,7 @@ def create_essay_set(text, score, prompt_string, generate_additional=True):
     for i in xrange(0, len(text)):
         x.add_essay(text[i], score[i])
         if score[i] == min(score) and generate_additional == True:
-            x.generate_additional_essays(x._clean_text[len(x._clean_text) - 1], score[i])
+            x.generate_additional_essays(x._cleaned_spelled_essays[len(x._cleaned_spelled_essays) - 1], score[i])
 
     x.update_prompt(prompt_string)
 

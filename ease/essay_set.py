@@ -23,21 +23,35 @@ MAXIMUM_ESSAY_LENGTH = 20000
 
 
 class EssaySet(object):
-    def __init__(self, essaytype="train"):
+    """
+    The essay set object which encapsulates essays into sets for two purposes:
+        Testing
+        Training
+    Additionally, the addition of essays into one of these sets performs all spell/grammar
+    checking, tokenization of the essay, and stemming.
+
+    Essays in an essay set can be assumed to have these properties.
+    """
+    def __init__(self, essay_type="train"):
         """
         Initialize variables and check essay set type
-        """
-        if (essaytype != "train" and essaytype != "test"):
-            essaytype = "train"
 
-        self._type = essaytype
-        self._score = []
-        self._text = []
-        self._id = []
-        self._clean_text = []
+        Args:
+            essay_type (string): Either 'train' or 'grade', defines the type of the essay set.
+                                    If not recognized, we default to "train"
+        """
+
+        if essay_type != "train" and essay_type != "test":
+            essay_type = "train"
+
+        self._type = essay_type
+        self._scores = []
+        self._cleaned_essays = []
+        self._ids = []
+        self._cleaned_spelled_essays = []
         self._tokens = []
-        self._pos = []
-        self._clean_stem_text = []
+        self._pos_tags = []
+        self._cleaned_stem_essays = []
         self._generated = []
         self._prompt = ""
         self._spelling_errors = []
@@ -45,105 +59,150 @@ class EssaySet(object):
 
     def add_essay(self, essay_text, essay_score, essay_generated=0):
         """
-        Add new (essay_text,essay_score) pair to the essay set.
-        essay_text must be a string.
-        essay_score must be an int.
+        Adds a new pair of (essay_text, essay_score) to the essay set.
+
+        In the context of training, this occurs when a human creates another example
+        for the AI assessment to be based on
+
+        NOTE:
         essay_generated should not be changed by the user.
-        Returns a confirmation that essay was added.
+
+        Args:
+            essay_text (string): The text of the essay
+            essay_score (int): The score assigned to the essay by a human.
+
+        Kwargs:
+            essay_generated (int):
+
+        Returns:
+            A string confirmation that essay was added.
         """
-        # Get maximum current essay id, or set to 0 if this is the first essay added
-        if (len(self._id) > 0):
-            max_id = max(self._id)
+
+        # Get maximum current essay id (the newest essay), or set to 0 if this is the first essay added
+        if len(self._ids) > 0:
+            max_id = max(self._ids)
         else:
             max_id = 0
-            # Verify that essay_score is an int, essay_text is a string, and essay_generated equals 0 or 1
 
+        # Encodes the essay into ascii.  Note that un-recognized characters will be ignored
+        # Also note that if we first fail to encode, we will try to decode from utf-8 then encode.
         try:
             essay_text = essay_text.encode('ascii', 'ignore')
-            if len(essay_text) < 5:
-                essay_text = "Invalid essay."
-        except:
-            log.exception("Could not parse essay into ascii.")
+        except UnicodeError:
+            try:
+                essay_text = (essay_text.decode('utf-8', 'replace')).encode('ascii', 'ignore')
+            except UnicodeError:
+                log.exception("Could not parse essay into ascii.")
+                raise
 
+        # Validates that score is an integer and essay_text is a string.
         try:
-            # Try conversion of types
             essay_score = int(essay_score)
             essay_text = str(essay_text)
-        except:
-            # Nothing needed here, will return error in any case.
+            essay_generated = int(essay_generated)
+        except TypeError:
             log.exception(
                 "Invalid type for essay score : {0} or essay text : {1}".format(type(essay_score), type(essay_text)))
+            raise
 
-        if isinstance(essay_score, int) and isinstance(essay_text, basestring) \
-                and (essay_generated == 0 or essay_generated == 1):
-            self._id.append(max_id + 1)
-            self._score.append(essay_score)
-            # Clean text by removing non digit/work/punctuation characters
-            try:
-                essay_text = str(essay_text.encode('ascii', 'ignore'))
-            except:
-                essay_text = (essay_text.decode('utf-8', 'replace')).encode('ascii', 'ignore')
-            cleaned_essay = util_functions.sub_chars(essay_text).lower()
-            if (len(cleaned_essay) > MAXIMUM_ESSAY_LENGTH):
-                cleaned_essay = cleaned_essay[0:MAXIMUM_ESSAY_LENGTH]
-            self._text.append(cleaned_essay)
-            # Spell correct text using aspell
-            cleaned_text, spell_errors, markup_text = util_functions.spell_correct(self._text[len(self._text) - 1])
-            self._clean_text.append(cleaned_text)
-            self._spelling_errors.append(spell_errors)
-            self._markup_text.append(markup_text)
-            # Tokenize text
-            self._tokens.append(nltk.word_tokenize(self._clean_text[len(self._clean_text) - 1]))
-            # Part of speech tag text
-            self._pos.append(nltk.pos_tag(self._clean_text[len(self._clean_text) - 1].split(" ")))
-            self._generated.append(essay_generated)
-            # Stem spell corrected text
-            porter = nltk.PorterStemmer()
-            por_toks = " ".join([porter.stem(w) for w in self._tokens[len(self._tokens) - 1]])
-            self._clean_stem_text.append(por_toks)
+        # Validates that essay generated is 0 or 1
+        if essay_generated != 0 and essay_generated != 1:
+            ex = "Invalid value for essay_generated ({}).  Value must be 0 or 1.".format(essay_generated)
+            log.exception(ex)
+            raise util_functions.InputError(ex)
 
-            ret = "text: " + self._text[len(self._text) - 1] + " score: " + str(essay_score)
-        else:
-            raise util_functions.InputError(essay_text, "arguments need to be in format "
-                                                        "(text,score). text needs to be string,"
-                                                        " score needs to be int.")
+        # Validates to make sure that the essay is at least five characters long.
+        if len(essay_text) < 5:
+            essay_text = "Invalid essay."
+
+        # If we reach this point, we are not going to raise an exception beyond it, so we can add any and all
+        # variables to our lists while maintaining internal consistency.  This is a new fix as of 6-12-14 GBW
+
+        # Assigns a new ID to the essay, adds fields passed in.
+        self._ids.append(max_id + 1)
+        self._scores.append(essay_score)
+        self._generated.append(essay_generated)
+
+        # Cleans text by removing non digit/work/punctuation characters
+        cleaned_essay = util_functions.sub_chars(essay_text).lower()
+        # Checks to see if the essay is longer than we allow. Truncates if longer
+        if len(cleaned_essay) > MAXIMUM_ESSAY_LENGTH:
+            cleaned_essay = cleaned_essay[0:MAXIMUM_ESSAY_LENGTH]
+        self._cleaned_essays.append(cleaned_essay)
+
+        # Spell correct text using aspell
+        cleaned_spelled_essay, spell_errors, markup_text = util_functions.spell_correct(cleaned_essay)
+        self._cleaned_spelled_essays.append(cleaned_spelled_essay)
+        self._spelling_errors.append(spell_errors)
+        self._markup_text.append(markup_text)
+
+        # Create tokens for the text and part of speech tags
+        tokens = nltk.word_tokenize(cleaned_spelled_essay)
+        pos_tags = nltk.pos_tag(cleaned_spelled_essay.split(" "))
+        self._tokens.append(tokens)
+        self._pos_tags.append(pos_tags)
+
+        # Applies Porter stemming algorithm, a process for removing the commoner morphological and inflexional endings
+        # from words in English.
+        porter = nltk.PorterStemmer()
+        porter_tokens = " ".join([porter.stem(token) for token in tokens])
+        self._cleaned_stem_essays.append(porter_tokens)
+
+        return "Essay Added. Text: " + cleaned_essay + " Score: " + str(essay_score)
 
     def update_prompt(self, prompt_text):
         """
-        Update the default prompt string, which is "".
-        prompt_text should be a string.
-        Returns the prompt as a confirmation.
+        Updates the default prompt (an empty string) to a user specified string
+
+        Args:
+            prompt_text (str): the value to set the prompt to
+
+        Returns:
+            (str): The prompt, if it was stored successfully.
         """
         if (isinstance(prompt_text, basestring)):
             self._prompt = util_functions.sub_chars(prompt_text)
-            ret = self._prompt
         else:
             raise util_functions.InputError(prompt_text, "Invalid prompt. Need to enter a string value.")
-        return ret
+        return self._prompt
 
-    def generate_additional_essays(self, e_text, e_score, dictionary=None, max_syns=3):
+    def generate_additional_essays(self, original_essay, original_score, to_generate=3):
         """
-        Substitute synonyms to generate extra essays from existing ones.
-        This is done to increase the amount of training data.
-        Should only be used with lowest scoring essays.
-        e_text is the text of the original essay.
-        e_score is the score of the original essay.
-        dictionary is a fixed dictionary (list) of words to replace.
-        max_syns defines the maximum number of additional essays to generate.  Do not set too high.
+        Generates and adds additional essays to the essay set from a base essay by substituting synonyms.
+
+        Args:
+            original_essay (str): The original essay to generate off of.
+            original_score (int): The integer score assigned to the input essay.
+
+        Kwargs:
+            FEATURE REMOVED (GBW): dictionary (dict): A static dictionary of words to replace. Defaults to none.
+                                    Feature was removed because it was not implemented fully to begin with.
+            to_generate (int): The number of additional essays to generate based on synonym substitution
         """
-        e_toks = nltk.word_tokenize(e_text)
-        all_syns = []
-        for word in e_toks:
+
+        original_tokens = nltk.word_tokenize(original_essay)
+        synonym_matrix = []
+
+        # Iterates through the words in the original essay
+        for word in original_tokens:
             synonyms = util_functions.get_wordnet_syns(word)
-            if (len(synonyms) > max_syns):
-                synonyms = random.sample(synonyms, max_syns)
-            all_syns.append(synonyms)
+            # Only substitute on a token if one could generate N=max_syns unique essays on that token.
+            if len(synonyms) > to_generate:
+                # Adds one word on to the list of synonyms, one for each of the new essays
+                synonyms = random.sample(synonyms, to_generate)
+            synonym_matrix.append(synonyms)
+
         new_essays = []
-        for i in range(0, max_syns):
-            syn_toks = e_toks
-            for z in range(0, len(e_toks)):
-                if len(all_syns[z]) > i and (dictionary == None or e_toks[z] in dictionary):
-                    syn_toks[z] = all_syns[z][i]
-            new_essays.append(" ".join(syn_toks))
-        for z in xrange(0, len(new_essays)):
-            self.add_essay(new_essays[z], e_score, 1)
+        # Generates each essay
+        for i in range(0, to_generate):
+            # Start out from the same base essay
+            new_tokens = original_tokens
+            for z in range(0, len(original_tokens)):
+                # Replace a given token ONLY if it is not the first token in the dictionary??!?!?!!?!
+                if len(synonym_matrix[z]) > i:
+                    new_tokens[z] = synonym_matrix[z][i]
+            new_essays.append(" ".join(new_tokens))
+
+        # Adds each new essay to the list of essays in this essay set
+        for i in xrange(0, len(new_essays)):
+            self.add_essay(new_essays[i], original_score, 1)

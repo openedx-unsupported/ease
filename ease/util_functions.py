@@ -198,19 +198,29 @@ def regenerate_good_tokens(string):
     return sel_pos_ngrams
 
 
-def get_vocab(text, score, max_feats=750, max_feats2=200):
+def get_vocab(essays, scores, max_features_pass_1=750, max_features_pass_2=200):
     """
     Uses a fisher test to find words that are significant in that they separate
     high scoring essays from low scoring essays.
-    text is a list of input essays.
-    score is a list of scores, with score[n] corresponding to text[n]
-    max_feats is the maximum number of features to consider in the first pass
-    max_feats2 is the maximum number of features to consider in the second (final) pass
-    Returns a list of words that constitute the significant vocabulary
+
+    Args:
+        essays (list of str): a list of input essays
+        scores (list of int): a list of associated input scores
+
+    Kwargs:
+        max_features_pass_1 (int): the maximum number of features to consider in the first pass of the essays
+        max_features_pass_2 (int): the maximum number of features to consider in the second pass of the essays
+            (DEFAULTS of 750 and 200 respectively)
+
+    Returns:
+        (list of str): A list of strings which constitute the signifigant vocabulary which diferentiates between
+                        strong and weak essays.
+
+    NOTE: GBW didn't mess around with this because it is very easy to mess up, and I didn't want to mess it up.
     """
-    dict = CountVectorizer(ngram_range=(1, 2), max_features=max_feats)
-    dict_mat = dict.fit_transform(text)
-    set_score = numpy.asarray(score, dtype=numpy.int)
+    dict = CountVectorizer(ngram_range=(1, 2), max_features=max_features_pass_1)
+    dict_matrix = dict.fit_transform(essays)
+    set_score = numpy.asarray(scores, dtype=numpy.int)
     med_score = numpy.median(set_score)
     new_score = set_score
     if (med_score == 0):
@@ -219,8 +229,8 @@ def get_vocab(text, score, max_feats=750, max_feats2=200):
     new_score[set_score >= med_score] = 1
 
     fish_vals = []
-    for col_num in range(0, dict_mat.shape[1]):
-        loop_vec = dict_mat.getcol(col_num).toarray()
+    for col_num in range(0, dict_matrix.shape[1]):
+        loop_vec = dict_matrix.getcol(col_num).toarray()
         good_loop_vec = loop_vec[new_score == 1]
         bad_loop_vec = loop_vec[new_score == 0]
         good_loop_present = len(good_loop_vec[good_loop_vec > 0])
@@ -231,9 +241,9 @@ def get_vocab(text, score, max_feats=750, max_feats2=200):
         fish_vals.append(fish_val)
 
     cutoff = 1
-    if (len(fish_vals) > max_feats2):
-        cutoff = sorted(fish_vals)[max_feats2]
-    good_cols = numpy.asarray([num for num in range(0, dict_mat.shape[1]) if fish_vals[num] <= cutoff])
+    if (len(fish_vals) > max_features_pass_2):
+        cutoff = sorted(fish_vals)[max_features_pass_2]
+    good_cols = numpy.asarray([num for num in range(0, dict_matrix.shape[1]) if fish_vals[num] <= cutoff])
 
     getVar = lambda searchList, ind: [searchList[i] for i in ind]
     vocab = getVar(dict.get_feature_names(), good_cols)

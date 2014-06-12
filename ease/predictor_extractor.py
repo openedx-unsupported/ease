@@ -57,7 +57,7 @@ class PredictorExtractor(object):
         max_feats2 = int(math.floor(200 / div_length))
         for i in xrange(0, len(p_set._essay_sets)):
             self._extractors.append(FeatureExtractor())
-            self._extractors[i].initialize_dictionaries(p_set._essay_sets[i], max_feats2=max_feats2)
+            self._extractors[i].initialize_dictionaries(p_set._essay_sets[i], max_features_pass_2=max_feats2)
             self._initialized = True
             success = True
         return success
@@ -74,7 +74,7 @@ class PredictorExtractor(object):
 
         textual_features = []
         for i in xrange(0, len(p_set._essay_sets)):
-            textual_features.append(self._extractors[i].gen_feats(p_set._essay_sets[i]))
+            textual_features.append(self._extractors[i].generate_features(p_set._essay_sets[i]))
 
         textual_matrix = numpy.concatenate(textual_features, axis=1)
         predictor_matrix = numpy.array(p_set._numeric_features)

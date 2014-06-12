@@ -32,6 +32,7 @@ class EssaySet(object):
 
     Essays in an essay set can be assumed to have these properties.
     """
+
     def __init__(self, essay_type="train"):
         """
         Initialize variables and check essay set type

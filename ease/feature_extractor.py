@@ -30,85 +30,123 @@ ESSAY_CORPUS_PATH = util_functions.ESSAY_CORPUS_PATH
 
 
 class FeatureExtractor(object):
-    def __init__(self):
+    """
+    An object which serves as a feature extractor, using NLTK and some statistics to derive an object which will extract
+    features from an object which will allow object classification.
+    """
+
+
+    def __init__(self, essay_set, max_features_pass_2=200):
+        """
+        Initializes requisite dictionaries/statistics before the feature extraction can occur.
+
+        Was originally separated between an __init__ and an instantiate_dictionaries method, but they were never
+        called separately, so I combined them, as the logical similarity is striking.
+
+        Args:
+            essay_set: an input set of essays that the feature extractor extracts from and is based upon
+
+        Kwargs:
+            max_features_pass_2: The maximum number of features we consider on the second pass of vocabulary grooming
+
+        """
+
+        if hasattr(essay_set, '_type'):
+            if essay_set._type == "train":
+                # Finds vocabulary which differentiates good/high scoring essays from bad/low scoring essays.
+                normal_vocab = util_functions.get_vocab(
+                    essay_set._cleaned_spelled_essays, essay_set._scores, max_features_pass_2=max_features_pass_2
+                )
+
+                # Finds vocab (same criteria as above), but with essays that have been porter stemmed
+                stemmed_vocab = util_functions.get_vocab(
+                    essay_set._clean_stem_text, essay_set._scores, max_features_pass_2=max_features_pass_2
+                )
+
+                # Constructs dictionaries trained based on the important vocabularies
+                self._normal_dict = CountVectorizer(ngram_range=(1, 2), vocabulary=normal_vocab)
+                self._stem_dict = CountVectorizer(ngram_range=(1, 2), vocabulary=stemmed_vocab)
+
+                # Sets the flag to show that this instance is now ready for training
+                self.dict_initialized = True
+
+                # Average the number of spelling errors in the set. This is needed later for spelling detection.
+                spelling_errors = essay_set._spelling_errors
+                self._mean_spelling_errors = sum(spelling_errors) / float(len(spelling_errors))
+                self._spell_errors_per_character = sum(spelling_errors) / float(
+                    sum([len(essay) for essay in essay_set._cleaned_essays]))
+
+                # Gets the number and positions of grammar errors
+                good_pos_tags, bad_pos_positions = self._get_grammar_errors(
+                    essay_set._pos_tags, essay_set._cleaned_essays, essay_set._tokens
+                )
+                # NOTE!!! Here, I changed the definition from utilizing good grammar ratios to using the counts of
+                # gramatical errors.  Though this was not what the original author used, it is clearly what his code
+                # implies, as if this is intended to be a true "grammar errors per character", we should have that
+                # exact number.  The replaced call is included for posterity.
+                # self._grammar_errors_per_character =
+                # (sum(good_pos_tags) / float(sum([len(t) for t in essay_set._text])))
+                total_grammar_errors = sum(len(l) for l in bad_pos_positions)
+                total_characters = float(sum([len(t) for t in essay_set._text]))
+                self._grammar_errors_per_character = total_grammar_errors / total_characters
+
+                # Generates a bag of vocabulary features
+                vocabulary_features = self.gen_vocabulary_features(essay_set)
+
+                # Sum of a row of bag of words features (topical words in an essay)
+                feature_row_sum = numpy.sum(vocabulary_features[:, :])
+
+                # Average index of how "topical" essays are
+                self._mean_f_prop = feature_row_sum / float(sum([len(t) for t in essay_set._text]))
+            else:
+                raise util_functions.InputError(essay_set, "needs to be an essay set of the train type.")
+        else:
+            raise util_functions.InputError(essay_set, "wrong input. need an essay set object.")
+
         self._good_pos_ngrams = self.get_good_pos_ngrams()
         self.dict_initialized = False
         self._spell_errors_per_character = 0
         self._grammar_errors_per_character = 0
 
-    def initialize_dictionaries(self, e_set, max_feats2=200):
-        """
-        Initializes dictionaries from an essay set object
-        Dictionaries must be initialized prior to using this to extract features
-        e_set is an input essay set
-        returns a confirmation of initialization
-        """
-        if (hasattr(e_set, '_type')):
-            if (e_set._type == "train"):
-                #normal text (unstemmed) useful words/bigrams
-                nvocab = util_functions.get_vocab(e_set._text, e_set._score, max_feats2=max_feats2)
-                #stemmed and spell corrected vocab useful words/ngrams
-                svocab = util_functions.get_vocab(e_set._clean_stem_text, e_set._score, max_feats2=max_feats2)
-                #dictionary trained on proper vocab
-                self._normal_dict = CountVectorizer(ngram_range=(1, 2), vocabulary=nvocab)
-                #dictionary trained on proper vocab
-                self._stem_dict = CountVectorizer(ngram_range=(1, 2), vocabulary=svocab)
-                self.dict_initialized = True
-                #Average spelling errors in set. needed later for spelling detection
-                self._mean_spelling_errors = sum(e_set._spelling_errors) / float(len(e_set._spelling_errors))
-                self._spell_errors_per_character = sum(e_set._spelling_errors) / float(
-                    sum([len(t) for t in e_set._text]))
-                #Gets the number and positions of grammar errors
-                good_pos_tags, bad_pos_positions = self._get_grammar_errors(e_set._pos, e_set._text, e_set._tokens)
-                self._grammar_errors_per_character = (sum(good_pos_tags) / float(sum([len(t) for t in e_set._text])))
-                #Generate bag of words features
-                bag_feats = self.gen_bag_feats(e_set)
-                #Sum of a row of bag of words features (topical words in an essay)
-                f_row_sum = numpy.sum(bag_feats[:, :])
-                #Average index of how "topical" essays are
-                self._mean_f_prop = f_row_sum / float(sum([len(t) for t in e_set._text]))
-                ret = "ok"
-            else:
-                raise util_functions.InputError(e_set, "needs to be an essay set of the train type.")
-        else:
-            raise util_functions.InputError(e_set, "wrong input. need an essay set object")
-        return ret
-
     def get_good_pos_ngrams(self):
         """
-        Gets a list of gramatically correct part of speech sequences from an input file called essaycorpus.txt
+        Gets a list of grammatically correct part of speech sequences from an input file called essaycorpus.txt
         Returns the list and caches the file
+
+        Returns:
+            A list of all grammatically correct parts of speech.
         """
         if (os.path.isfile(NGRAM_PATH)):
             good_pos_ngrams = pickle.load(open(NGRAM_PATH, 'rb'))
-        elif os.path.isfile(ESSAY_CORPUS_PATH):
-            essay_corpus = open(ESSAY_CORPUS_PATH).read()
-            essay_corpus = util_functions.sub_chars(essay_corpus)
-            good_pos_ngrams = util_functions.regenerate_good_tokens(essay_corpus)
-            pickle.dump(good_pos_ngrams, open(NGRAM_PATH, 'wb'))
         else:
-            #Hard coded list in case the needed files cannot be found
+            #Hard coded an incomplete list in case the needed files cannot be found
             good_pos_ngrams = ['NN PRP', 'NN PRP .', 'NN PRP . DT', 'PRP .', 'PRP . DT', 'PRP . DT NNP', '. DT',
                                '. DT NNP', '. DT NNP NNP', 'DT NNP', 'DT NNP NNP', 'DT NNP NNP NNP', 'NNP NNP',
                                'NNP NNP NNP', 'NNP NNP NNP NNP', 'NNP NNP NNP .', 'NNP NNP .', 'NNP NNP . TO',
                                'NNP .', 'NNP . TO', 'NNP . TO NNP', '. TO', '. TO NNP', '. TO NNP NNP',
                                'TO NNP', 'TO NNP NNP']
-
         return good_pos_ngrams
 
-    def _get_grammar_errors(self, pos, text, tokens):
+    def _get_grammar_errors(self, pos, essays, tokens):
         """
         Internal function to get the number of grammar errors in given text
-        pos - part of speech tagged text (list)
-        text - normal text (list)
-        tokens - list of lists of tokenized text
+
+        Args:
+            pos: list of pos values for an essay set
+            essays: list of essay texts
+            tokens: list of the lists of the tokens in each essay
+
+        Returns:
+            Tuple of the form (good_grammar_ratios, bad_pos_positions)
+                The former is a list of each essay's "good grammar ratio", which is not very well defined
+                The latter is a list of lists of each essay's grammatical mistakes as a location in its tokens
         """
         word_counts = [max(len(t), 1) for t in tokens]
-        good_pos_tags = []
+        good_grammar_ratios = []
         min_pos_seq = 2
         max_pos_seq = 4
         bad_pos_positions = []
-        for i in xrange(0, len(text)):
+        for i in xrange(0, len(essays)):
             pos_seq = [tag[1] for tag in pos[i]]
             pos_ngrams = util_functions.ngrams(pos_seq, min_pos_seq, max_pos_seq)
             long_pos_ngrams = [z for z in pos_ngrams if z.count(' ') == (max_pos_seq - 1)]
@@ -134,8 +172,8 @@ class FeatureExtractor(object):
             if divisor == 0:
                 divisor = 1
             good_grammar_ratio = (len(pos_ngrams) - len(overlap_ngrams)) / divisor
-            good_pos_tags.append(good_grammar_ratio)
-        return good_pos_tags, bad_pos_positions
+            good_grammar_ratios.append(good_grammar_ratio)
+        return good_grammar_ratios, bad_pos_positions
 
     def gen_length_feats(self, e_set):
         """
@@ -161,34 +199,46 @@ class FeatureExtractor(object):
 
         return length_arr.copy()
 
-    def gen_bag_feats(self, e_set):
+    def gen_vocabulary_features(self, essay_set):
         """
-        Generates bag of words features from an input essay set and trained FeatureExtractor
-        Generally called by gen_feats
-        Returns an array of features
-        e_set - EssaySet object
-        """
-        if (hasattr(self, '_stem_dict')):
-            sfeats = self._stem_dict.transform(e_set._clean_stem_text)
-            nfeats = self._normal_dict.transform(e_set._text)
-            bag_feats = numpy.concatenate((sfeats.toarray(), nfeats.toarray()), axis=1)
-        else:
-            raise util_functions.InputError(self, "Dictionaries must be initialized prior to generating bag features.")
-        return bag_feats.copy()
+        Generates a bag of words features from an essay set and a trained FeatureExtractor (self)
 
-    def gen_feats(self, e_set):
+        Args:
+            self: The trained Feature Extractor (trained by the init_method)
+            essay_set: the EssaySet Object to generate the bag of word features from.
+
+        Returns:
+            An array of features to be used for extraction
+        """
+        # Calculates Stem and Normal features
+        stem_features = self._stem_dict.transform(essay_set._cleaned_stem_essays)
+        normal_features = self._normal_dict.transform(essay_set._cleaned_essays)
+
+        # Mushes them together and returns
+        bag_features = numpy.concatenate((stem_features.toarray(), normal_features.toarray()), axis=1)
+        return bag_features.copy()
+
+    def generate_features(self, essay_set):
         """
         Generates bag of words, length, and prompt features from an essay set object
-        returns an array of features
-        e_set - EssaySet object
-        """
-        bag_feats = self.gen_bag_feats(e_set)
-        length_feats = self.gen_length_feats(e_set)
-        prompt_feats = self.gen_prompt_feats(e_set)
-        overall_feats = numpy.concatenate((length_feats, prompt_feats, bag_feats), axis=1)
-        overall_feats = overall_feats.copy()
 
-        return overall_feats
+        Args:
+            essay_set (EssaySet): the essay set to extract features for
+
+        Returns:
+            Array of features with the following included:
+                - Length Features
+                - Vocabulary Features (both Normal and Stemmed Vocabulary)
+                - Prompt Features
+        """
+        vocabulary_features = self.gen_vocabulary_features(essay_set)
+        length_features = self.gen_length_feats(essay_set)
+        prompt_features = self.gen_prompt_feats(essay_set)
+
+        # Lumps them all together, copies to solidify, and returns
+        overall_features = numpy.concatenate((length_features, prompt_features, vocabulary_features), axis=1)
+        overall_features = overall_features.copy()
+        return overall_features
 
     def gen_prompt_feats(self, e_set):
         """

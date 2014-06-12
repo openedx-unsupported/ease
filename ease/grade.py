@@ -71,7 +71,7 @@ def grade(grader_data, submission):
     # Tries to extract features from submission and assign score via the model
     grader_features = None
     try:
-        grader_features = extractor.gen_feats(grader_set)
+        grader_features = extractor.generate_features(grader_set)
         feedback = extractor.gen_feedback(grader_set, grader_features)[0]
         results['score'] = int(model.predict(grader_features)[0])
     except:
@@ -154,7 +154,7 @@ def grade_generic(grader_data, numeric_features, textual_features):
 
     # Try to extract features from submission and assign score via the model
     try:
-        grader_feats = extractor.gen_feats(grader_set)
+        grader_feats = extractor.generate_features(grader_set)
         results['score'] = model.predict(grader_feats)[0]
     except:
         error_msg = "Could not extract features and score essay."

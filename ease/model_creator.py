@@ -174,7 +174,7 @@ def extract_features_and_generate_model(essays, algorithm=util_functions.Algorit
     f = feature_extractor.FeatureExtractor()
     f.initialize_dictionaries(essays)
 
-    train_feats = f.gen_feats(essays)
+    train_feats = f.generate_features(essays)
 
     set_score = numpy.asarray(essays._score, dtype=numpy.int)
     algorithm = create.select_algorithm(set_score)

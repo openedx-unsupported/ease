@@ -132,7 +132,7 @@ def grade_generic(grader_data, numeric_features, textual_features):
 
     #Try to find and load the model file
 
-    grader_set = predictor_set.PredictorSet(essaytype="test")
+    grader_set = predictor_set.PredictorSet(essay_type="test")
 
     model, extractor = get_classifier_and_ext(grader_data)
 

@@ -141,7 +141,7 @@ def create_generic(numeric_values, textual_values, target, algorithm=util_functi
 
     # Initialize a predictor set object that encapsulates all of the text and numeric predictors
     try:
-        predictor = predictor_set.PredictorSet(essaytype="train")
+        predictor = predictor_set.PredictorSet(essay_type="train")
         for i in xrange(0, len(numeric_values)):
             predictor.add_row(numeric_values[i], textual_values[i], target[i])
     except:

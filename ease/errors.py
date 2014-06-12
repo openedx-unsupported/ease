@@ -10,3 +10,6 @@ class ExampleCreationInternalError(Exception):
 
 class EaseError(Exception):
     pass
+
+class GradingRequestError(Exception):
+    pass

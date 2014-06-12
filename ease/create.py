@@ -44,7 +44,7 @@ def dump_input_data(text, score):
 
 def create(examples, scores, prompt_string, dump_data=False):
     """
-    Creates a machine learning model from basic inputs (essays, associated scores and a prompt)
+    Creates a machine learning model from basic inputs (essays, associated scores and a prompt) and trains the model.
 
     The previous version of this function took an additional argument which specified the path to the model.
 

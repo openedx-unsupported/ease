@@ -91,7 +91,7 @@ class FeatureExtractor(object):
                 self._grammar_errors_per_character = total_grammar_errors / total_characters
 
                 # Generates a bag of vocabulary features
-                vocabulary_features = self.gen_vocabulary_features(essay_set)
+                vocabulary_features = self.generate_vocabulary_features(essay_set)
 
                 # Sum of a row of bag of words features (topical words in an essay)
                 feature_row_sum = numpy.sum(vocabulary_features[:, :])
@@ -175,31 +175,37 @@ class FeatureExtractor(object):
             good_grammar_ratios.append(good_grammar_ratio)
         return good_grammar_ratios, bad_pos_positions
 
-    def gen_length_feats(self, e_set):
+    def generate_length_features(self, essay_set):
         """
         Generates length based features from an essay set
-        Generally an internal function called by gen_feats
-        Returns an array of length features
-        e_set - EssaySet object
+
+        An exclusively internal function, called by generate_features
+
+        Args:
+            essay_set (EssaySet): the essay set to extract length features from
+
+        Returns:
+            An array of features that have been extracted based on length
         """
-        text = e_set._text
-        lengths = [len(e) for e in text]
-        word_counts = [max(len(t), 1) for t in e_set._tokens]
-        comma_count = [e.count(",") for e in text]
-        ap_count = [e.count("'") for e in text]
-        punc_count = [e.count(".") + e.count("?") + e.count("!") for e in text]
-        chars_per_word = [lengths[m] / float(word_counts[m]) for m in xrange(0, len(text))]
+        essays = essay_set._cleaned_essays
+        lengths = [len(e) for e in essays]
+        word_counts = [max(len(t), 1) for t in essay_set._tokens]
+        comma_count = [e.count(",") for e in essays]
+        apostrophe_count = [e.count("'") for e in essays]
+        punctuation_count = [e.count(".") + e.count("?") + e.count("!") for e in essays]
+        chars_per_word = [lengths[m] / float(word_counts[m]) for m in xrange(0, len(essays))]
 
-        good_pos_tags, bad_pos_positions = self._get_grammar_errors(e_set._pos, e_set._text, e_set._tokens)
-        good_pos_tag_prop = [good_pos_tags[m] / float(word_counts[m]) for m in xrange(0, len(text))]
+        # SEE COMMENT AROUND LINE 85
+        good_grammar_ratios, bad_pos_positions = self._get_grammar_errors(essay_set._pos, essay_set._text, essay_set._tokens)
+        good_pos_tag_proportion = [len(bad_pos_positions[m]) / float(word_counts[m]) for m in xrange(0, len(essays))]
 
-        length_arr = numpy.array((
-            lengths, word_counts, comma_count, ap_count, punc_count, chars_per_word, good_pos_tags,
-            good_pos_tag_prop)).transpose()
+        length_array = numpy.array((
+            lengths, word_counts, comma_count, apostrophe_count, punctuation_count, chars_per_word, good_grammar_ratios,
+            good_pos_tag_proportion)).transpose()
 
-        return length_arr.copy()
+        return length_array.copy()
 
-    def gen_vocabulary_features(self, essay_set):
+    def generate_vocabulary_features(self, essay_set):
         """
         Generates a bag of words features from an essay set and a trained FeatureExtractor (self)
 
@@ -231,23 +237,28 @@ class FeatureExtractor(object):
                 - Vocabulary Features (both Normal and Stemmed Vocabulary)
                 - Prompt Features
         """
-        vocabulary_features = self.gen_vocabulary_features(essay_set)
-        length_features = self.gen_length_feats(essay_set)
-        prompt_features = self.gen_prompt_feats(essay_set)
+        vocabulary_features = self.generate_vocabulary_features(essay_set)
+        length_features = self.generate_length_features(essay_set)
+        prompt_features = self.generate_prompt_features(essay_set)
 
         # Lumps them all together, copies to solidify, and returns
         overall_features = numpy.concatenate((length_features, prompt_features, vocabulary_features), axis=1)
         overall_features = overall_features.copy()
         return overall_features
 
-    def gen_prompt_feats(self, e_set):
+    def generate_prompt_features(self, essay_set):
         """
         Generates prompt based features from an essay set object and internal prompt variable.
-        Generally called internally by gen_feats
-        Returns an array of prompt features
-        e_set - EssaySet object
+
+        Called internally by generate_features
+
+        Args:
+            essay_set (EssaySet): an essay set object that is manipulated to generate prompt features
+
+        Returns:
+            an array of prompt features
         """
-        prompt_toks = nltk.word_tokenize(e_set._prompt)
+        prompt_toks = nltk.word_tokenize(essay_set._prompt)
         expand_syns = []
         for word in prompt_toks:
             synonyms = util_functions.get_wordnet_syns(word)
@@ -255,7 +266,7 @@ class FeatureExtractor(object):
         expand_syns = list(chain.from_iterable(expand_syns))
         prompt_overlap = []
         prompt_overlap_prop = []
-        for j in e_set._tokens:
+        for j in essay_set._tokens:
             tok_length = len(j)
             if (tok_length == 0):
                 tok_length = 1
@@ -263,7 +274,7 @@ class FeatureExtractor(object):
             prompt_overlap_prop.append(prompt_overlap[len(prompt_overlap) - 1] / float(tok_length))
         expand_overlap = []
         expand_overlap_prop = []
-        for j in e_set._tokens:
+        for j in essay_set._tokens:
             tok_length = len(j)
             if (tok_length == 0):
                 tok_length = 1
@@ -274,29 +285,40 @@ class FeatureExtractor(object):
 
         return prompt_arr.copy()
 
-    def gen_feedback(self, e_set, features=None):
+    def generate_feedback(self, essay_set, features=None):
         """
-        Generate feedback for a given set of essays
-        e_set - EssaySet object
-        features - optionally, pass in a matrix of features extracted from e_set using FeatureExtractor
-        in order to get off topic feedback.
-        Returns a list of lists (one list per essay in e_set)
-        e_set - EssaySet object
+        Generates feedback for a given set of essays
+
+        Args:
+            essay_set (EssaySet): The essay set that will have feedback assigned to it.
+
+        Kwargs:
+            features (list of feature): optionally, a matrix of features extracted from e_set using FeatureExtractor
+
+
         """
+        #TODO This is still bad.
 
         #Set ratio to modify thresholds for grammar/spelling errors
         modifier_ratio = 1.05
-
+        #GBW TODO: This might be wrong.
         #Calc number of grammar and spelling errors per character
-        set_grammar, bad_pos_positions = self._get_grammar_errors(e_set._pos, e_set._text, e_set._tokens)
-        set_grammar_per_character = [set_grammar[m] / float(len(e_set._text[m]) + .1) for m in
-                                     xrange(0, len(e_set._text))]
-        set_spell_errors_per_character = [e_set._spelling_errors[m] / float(len(e_set._text[m]) + .1) for m in
-                                          xrange(0, len(e_set._text))]
+        set_grammar, bad_pos_positions = self._get_grammar_errors(essay_set._pos, essay_set._text, essay_set._tokens)
+        set_grammar_per_character = [
+            set_grammar[m] / float(
+                len(essay_set._cleaned_essays[m]) + .1) for m in xrange(0, len(essay_set._cleaned_essays)
+            )
+        ]
 
-        #Iterate through essays and create a feedback dict for each
+        set_spell_errors_per_character = [
+            essay_set._spelling_errors[m] / float(
+                len(essay_set._cleaned_essays[m]) + .1) for m in xrange(0, len(essay_set._cleaned_essays)
+            )
+        ]
+
+        #Iterate through essays and create a feedback dictionary for each
         all_feedback = []
-        for m in xrange(0, len(e_set._text)):
+        for m in xrange(0, len(essay_set._text)):
             #Be very careful about changing these messages!
             individual_feedback = {'grammar': "Grammar: Ok.",
                                    'spelling': "Spelling: Ok.",
@@ -305,7 +327,7 @@ class FeatureExtractor(object):
                                    'spelling_per_char': set_spell_errors_per_character[m],
                                    'too_similar_to_prompt': False,
             }
-            markup_tokens = e_set._markup_text[m].split(" ")
+            markup_tokens = essay_set._markup_text[m].split(" ")
 
             #This loop ensures that sequences of bad grammar get put together into one sequence instead of staying
             #disjointed
@@ -315,8 +337,8 @@ class FeatureExtractor(object):
                 if z in bad_pos_starts:
                     markup_tokens[z] = '<bg>' + markup_tokens[z]
                 elif z in bad_pos_ends:
-                    markup_tokens[z] = markup_tokens[z] + "</bg>"
-            if (len(bad_pos_ends) > 0 and len(bad_pos_starts) > 0 and len(markup_tokens) > 1):
+                    markup_tokens[z] += "</bg>"
+            if len(bad_pos_ends) > 0 and len(bad_pos_starts) > 0 and len(markup_tokens) > 1:
                 if max(bad_pos_ends) > (len(markup_tokens) - 1) and max(bad_pos_starts) < (len(markup_tokens) - 1):
                     markup_tokens[len(markup_tokens) - 1] += "</bg>"
 
@@ -330,8 +352,8 @@ class FeatureExtractor(object):
             #mean.  Requires features to be passed in
             if features is not None:
                 f_row_sum = numpy.sum(features[m, 12:])
-                f_row_prop = f_row_sum / len(e_set._text[m])
-                if f_row_prop < (self._mean_f_prop / 1.5) or len(e_set._text[m]) < 20:
+                f_row_prop = f_row_sum / len(essay_set._text[m])
+                if f_row_prop < (self._mean_f_prop / 1.5) or len(essay_set._text[m]) < 20:
                     individual_feedback['topicality'] = "Topicality: Essay may be off topic."
 
                 if (features[m, 9] > .6):

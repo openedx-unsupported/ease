@@ -72,7 +72,7 @@ def grade(grader_data, submission):
     grader_features = None
     try:
         grader_features = extractor.generate_features(grader_set)
-        feedback = extractor.gen_feedback(grader_set, grader_features)[0]
+        feedback = extractor.generate_feedback(grader_set, grader_features)[0]
         results['score'] = int(model.predict(grader_features)[0])
     except:
         error_message = "Could not extract features and score essay."

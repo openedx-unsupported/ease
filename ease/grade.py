@@ -69,7 +69,7 @@ def grade(grader_data, submission):
         results['errors'].append(error_message)
 
     # We have gotten through without an error, so we have been successful
-    if len(results['errors']) < 0:
+    if len(results['errors']) == 0:
         results['success'] = True
     # If we get here, that means there was 1+ error above. Set success to false and return
     else:

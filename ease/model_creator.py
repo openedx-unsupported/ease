@@ -22,74 +22,6 @@ import create
 log = logging.getLogger()
 
 
-def read_in_test_data(filename):
-    """
-    Reads in tab delimited test data file found at filename for training purposes.
-
-    filename must be a tab delimited file with columns id, dummy number column, score, dummy score, text
-
-    Args:
-        filename (str): The path to the data
-
-    Return:
-        Tuple of the form (score, text), where:
-            The former is the list of scores assigned to the essays in the file (int)
-            The latter is the list of essays in the file
-
-    """
-    tid, e_set, score, score2, text = [], [], [], [], []
-    combined_raw = open(filename).read()
-    raw_lines = combined_raw.splitlines()
-    for row in xrange(1, len(raw_lines)):
-        tid1, set1, score1, score12, text1 = raw_lines[row].strip().split("\t")
-        tid.append(int(tid1))
-        text.append(text1)
-        e_set.append(int(set1))
-        score.append(int(score1))
-        score2.append(int(score12))
-
-    return score, text
-
-
-def read_in_test_prompt(filename):
-    """
-    Reads in the prompt from a file.
-
-    Args:
-        filename (str): the name of the file
-
-    Returns:
-        (str): the prompt as a string.
-    """
-    prompt_string = open(filename).read()
-    return prompt_string
-
-
-def read_in_test_data_twocolumn(filename, sep=","):
-    """
-    Reads in a two column version of the test data.
-
-    In filename, the first column should be integer score data.
-    The second column should be string text data.
-    Sep specifies the type of separator between fields.
-
-    Return:
-        Tuple of the form (score, text), where:
-            The former is the list of scores assigned to the essays in the file (int)
-            The latter is the list of essays in the file
-
-    """
-    score, text = [], []
-    combined_raw = open(filename).read()
-    raw_lines = combined_raw.splitlines()
-    for row in xrange(1, len(raw_lines)):
-        score1, text1 = raw_lines[row].strip().split("\t")
-        text.append(text1)
-        score.append(int(score1))
-
-    return score, text
-
-
 def create_essay_set(text, score, prompt_string, generate_additional=True):
     """
     Creates an essay set from given data.
@@ -151,34 +83,6 @@ def get_algorithms(algorithm):
                                                           max_depth=4, random_state=1, min_samples_leaf=3)
     return clf, clf2
 
-def extract_features_and_generate_model_from_predictors(predictor_set, algorithm=util_functions.AlgorithmTypes.regression):
-    """
-    Extracts features and generates predictors based on a given predictor set
-    predictor_set - a PredictorSet object that has been initialized with data
-    type - one of util_functions.AlgorithmType
-    """
-    if (algorithm not in [util_functions.AlgorithmTypes.regression, util_functions.AlgorithmTypes.classification]):
-        algorithm = util_functions.AlgorithmTypes.regression
-
-    f = predictor_extractor.PredictorExtractor(predictor_set)
-
-    train_feats = f.generate_features(predictor_set)
-
-    clf, clf2 = get_algorithms(algorithm)
-    cv_error_results = get_cv_error(clf2, train_feats, predictor_set._target)
-
-    try:
-        set_score = numpy.asarray(predictor_set._target, dtype=numpy.int)
-        clf.fit(train_feats, set_score)
-    except ValueError:
-        log.exception("Not enough classes (0,1,etc) in sample.")
-        set_score = predictor_set._target
-        set_score[0] = 1
-        set_score[1] = 0
-        clf.fit(train_feats, set_score)
-
-    return f, clf, cv_error_results
-
 
 def extract_features_and_generate_model(essay_set):
     """
@@ -213,32 +117,3 @@ def extract_features_and_generate_model(essay_set):
         predict_classifier.fit(features, set_score)
 
     return feat_extractor, predict_classifier, cv_error_results
-
-
-def dump_model_to_file(prompt_string, feature_ext, classifier, text, score, model_path):
-    """
-    Writes out a model to a file.
-
-    Args:
-        prompt_string (str): The prompt for the set of essays
-        feature_ext (FeatureExtractor): a trained FeatureExtractor Object
-        classifier : a trained Classifier Object
-    prompt string is a string containing the prompt
-    feature_ext is a trained FeatureExtractor object
-    classifier is a trained classifier
-    model_path is the path of write out the model file to
-    """
-    model_file = {'prompt': prompt_string, 'extractor': feature_ext, 'model': classifier, 'text': text, 'score': score}
-    pickle.dump(model_file, file=open(model_path, "w"))
-
-
-def create_essay_set_and_dump_model(text, score, prompt, model_path, additional_array=None):
-    """
-    Function that creates essay set, extracts features, and writes out model
-    See above functions for argument descriptions
-    """
-    essay_set = create_essay_set(text, score, prompt)
-    feature_ext, clf = extract_features_and_generate_model(essay_set, additional_array)
-    dump_model_to_file(prompt, feature_ext, clf, model_path)
-
-

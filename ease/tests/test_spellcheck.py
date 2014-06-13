@@ -1,4 +1,5 @@
 from unittest import TestCase
+
 from nose.tools import assert_equal
 from mock import patch
 from ease.util_functions import spell_correct
@@ -35,7 +36,6 @@ class SpellCheckUnitTest(TestCase):
 
     @patch("util_functions.os.popen")
     def test_aspell_not_found(self, popen_mock):
-
         # Expected behavior when aspell is not installed is to return the original
         # string with no corrections.
         popen_mock.side_effect = OSError

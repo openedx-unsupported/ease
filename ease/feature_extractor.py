@@ -2,24 +2,26 @@
 Extracts features from training set and test set essays
 """
 
-import numpy
-import nltk
-import sys
-from sklearn.feature_extraction.text import CountVectorizer
 import pickle
 import os
 from itertools import chain
 import operator
 import logging
+
+import numpy
+
+import nltk
+import sys
+from sklearn.feature_extraction.text import CountVectorizer
 from errors import *
+
 
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
-from essay_set import EssaySet
 import util_functions
 
 if not base_path.endswith("/"):
-    base_path = base_path + "/"
+    base_path += "/"
 
 log = logging.getLogger(__name__)
 
@@ -79,9 +81,8 @@ class FeatureExtractor(object):
                     sum([len(essay) for essay in essay_set._cleaned_essays]))
 
                 # Gets the number and positions of grammar errors
-                good_pos_tags, bad_pos_positions = self._get_grammar_errors(
-                    essay_set._pos_tags, essay_set._cleaned_essays, essay_set._tokens
-                )
+                good_pos_tags, bad_pos_positions = self._get_grammar_errors(essay_set._pos_tags,
+                                                                            essay_set._cleaned_essays)
                 # NOTE!!! Here, I changed the definition from utilizing good grammar ratios to using the counts of
                 # grammatical errors.  Though this was not what the original author used, it is clearly what his code
                 # implies, as if this is intended to be a true "grammar errors per character", we should have that
@@ -154,7 +155,7 @@ class FeatureExtractor(object):
 
         # SEE COMMENT AROUND LINE 85
         good_grammar_ratios, bad_pos_positions = self._get_grammar_errors(essay_set._pos_tags,
-                                                                          essay_set._cleaned_essays, essay_set._tokens)
+                                                                          essay_set._cleaned_essays)
         good_pos_tag_proportion = [len(bad_pos_positions[m]) / float(word_counts[m]) for m in xrange(0, len(essays))]
 
         length_array = numpy.array((
@@ -204,7 +205,7 @@ class FeatureExtractor(object):
         prompt_overlap_prop = []
         for j in essay_set._tokens:
             tok_length = len(j)
-            if (tok_length == 0):
+            if tok_length == 0:
                 tok_length = 1
             prompt_overlap.append(len([i for i in j if i in prompt_toks]))
             prompt_overlap_prop.append(prompt_overlap[len(prompt_overlap) - 1] / float(tok_length))
@@ -212,7 +213,7 @@ class FeatureExtractor(object):
         expand_overlap_prop = []
         for j in essay_set._tokens:
             tok_length = len(j)
-            if (tok_length == 0):
+            if tok_length == 0:
                 tok_length = 1
             expand_overlap.append(len([i for i in j if i in expand_syns]))
             expand_overlap_prop.append(expand_overlap[len(expand_overlap) - 1] / float(tok_length))
@@ -221,7 +222,7 @@ class FeatureExtractor(object):
 
         return prompt_arr.copy()
 
-    def _get_grammar_errors(self, pos, essays, tokens):
+    def _get_grammar_errors(self, pos, essays):
         """
         Internal function to get the number of grammar errors in given text
 
@@ -251,7 +252,7 @@ class FeatureExtractor(object):
                 start, end = bad_pos_tuples[m]
                 for j in xrange(m + 1, len(bad_pos_tuples)):
                     lstart, lend = bad_pos_tuples[j]
-                    if lstart >= start and lstart <= end:
+                    if start <= lstart <= end:
                         bad_pos_tuples[m][1] = bad_pos_tuples[j][1]
                         to_delete.append(j)
 
@@ -268,7 +269,8 @@ class FeatureExtractor(object):
             good_grammar_ratios.append(good_grammar_ratio)
         return good_grammar_ratios, bad_pos_positions
 
-    def _get_good_pos_ngrams(self):
+    @staticmethod
+    def _get_good_pos_ngrams():
         """
         Gets a list of grammatically correct part of speech sequences from an input file called essaycorpus.txt
         Returns the list and caches the file

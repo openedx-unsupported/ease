@@ -3,9 +3,12 @@ Functions that create a machine learning model from training data
 """
 
 import os
-import sys
 import logging
+
 import numpy
+
+import sys
+
 
 # Constructs a log
 log = logging.getLogger(__name__)
@@ -15,7 +18,7 @@ sys.path.append(base_path)
 one_up_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..//'))
 sys.path.append(one_up_path)
 
-#Import modules that are dependent on the base path
+# Import modules that are dependent on the base path
 import util_functions
 from errors import *
 from datetime import datetime
@@ -179,11 +182,11 @@ def _extract_features_and_generate_model(essay_set):
 
     # We cannot be sure what kind of errors .fit could throw at us. Memory, Type, Interrupt, etc.
     except Exception as ex:
-        str = (
+        msg = (
             "predict_classifier.fit raised an exception in _extract_features_and_generate_model: {}"
         ).format(ex)
-        log.exception(str)
-        raise ClassifierTrainingInternalError(str)
+        log.exception(msg)
+        raise ClassifierTrainingInternalError(msg)
 
     return feat_extractor, predict_classifier, cv_error_results
 

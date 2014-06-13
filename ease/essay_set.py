@@ -3,20 +3,21 @@ Defines an essay set object, which encapsulates essays from training and test se
 Performs spell and grammar checking, tokenization, and stemming.
 """
 
-import nltk
-import sys
 import random
 import os
 import logging
-from ease.errors import InputError
+
+import nltk
+import sys
 from errors import *
+
 
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
 import util_functions
 
 if not base_path.endswith("/"):
-    base_path = base_path + "/"
+    base_path += "/"
 
 log = logging.getLogger(__name__)
 
@@ -97,9 +98,9 @@ class EssaySet(object):
             try:
                 essay_text = (essay_text.decode('utf-8', 'replace')).encode('ascii', 'ignore')
             except UnicodeError as ex:
-                str = "Could not parse essay text into ascii: {}".format(ex)
-                log.exception(str)
-                raise EssaySetRequestError(ex)
+                msg = "Could not parse essay text into ascii: {}".format(ex)
+                log.exception(msg)
+                raise EssaySetRequestError(msg)
 
         # Validates that score is an integer and essay_text is a string.
         try:
@@ -107,9 +108,9 @@ class EssaySet(object):
             essay_text = str(essay_text)
             essay_generated = int(essay_generated)
         except TypeError:
-            str = "Invalid type for essay score : {0} or essay text : {1}".format(type(essay_score), type(essay_text))
-            log.exception(str)
-            raise EssaySetRequestError(str)
+            ex = "Invalid type for essay score : {0} or essay text : {1}".format(type(essay_score), type(essay_text))
+            log.exception(ex)
+            raise EssaySetRequestError(ex)
 
         # Validates that essay generated is 0 or 1
         if essay_generated != 0 and essay_generated != 1:

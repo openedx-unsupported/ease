@@ -8,11 +8,12 @@ import logging
 import sys
 
 
+
 # Append sys to base path to import the following modules
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
 
-#Depend on base path to be imported
+# Depend on base path to be imported
 from essay_set import EssaySet
 from errors import *
 
@@ -45,7 +46,6 @@ def grade(grader_data, submission):
 
     # Instantiates the Essay set which will carry our essay while it is being classified and graded.
     grader_set = EssaySet(essay_type="test")
-    feedback = {}
 
     # Retrieves the model and extractor we will be using
     model, extractor = _get_classifier_and_extractor(grader_data)

@@ -2,6 +2,7 @@
 Errors for the EASE repository
 """
 
+
 class EaseError(Exception):
     pass
 
@@ -45,6 +46,7 @@ class InputError(EaseError):
     """
     The user supplied an argument which was incorrect.
     """
+
     def __init__(self, expr, msg):
         self.expr = expr
         self.msg = msg

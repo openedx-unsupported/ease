@@ -23,9 +23,9 @@ log = logging.getLogger(__name__)
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
 if not base_path.endswith("/"):
-    base_path = base_path + "/"
+    base_path += "/"
 
-#Paths to needed data files
+# Paths to needed data files
 ESSAY_CORPUS_PATH = base_path + "data/essaycorpus.txt"
 ESSAY_COR_TOKENS_PATH = base_path + "data/essay_cor_tokens.p"
 
@@ -100,7 +100,7 @@ def spell_correct(string):
     incorrect_words = list()
     correct_spelling = list()
     for i in range(1, len(incorrect)):
-        if (len(incorrect[i]) > 10):
+        if len(incorrect[i]) > 10:
             #Reformat aspell output to make sense
             match = re.search(":", incorrect[i])
             if hasattr(match, "start"):
@@ -167,12 +167,12 @@ def get_vocab(essays, scores, max_features_pass_1=750, max_features_pass_2=200):
 
     NOTE: GBW didn't mess around with this because it is very easy to mess up, and I didn't want to mess it up.
     """
-    dict = CountVectorizer(ngram_range=(1, 2), max_features=max_features_pass_1)
-    dict_matrix = dict.fit_transform(essays)
+    dictionary = CountVectorizer(ngram_range=(1, 2), max_features=max_features_pass_1)
+    dict_matrix = dictionary.fit_transform(essays)
     set_score = numpy.asarray(scores, dtype=numpy.int)
     med_score = numpy.median(set_score)
     new_score = set_score
-    if (med_score == 0):
+    if med_score == 0:
         med_score = 1
     new_score[set_score < med_score] = 0
     new_score[set_score >= med_score] = 1
@@ -190,12 +190,12 @@ def get_vocab(essays, scores, max_features_pass_1=750, max_features_pass_2=200):
         fish_vals.append(fish_val)
 
     cutoff = 1
-    if (len(fish_vals) > max_features_pass_2):
+    if len(fish_vals) > max_features_pass_2:
         cutoff = sorted(fish_vals)[max_features_pass_2]
     good_cols = numpy.asarray([num for num in range(0, dict_matrix.shape[1]) if fish_vals[num] <= cutoff])
 
-    getVar = lambda searchList, ind: [searchList[i] for i in ind]
-    vocab = getVar(dict.get_feature_names(), good_cols)
+    get_var = lambda search_list, ind: [search_list[i] for i in ind]
+    vocab = get_var(dictionary.get_feature_names(), good_cols)
 
     return vocab
 
@@ -219,14 +219,13 @@ def gen_cv_preds(clf, arr, sel_score, num_chunks=3):
         chunks.append(range(range_min, range_max))
     preds = []
     set_score = numpy.asarray(sel_score, dtype=numpy.int)
-    chunk_vec = numpy.asarray(range(0, len(chunks)))
     for i in xrange(0, len(chunks)):
         loop_inds = list(
             chain.from_iterable([chunks[int(z)] for z, m in enumerate(range(0, len(chunks))) if int(z) != i]))
         sim_fit = clf.fit(arr[loop_inds], set_score[loop_inds])
         preds.append(list(sim_fit.predict(arr[chunks[i]])))
     all_preds = list(chain(*preds))
-    return (all_preds)
+    return all_preds
 
 
 stdev = lambda d: (sum((x - 1. * sum(d) / len(d)) ** 2 for x in d) / (1. * (len(d) - 1))) ** .5
@@ -260,7 +259,7 @@ def quadratic_weighted_kappa(rater_a, rater_b, min_rating=None, max_rating=None)
     numerator = 0.0
     denominator = 0.0
 
-    if (num_ratings > 1):
+    if num_ratings > 1:
         for i in range(num_ratings):
             for j in range(num_ratings):
                 expected_count = (hist_rater_a[i] * hist_rater_b[j]

@@ -26,22 +26,6 @@ import json
 log = logging.getLogger(__name__)
 
 
-def dump_input_data(text, score):
-    try:
-        file_path = base_path + "/tests/data/json_data/"
-        time_suffix = datetime.now().strftime("%H%M%S%d%m%Y")
-        prefix = "test-case-"
-        filename = prefix + time_suffix + ".json"
-        json_data = []
-        for i in xrange(0, len(text)):
-            json_data.append({'text': text[i], 'score': score[i]})
-        with open(file_path + filename, 'w+') as outfile:
-            json.dump(json_data, outfile)
-    except:
-        error = "Could not dump data to file."
-        log.exception(error)
-
-
 def create(examples, scores, prompt_string, dump_data=False):
     """
     Creates a machine learning model from basic inputs (essays, associated scores and a prompt) and trains the model.
@@ -68,10 +52,10 @@ def create(examples, scores, prompt_string, dump_data=False):
 
     # If dump_data is true, then the examples and scores are loaded from json data.
     if dump_data:
-        dump_input_data(examples, scores)
+        _dump_input_data(examples, scores)
 
     # Selects the appropriate ML algorithm to use to train the classifier
-    algorithm = select_algorithm(scores)
+    algorithm = _determine_algorithm(scores)
 
     #Initialize a results dictionary to return
     results = {'errors': [], 'success': False, 'cv_kappa': 0, 'cv_mean_absolute_error': 0,
@@ -85,7 +69,7 @@ def create(examples, scores, prompt_string, dump_data=False):
 
     # Create an essay set object that encapsulates all the essays and alternate representations (tokens, etc)
     try:
-        essay_set = create_essay_set(examples, scores, prompt_string)
+        essay_set = _create_essay_set(examples, scores, prompt_string)
     except (ExampleCreationRequestError, ExampleCreationInternalError) as ex:
         msg = "essay set creation failed due to an error in the create_essay_set method. {}".format(ex)
         results['errors'].append(msg)
@@ -94,7 +78,7 @@ def create(examples, scores, prompt_string, dump_data=False):
 
     # Gets the features and classifiers from the essay set and computes the error
     try:
-        feature_ext, classifier, cv_error_results = extract_features_and_generate_model(
+        feature_ext, classifier, cv_error_results = _extract_features_and_generate_model(
             essay_set
         )
         results['cv_kappa'] = cv_error_results['kappa']
@@ -112,7 +96,7 @@ def create(examples, scores, prompt_string, dump_data=False):
     return results
 
 
-def select_algorithm(score_list):
+def _determine_algorithm(score_list):
     """
     Decides whether to use regression or classification as the ML algorithm based on the number of unique scores
 
@@ -133,28 +117,36 @@ def select_algorithm(score_list):
         return util_functions.AlgorithmTypes.classification
 
 
-def create_essay_set(text, score, prompt_string, generate_additional=True):
+def _create_essay_set(essays, scores, prompt_string, generate_additional=True):
+    """
+    Constructs an essay set from a given set of data.
+
+    Args:
+        essays (list of str): A list of essays
+        scores (list of int): the corresponding scores of the essays
+        prompt_string (str): the common prompt for the essays
+
+    Kwargs:
+        generate_additional (bool): Whether or not to generate additional essays at the minimum score point or not.
+            DEFAULT = TRUE
+
+    Returns:
+        (EssaySet): An essay set object which encapsulates all of this information.
     """
 
-
-    Creates an essay set from given data.
-    Text should be a list of strings corresponding to essay text.
-    Score should be a list of scores where score[n] corresponds to text[n]
-    Prompt string is just a string containing the essay prompt.
-    Generate_additional indicates whether to generate additional essays at the minimum score point or not.
-    """
     essay_set = EssaySet()
-    for i in xrange(0, len(text)):
-        essay_set.add_essay(text[i], score[i])
-        if score[i] == min(score) and generate_additional == True:
-            essay_set.generate_additional_essays(essay_set._cleaned_spelled_essays[len(essay_set._cleaned_spelled_essays) - 1], score[i])
-
     essay_set.update_prompt(prompt_string)
+
+    # Adds all essays to the essay set, and generates additional essays for the bottom scoring essay if applicable
+    for i in xrange(0, len(essays)):
+        essay_set.add_essay(essays[i], scores[i])
+        if scores[i] == min(scores) and generate_additional == True:
+            essay_set.generate_additional_essays(essay_set._cleaned_spelled_essays[-1], scores[i])
 
     return essay_set
 
 
-def extract_features_and_generate_model(essay_set):
+def _extract_features_and_generate_model(essay_set):
     """
     Feed in an essay set to get feature vector and classifier
 
@@ -172,9 +164,9 @@ def extract_features_and_generate_model(essay_set):
     features = feat_extractor.generate_features(essay_set)
 
     set_scores = numpy.asarray(essay_set._scores, dtype=numpy.int)
-    algorithm = create.select_algorithm(set_scores)
+    algorithm = _determine_algorithm(set_scores)
 
-    predict_classifier, cv_error_classifier = get_algorithms(algorithm)
+    predict_classifier, cv_error_classifier = _instantiate_algorithms(algorithm)
 
     cv_error_results = get_cv_error(cv_error_classifier, features, essay_set._scores)
 
@@ -189,7 +181,7 @@ def extract_features_and_generate_model(essay_set):
     return feat_extractor, predict_classifier, cv_error_results
 
 
-def get_algorithms(algorithm):
+def _instantiate_algorithms(algorithm):
     """
     Gets two classifiers for each type of algorithm, and returns them.
 
@@ -254,3 +246,19 @@ def get_cv_error(classifier, features, scores):
         log.exception("Error getting cv error estimates.")
 
     return results
+
+
+def _dump_input_data(text, score):
+    try:
+        file_path = base_path + "/tests/data/json_data/"
+        time_suffix = datetime.now().strftime("%H%M%S%d%m%Y")
+        prefix = "test-case-"
+        filename = prefix + time_suffix + ".json"
+        json_data = []
+        for i in xrange(0, len(text)):
+            json_data.append({'text': text[i], 'score': score[i]})
+        with open(file_path + filename, 'w+') as outfile:
+            json.dump(json_data, outfile)
+    except:
+        error = "Could not dump data to file."
+        log.exception(error)

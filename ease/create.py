@@ -21,6 +21,7 @@ import util_functions
 from errors import *
 from datetime import datetime
 import json
+import sklearn.ensemble
 
 #Make a log
 log = logging.getLogger(__name__)

@@ -14,7 +14,6 @@ import numpy
 from itertools import chain
 import math
 import nltk
-import pickle
 import logging
 import sys
 import tempfile
@@ -37,21 +36,6 @@ class AlgorithmTypes(object):
     """
     regression = "regression"
     classification = "classifiction"
-
-
-def create_model_path(model_path):
-    """
-    Creates a path to model files
-    model_path - string
-    """
-    if not model_path.startswith("/") and not model_path.startswith("models/"):
-        model_path = "/" + model_path
-    if not model_path.startswith("models"):
-        model_path = "models" + model_path
-    if not model_path.endswith(".p"):
-        model_path += ".p"
-
-    return model_path
 
 
 def sub_chars(string):
@@ -176,32 +160,6 @@ def make_unique(sequence):
     return list(set(sequence))
 
 
-def count_list(the_list):
-    """
-    Generates a count of the number of times each unique item appears in a list
-    """
-    count = the_list.count
-    result = [(item, count(item)) for item in set(the_list)]
-    result.sort()
-    return result
-
-
-def regenerate_good_tokens(string):
-    """
-    Given an input string, part of speech tags the string, then generates a list of
-    ngrams that appear in the string.
-    Used to define grammatically correct part of speech tag sequences.
-    Returns a list of part of speech tag sequences.
-    """
-    toks = nltk.word_tokenize(string)
-    pos_string = nltk.pos_tag(toks)
-    pos_seq = [tag[1] for tag in pos_string]
-    pos_ngrams = ngrams(pos_seq, 2, 4)
-    # TODO POTENTIAL ISSUE WITH NON STABLE ALGORITHM F7!?!
-    sel_pos_ngrams = make_unique(pos_ngrams)
-    return sel_pos_ngrams
-
-
 def get_vocab(essays, scores, max_features_pass_1=750, max_features_pass_2=200):
     """
     Uses a fisher test to find words that are significant in that they separate
@@ -255,41 +213,7 @@ def get_vocab(essays, scores, max_features_pass_1=750, max_features_pass_2=200):
     return vocab
 
 
-def edit_distance(s1, s2):
-    """
-    Calculates string edit distance between string 1 and string 2.
-    Deletion, insertion, substitution, and transposition all increase edit distance.
-    """
-    d = {}
-    lenstr1 = len(s1)
-    lenstr2 = len(s2)
-    for i in xrange(-1, lenstr1 + 1):
-        d[(i, -1)] = i + 1
-    for j in xrange(-1, lenstr2 + 1):
-        d[(-1, j)] = j + 1
-
-    for i in xrange(lenstr1):
-        for j in xrange(lenstr2):
-            if s1[i] == s2[j]:
-                cost = 0
-            else:
-                cost = 1
-            d[(i, j)] = min(
-                d[(i - 1, j)] + 1,  # deletion
-                d[(i, j - 1)] + 1,  # insertion
-                d[(i - 1, j - 1)] + cost,  # substitution
-            )
-            if i and j and s1[i] == s2[j - 1] and s1[i - 1] == s2[j]:
-                d[(i, j)] = min(d[(i, j)], d[i - 2, j - 2] + cost)  # transposition
-
-    return d[lenstr1 - 1, lenstr2 - 1]
-
-
-class Error(Exception):
-    pass
-
-
-class InputError(Error):
+class InputError(Exception):
     def __init__(self, expr, msg):
         self.expr = expr
         self.msg = msg
@@ -322,45 +246,6 @@ def gen_cv_preds(clf, arr, sel_score, num_chunks=3):
         preds.append(list(sim_fit.predict(arr[chunks[i]])))
     all_preds = list(chain(*preds))
     return (all_preds)
-
-
-def gen_model(clf, arr, sel_score):
-    """
-    Fits a classifier to data and a target score
-    clf is an input classifier that implements the fit method.
-    arr is a data array(X)
-    sel_score is the target list (y) where y[n] corresponds to X[n,:]
-    sim_fit is not a useful return value.  Instead the clf is the useful output.
-    """
-    set_score = numpy.asarray(sel_score, dtype=numpy.int)
-    sim_fit = clf.fit(arr, set_score)
-    return (sim_fit)
-
-
-def gen_preds(clf, arr):
-    """
-    Generates predictions on a novel data array using a fit classifier
-    clf is a classifier that has already been fit
-    arr is a data array identical in dimension to the array clf was trained on
-    Returns the array of predictions.
-    """
-    if (hasattr(clf, "predict_proba")):
-        ret = clf.predict(arr)
-        # pred_score=preds.argmax(1)+min(x._score)
-    else:
-        ret = clf.predict(arr)
-    return ret
-
-
-def calc_list_average(l):
-    """
-    Calculates the average value of a list of numbers
-    Returns a float
-    """
-    total = 0.0
-    for value in l:
-        total += value
-    return total / len(l)
 
 
 stdev = lambda d: (sum((x - 1. * sum(d) / len(d)) ** 2 for x in d) / (1. * (len(d) - 1))) ** .5
@@ -464,59 +349,3 @@ def get_wordnet_syns(word):
             synonyms.append(pat.sub(" ", swords.lower()))
     synonyms = make_unique(synonyms)
     return synonyms
-
-
-def get_separator_words(toks1):
-    """
-    Finds the words that separate a list of tokens from a background corpus
-    Basically this generates a list of informative/interesting words in a set
-    toks1 is a list of words
-    Returns a list of separator words
-    """
-    tab_toks1 = nltk.FreqDist(word.lower() for word in toks1)
-    if (os.path.isfile(ESSAY_COR_TOKENS_PATH)):
-        toks2 = pickle.load(open(ESSAY_COR_TOKENS_PATH, 'rb'))
-    else:
-        essay_corpus = open(ESSAY_CORPUS_PATH).read()
-        essay_corpus = sub_chars(essay_corpus)
-        toks2 = nltk.FreqDist(word.lower() for word in nltk.word_tokenize(essay_corpus))
-        pickle.dump(toks2, open(ESSAY_COR_TOKENS_PATH, 'wb'))
-    sep_words = []
-    for word in tab_toks1.keys():
-        tok1_present = tab_toks1[word]
-        if (tok1_present > 2):
-            tok1_total = tab_toks1._N
-            tok2_present = toks2[word]
-            tok2_total = toks2._N
-            fish_val = pvalue(tok1_present, tok2_present, tok1_total, tok2_total).two_tail
-            if (fish_val < .001 and tok1_present / float(tok1_total) > (tok2_present / float(tok2_total)) * 2):
-                sep_words.append(word)
-    sep_words = [w for w in sep_words if not w in nltk.corpus.stopwords.words("english") and len(w) > 5]
-    return sep_words
-
-
-def encode_plus(s):
-    """
-    Literally encodes the plus sign
-    input is a string
-    returns the string with plus signs encoded
-    """
-    regex = r"\+"
-    pat = re.compile(regex)
-    return pat.sub("%2B", s)
-
-
-def getMedian(numericValues):
-    """
-    Gets the median of a list of values
-    Returns a float/int
-    """
-    theValues = sorted(numericValues)
-
-    if len(theValues) % 2 == 1:
-        return theValues[(len(theValues) + 1) / 2 - 1]
-    else:
-        lower = theValues[len(theValues) / 2 - 1]
-        upper = theValues[len(theValues) / 2]
-
-        return (float(lower + upper)) / 2 

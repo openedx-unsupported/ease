@@ -8,7 +8,6 @@ import logging
 import sys
 
 
-
 # Append sys to base path to import the following modules
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)

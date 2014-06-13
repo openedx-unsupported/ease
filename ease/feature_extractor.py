@@ -117,19 +117,19 @@ class FeatureExtractor(object):
             Array of features with the following included:
                 - Length Features
                 - Vocabulary Features (both Normal and Stemmed Vocabulary)
-                - Prompt Features
+                - EDIT: Prompt Features were being ignored (passed in an empty string), so for posterity we are ignoring
+                    them.
         """
         try:
             vocabulary_features = self._generate_vocabulary_features(essay_set)
             length_features = self._generate_length_features(essay_set)
-            prompt_features = self._generate_prompt_features(essay_set)
         except Exception as ex:
             msg = "An unexpected error occurred during feature extraction: {}".format(ex)
             log.exception(msg)
             raise FeatureExtractionInternalError(msg)
 
         # Lumps them all together, copies to solidify, and returns
-        overall_features = numpy.concatenate((length_features, prompt_features, vocabulary_features), axis=1)
+        overall_features = numpy.concatenate((length_features, vocabulary_features), axis=1)
         overall_features = overall_features.copy()
         return overall_features
 
@@ -182,45 +182,6 @@ class FeatureExtractor(object):
         # Mushes them together and returns
         bag_features = numpy.concatenate((stem_features.toarray(), normal_features.toarray()), axis=1)
         return bag_features.copy()
-
-    def _generate_prompt_features(self, essay_set):
-        """
-        Generates prompt based features from an essay set object and internal prompt variable.
-
-        Called internally by generate_features
-
-        Args:
-            essay_set (EssaySet): an essay set object that is manipulated to generate prompt features
-
-        Returns:
-            an array of prompt features
-        """
-        prompt_toks = nltk.word_tokenize(essay_set._prompt)
-        expand_syns = []
-        for word in prompt_toks:
-            synonyms = util_functions.get_wordnet_syns(word)
-            expand_syns.append(synonyms)
-        expand_syns = list(chain.from_iterable(expand_syns))
-        prompt_overlap = []
-        prompt_overlap_prop = []
-        for j in essay_set._tokens:
-            tok_length = len(j)
-            if tok_length == 0:
-                tok_length = 1
-            prompt_overlap.append(len([i for i in j if i in prompt_toks]))
-            prompt_overlap_prop.append(prompt_overlap[len(prompt_overlap) - 1] / float(tok_length))
-        expand_overlap = []
-        expand_overlap_prop = []
-        for j in essay_set._tokens:
-            tok_length = len(j)
-            if tok_length == 0:
-                tok_length = 1
-            expand_overlap.append(len([i for i in j if i in expand_syns]))
-            expand_overlap_prop.append(expand_overlap[len(expand_overlap) - 1] / float(tok_length))
-
-        prompt_arr = numpy.array((prompt_overlap, prompt_overlap_prop, expand_overlap, expand_overlap_prop)).transpose()
-
-        return prompt_arr.copy()
 
     def _get_grammar_errors(self, pos, essays):
         """

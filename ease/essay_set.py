@@ -102,19 +102,14 @@ class EssaySet(object):
                 log.exception(msg)
                 raise EssaySetRequestError(msg)
 
-        # Validates that score is an integer and essay_text is a string.
+        # Validates that score is an integer and essay_text is a string and essay_generated is a 0 or a 1.
         try:
             essay_score = int(essay_score)
             essay_text = str(essay_text)
             essay_generated = int(essay_generated)
+            bool(essay_generated)
         except TypeError:
             ex = "Invalid type for essay score : {0} or essay text : {1}".format(type(essay_score), type(essay_text))
-            log.exception(ex)
-            raise EssaySetRequestError(ex)
-
-        # Validates that essay generated is 0 or 1
-        if essay_generated != 0 and essay_generated != 1:
-            ex = "Invalid value for essay_generated ({}).  Value must be 0 or 1.".format(essay_generated)
             log.exception(ex)
             raise EssaySetRequestError(ex)
 

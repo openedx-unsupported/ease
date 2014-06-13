@@ -28,7 +28,7 @@ from ease import feature_extractor
 from ease.essay_set import EssaySet
 
 
-def create(examples, scores, prompt_string, dump_data=False):
+def create(examples, scores, prompt_string):
     """
     Creates a machine learning model from basic inputs (essays, associated scores and a prompt) and trains the model.
 
@@ -38,9 +38,6 @@ def create(examples, scores, prompt_string, dump_data=False):
         examples (list of str): the example essays that have been assigned to train the AI.
         scores (list of int): the associated scores that correspond to the essays.
         prompt_string (str): the common prompt for all of the example essays.
-
-    Kwargs:
-        dump_data (bool): whether or not a examples and scores should be set via a data input dump
 
     Returns:
         (dict): Has the following keys:
@@ -52,11 +49,7 @@ def create(examples, scores, prompt_string, dump_data=False):
             'success' (bool): Whether or not the training of the classifier was successful.
     """
 
-    # If dump_data is true, then the examples and scores are loaded from json data.
-    if dump_data:
-        _dump_input_data(examples, scores)
-
-    # Selects the appropriate ML algorithm to use to train the classifier
+    # Selects the appropriate ML algorithm to use to train (Classification or Regression)
     algorithm = _determine_algorithm(scores)
 
     #Initialize a results dictionary to return
@@ -114,7 +107,7 @@ def _determine_algorithm(score_list):
         The ML algorithm used to train the classifier set and feature extractor
     """
 
-    #Count the number of unique score points in the score list
+    #Count the number of unique score values in the score list
     if len(set(score_list)) > 5:
         return util_functions.AlgorithmTypes.regression
     else:
@@ -249,33 +242,8 @@ def _get_cv_error(classifier, features, scores):
         results['success'] = True
     except ValueError as ex:
         # If this is hit, everything is fine.  It is hard to explain why the error occurs, but it isn't a big deal.
-        # TODO Figure out why this error would occur in the first place.
+        # TODO Figure out why this error would occur in the first place. ^^^ THIS IS NOT ACCEPTABLE
         msg = u"Not enough classes (0,1,etc) in each cross validation fold: {ex}".format(ex=ex)
         log.debug(msg)
 
     return results
-
-
-def _dump_input_data(essays, scores):
-    """
-    Dumps input data using json serialized objects of the form {'text': essay, 'score': score}
-
-    Args:
-        essays (list of str): A list of essays to dump
-        scores (list of int): An associated list of scores
-    """
-
-    file_path = base_path + "/tests/data/json_data/"
-    time_suffix = datetime.now().strftime("%H%M%S%d%m%Y")
-    prefix = "test-case-"
-    filename = prefix + time_suffix + ".json"
-    json_data = []
-    try:
-        for i in xrange(0, len(essays)):
-            json_data.append({'text': essays[i], 'score': scores[i]})
-        with open(file_path + filename, 'w+') as outfile:
-            json.dump(json_data, outfile)
-    except IOError as ex:
-        error = "An IO error occurred while trying to dump JSON data to a file: {ex}".format(ex=ex)
-        log.exception(error)
-        raise CreateRequestError(error)

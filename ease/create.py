@@ -16,9 +16,7 @@ sys.path.append(one_up_path)
 #Import modules that are dependent on the base path
 import model_creator
 import util_functions
-import predictor_set
 from errors import *
-import predictor_extractor
 from datetime import datetime
 import json
 
@@ -108,62 +106,6 @@ def create(examples, scores, prompt_string, dump_data=False):
         results['errors'].append(msg)
         log.exception(msg)
         log.exception(ex)
-
-    return results
-
-
-def create_generic(numeric_values, textual_values, target, algorithm=util_functions.AlgorithmTypes.regression):
-    """
-    Constructs a model from a generic list of numeric values and text values.
-
-    Generates this through a predictor set, rather than an essay set.
-
-    Args:
-        numeric_values:
-        textual_values:
-        target:
-
-    Kwargs:
-        GBW DELETED KWARG ALGORITHM (it was never used)
-    """
-
-    # Selects the appropriate ML algorithm to use to train the classifier
-    algorithm = select_algorithm(target)
-
-    # Initialize a result dictionary to return.
-    results = {'errors': [], 'success': False, 'cv_kappa': 0, 'cv_mean_absolute_error': 0,
-               'feature_ext': "", 'classifier': "", 'algorithm': algorithm}
-
-    if len(numeric_values) != len(textual_values) or len(numeric_values) != len(target):
-        msg = "Target, numeric features, and text features must all be the same length."
-        results['errors'].append(msg)
-        log.exception(msg)
-        return results
-
-    # Initialize a predictor set object that encapsulates all of the text and numeric predictors
-    try:
-        predictor = predictor_set.PredictorSet(essay_type="train")
-        for i in xrange(0, len(numeric_values)):
-            predictor.add_row(numeric_values[i], textual_values[i], target[i])
-    except:
-        msg = "predictor set creation failed."
-        results['errors'].append(msg)
-        log.exception(msg)
-        return results
-
-    # Gets the features and classifiers from the essay set and computes the error
-    try:
-        feature_ext, classifier, cv_error_results = \
-            model_creator.extract_features_and_generate_model_from_predictors(predictor, algorithm)
-        results['cv_kappa'] = cv_error_results['kappa']
-        results['cv_mean_absolute_error'] = cv_error_results['mae']
-        results['feature_ext'] = feature_ext
-        results['classifier'] = classifier
-        results['success'] = True
-    except:
-        msg = "feature extraction and model creation failed."
-        results['errors'].append(msg)
-        log.exception(msg)
 
     return results
 

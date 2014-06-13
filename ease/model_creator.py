@@ -17,7 +17,6 @@ from essay_set import EssaySet
 import util_functions
 import feature_extractor
 import logging
-import predictor_extractor
 import create
 
 log = logging.getLogger()
@@ -99,15 +98,15 @@ def create_essay_set(text, score, prompt_string, generate_additional=True):
     Prompt string is just a string containing the essay prompt.
     Generate_additional indicates whether to generate additional essays at the minimum score point or not.
     """
-    x = EssaySet()
+    essay_set = EssaySet()
     for i in xrange(0, len(text)):
-        x.add_essay(text[i], score[i])
+        essay_set.add_essay(text[i], score[i])
         if score[i] == min(score) and generate_additional == True:
-            x.generate_additional_essays(x._cleaned_spelled_essays[len(x._cleaned_spelled_essays) - 1], score[i])
+            essay_set.generate_additional_essays(essay_set._cleaned_spelled_essays[len(essay_set._cleaned_spelled_essays) - 1], score[i])
 
-    x.update_prompt(prompt_string)
+    essay_set.update_prompt(prompt_string)
 
-    return x
+    return essay_set
 
 
 def get_cv_error(clf, feats, scores):
@@ -181,7 +180,7 @@ def extract_features_and_generate_model_from_predictors(predictor_set, algorithm
     return f, clf, cv_error_results
 
 
-def extract_features_and_generate_model(essays):
+def extract_features_and_generate_model(essay_set):
     """
     Feed in an essay set to get feature vector and classifier
 
@@ -194,16 +193,16 @@ def extract_features_and_generate_model(essays):
             - The Trained Classifier
             - Any Cross Validation results
     """
-    feat_extractor = feature_extractor.FeatureExtractor(essays)
+    feat_extractor = feature_extractor.FeatureExtractor(essay_set)
 
-    features = feat_extractor.generate_features(essays)
+    features = feat_extractor.generate_features(essay_set)
 
-    set_score = numpy.asarray(essays._score, dtype=numpy.int)
+    set_score = numpy.asarray(essay_set._score, dtype=numpy.int)
     algorithm = create.select_algorithm(set_score)
 
     predict_classifier, cv_error_classifier = get_algorithms(algorithm)
 
-    cv_error_results = get_cv_error(cv_error_classifier, features, essays._score)
+    cv_error_results = get_cv_error(cv_error_classifier, features, essay_set._score)
 
     try:
         predict_classifier.fit(features, set_score)

@@ -7,10 +7,9 @@ import sys
 import logging
 import numpy
 
-# Define base path and add to sys path
-from ease import feature_extractor
-from ease.essay_set import EssaySet
-
+# Constructs a log
+log = logging.getLogger(__name__)
+# Setup base path so that we can import modules who are dependent on it
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
 one_up_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..//'))
@@ -22,9 +21,8 @@ from errors import *
 from datetime import datetime
 import json
 import sklearn.ensemble
-
-#Make a log
-log = logging.getLogger(__name__)
+from ease import feature_extractor
+from ease.essay_set import EssaySet
 
 
 def create(examples, scores, prompt_string, dump_data=False):
@@ -72,7 +70,7 @@ def create(examples, scores, prompt_string, dump_data=False):
     try:
         essay_set = _create_essay_set(examples, scores, prompt_string)
     except (ExampleCreationRequestError, ExampleCreationInternalError) as ex:
-        msg = "essay set creation failed due to an error in the create_essay_set method. {}".format(ex)
+        msg = "Essay Set Creation failed (likely due to an error in essay cleaning/parsing) {}".format(ex)
         results['errors'].append(msg)
         log.exception(msg)
         return results
@@ -88,11 +86,13 @@ def create(examples, scores, prompt_string, dump_data=False):
         results['classifier'] = classifier
         results['algorithm'] = algorithm
         results['success'] = True
-    except Exception as ex:
-        msg = "feature extraction and model creation failed."
+
+    # We cannot be sure what kind of errors .fit could throw at us. Memory, Type, Interrupt, etc.
+    except ClassifierTrainingInternalError as ex:
+        msg = "Feature extraction and Model Creation failed with the following error {ex}".format(ex=ex)
         results['errors'].append(msg)
         log.exception(msg)
-        log.exception(ex)
+        results['success'] = False
 
     return results
 
@@ -159,6 +159,9 @@ def _extract_features_and_generate_model(essay_set):
             - The Trained Feature extractor
             - The Trained Classifier
             - Any Cross Validation results
+
+    Raises:
+        ClassifierTrainingInternalError
     """
     feat_extractor = feature_extractor.FeatureExtractor(essay_set)
 
@@ -173,11 +176,14 @@ def _extract_features_and_generate_model(essay_set):
 
     try:
         predict_classifier.fit(features, set_scores)
-    except:
-        log.exception("Not enough classes (0,1,etc) in sample.")
-        set_scores[0] = 1
-        set_scores[1] = 0
-        predict_classifier.fit(features, set_scores)
+
+    # We cannot be sure what kind of errors .fit could throw at us. Memory, Type, Interrupt, etc.
+    except Exception as ex:
+        str = (
+            "predict_classifier.fit raised an exception in _extract_features_and_generate_model: {}"
+        ).format(ex)
+        log.exception(str)
+        raise ClassifierTrainingInternalError(str)
 
     return feat_extractor, predict_classifier, cv_error_results
 
@@ -243,23 +249,30 @@ def _get_cv_error(classifier, features, scores):
         # TODO Figure out why this error would occur in the first place.
         msg = u"Not enough classes (0,1,etc) in each cross validation fold: {ex}".format(ex=ex)
         log.debug(msg)
-    except:
-        log.exception("Error getting cv error estimates.")
 
     return results
 
 
-def _dump_input_data(text, score):
+def _dump_input_data(essays, scores):
+    """
+    Dumps input data using json serialized objects of the form {'text': essay, 'score': score}
+
+    Args:
+        essays (list of str): A list of essays to dump
+        scores (list of int): An associated list of scores
+    """
+
+    file_path = base_path + "/tests/data/json_data/"
+    time_suffix = datetime.now().strftime("%H%M%S%d%m%Y")
+    prefix = "test-case-"
+    filename = prefix + time_suffix + ".json"
+    json_data = []
     try:
-        file_path = base_path + "/tests/data/json_data/"
-        time_suffix = datetime.now().strftime("%H%M%S%d%m%Y")
-        prefix = "test-case-"
-        filename = prefix + time_suffix + ".json"
-        json_data = []
-        for i in xrange(0, len(text)):
-            json_data.append({'text': text[i], 'score': score[i]})
+        for i in xrange(0, len(essays)):
+            json_data.append({'text': essays[i], 'score': scores[i]})
         with open(file_path + filename, 'w+') as outfile:
             json.dump(json_data, outfile)
-    except:
-        error = "Could not dump data to file."
+    except IOError as ex:
+        error = "An IO error occurred while trying to dump JSON data to a file: {ex}".format(ex=ex)
         log.exception(error)
+        raise CreateRequestError(error)

@@ -13,3 +13,8 @@ class EaseError(Exception):
 
 class GradingRequestError(Exception):
     pass
+
+class ClassifierTrainingInternalError(Exception):
+    pass
+
+class CreateRequestError(Exception):

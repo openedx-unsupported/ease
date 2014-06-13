@@ -168,7 +168,7 @@ def _extract_features_and_generate_model(essay_set):
 
     predict_classifier, cv_error_classifier = _instantiate_algorithms(algorithm)
 
-    cv_error_results = get_cv_error(cv_error_classifier, features, essay_set._scores)
+    cv_error_results = _get_cv_error(cv_error_classifier, features, essay_set._scores)
 
     try:
         predict_classifier.fit(features, set_scores)
@@ -213,7 +213,7 @@ def _instantiate_algorithms(algorithm):
     return clf, clf2
 
 
-def get_cv_error(classifier, features, scores):
+def _get_cv_error(classifier, features, scores):
     """
     Gets cross validated error for a given classifier, set of features, and scores
 

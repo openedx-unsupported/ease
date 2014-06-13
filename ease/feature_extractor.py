@@ -47,6 +47,11 @@ class FeatureExtractor(object):
             max_features_pass_2: The maximum number of features we consider on the second pass of vocabulary grooming
 
         """
+
+        self._good_pos_ngrams = self._get_good_pos_ngrams()
+        self._spell_errors_per_character = 0
+        self._grammar_errors_per_character = 0
+
         if hasattr(essay_set, '_type'):
             if essay_set._type == "train":
                 # Finds vocabulary which differentiates good/high scoring essays from bad/low scoring essays.
@@ -98,10 +103,6 @@ class FeatureExtractor(object):
                 raise util_functions.InputError(essay_set, "needs to be an essay set of the train type.")
         else:
             raise util_functions.InputError(essay_set, "wrong input. need an essay set object.")
-
-        self._good_pos_ngrams = self._get_good_pos_ngrams()
-        self._spell_errors_per_character = 0
-        self._grammar_errors_per_character = 0
 
     def generate_features(self, essay_set):
         """

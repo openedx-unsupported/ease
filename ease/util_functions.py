@@ -147,19 +147,6 @@ def ngrams(tokens, min_n, max_n):
     return all_ngrams
 
 
-def make_unique(sequence):
-    """
-    Makes a list of elements unique
-
-    Args:
-        sequence (list of any comparable): A sequence to make unique
-
-    Return:
-        the list without any duplicates.  May be out of order.
-    """
-    return list(set(sequence))
-
-
 def get_vocab(essays, scores, max_features_pass_1=750, max_features_pass_2=200):
     """
     Uses a fisher test to find words that are significant in that they separate
@@ -337,8 +324,12 @@ def histogram(ratings, min_rating=None, max_rating=None):
 def get_wordnet_syns(word):
     """
     Utilize wordnet (installed with nltk) to get synonyms for words
-    word is the input word
-    returns a list of unique synonyms
+
+    Args:
+        word (str): the word to generate synonyms for
+
+    Returns:
+        (list of str): Unique synonyms for the word
     """
     synonyms = []
     regex = r"_"
@@ -347,5 +338,6 @@ def get_wordnet_syns(word):
     for ss in synset:
         for swords in ss.lemma_names:
             synonyms.append(pat.sub(" ", swords.lower()))
-    synonyms = make_unique(synonyms)
+    # Makes the synonym list unique
+    synonyms = list(set(synonyms))
     return synonyms

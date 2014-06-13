@@ -4,7 +4,6 @@ Functions to score specified data using specified ML models
 
 import sys
 import os
-import numpy
 import logging
 
 # Append sys to base path to import the following modules
@@ -13,11 +12,7 @@ sys.path.append(base_path)
 
 #Depend on base path to be imported
 from essay_set import EssaySet
-import util_functions
 from errors import *
-
-#Imports needed to unpickle grader data
-import math
 
 log = logging.getLogger(__name__)
 
@@ -51,7 +46,7 @@ def grade(grader_data, submission):
     feedback = {}
 
     # Retrieves the model and extractor we will be using
-    model, extractor = get_classifier_and_extractor(grader_data)
+    model, extractor = _get_classifier_and_extractor(grader_data)
 
     # Attempts to add the essay (text) to the essay set.
     try:
@@ -82,7 +77,7 @@ def grade(grader_data, submission):
     return results
 
 
-def get_classifier_and_extractor(grader_data):
+def _get_classifier_and_extractor(grader_data):
     """
     Finds the classifier and extractor from a completed training operation in order to perform the grading operation.
 

@@ -3,14 +3,12 @@ Extracts features from training set and test set essays
 """
 
 import numpy
-import re
 import nltk
 import sys
 from sklearn.feature_extraction.text import CountVectorizer
 import pickle
 import os
 from itertools import chain
-import copy
 import operator
 import logging
 

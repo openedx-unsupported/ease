@@ -8,13 +8,15 @@ import logging
 import numpy
 
 # Define base path and add to sys path
+from ease import feature_extractor
+from ease.essay_set import EssaySet
+
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
 one_up_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..//'))
 sys.path.append(one_up_path)
 
 #Import modules that are dependent on the base path
-import model_creator
 import util_functions
 from errors import *
 from datetime import datetime
@@ -83,7 +85,7 @@ def create(examples, scores, prompt_string, dump_data=False):
 
     # Create an essay set object that encapsulates all the essays and alternate representations (tokens, etc)
     try:
-        essay_set = model_creator.create_essay_set(examples, scores, prompt_string)
+        essay_set = create_essay_set(examples, scores, prompt_string)
     except (ExampleCreationRequestError, ExampleCreationInternalError) as ex:
         msg = "essay set creation failed due to an error in the create_essay_set method. {}".format(ex)
         results['errors'].append(msg)
@@ -92,7 +94,7 @@ def create(examples, scores, prompt_string, dump_data=False):
 
     # Gets the features and classifiers from the essay set and computes the error
     try:
-        feature_ext, classifier, cv_error_results = model_creator.extract_features_and_generate_model(
+        feature_ext, classifier, cv_error_results = extract_features_and_generate_model(
             essay_set
         )
         results['cv_kappa'] = cv_error_results['kappa']
@@ -129,3 +131,126 @@ def select_algorithm(score_list):
         return util_functions.AlgorithmTypes.regression
     else:
         return util_functions.AlgorithmTypes.classification
+
+
+def create_essay_set(text, score, prompt_string, generate_additional=True):
+    """
+
+
+    Creates an essay set from given data.
+    Text should be a list of strings corresponding to essay text.
+    Score should be a list of scores where score[n] corresponds to text[n]
+    Prompt string is just a string containing the essay prompt.
+    Generate_additional indicates whether to generate additional essays at the minimum score point or not.
+    """
+    essay_set = EssaySet()
+    for i in xrange(0, len(text)):
+        essay_set.add_essay(text[i], score[i])
+        if score[i] == min(score) and generate_additional == True:
+            essay_set.generate_additional_essays(essay_set._cleaned_spelled_essays[len(essay_set._cleaned_spelled_essays) - 1], score[i])
+
+    essay_set.update_prompt(prompt_string)
+
+    return essay_set
+
+
+def extract_features_and_generate_model(essay_set):
+    """
+    Feed in an essay set to get feature vector and classifier
+
+    Args:
+        essays (EssaySet): The essay set to construct the feature extractor and model off of
+
+    Returns:
+        A tuple with the following elements in the following order:
+            - The Trained Feature extractor
+            - The Trained Classifier
+            - Any Cross Validation results
+    """
+    feat_extractor = feature_extractor.FeatureExtractor(essay_set)
+
+    features = feat_extractor.generate_features(essay_set)
+
+    set_scores = numpy.asarray(essay_set._scores, dtype=numpy.int)
+    algorithm = create.select_algorithm(set_scores)
+
+    predict_classifier, cv_error_classifier = get_algorithms(algorithm)
+
+    cv_error_results = get_cv_error(cv_error_classifier, features, essay_set._scores)
+
+    try:
+        predict_classifier.fit(features, set_scores)
+    except:
+        log.exception("Not enough classes (0,1,etc) in sample.")
+        set_scores[0] = 1
+        set_scores[1] = 0
+        predict_classifier.fit(features, set_scores)
+
+    return feat_extractor, predict_classifier, cv_error_results
+
+
+def get_algorithms(algorithm):
+    """
+    Gets two classifiers for each type of algorithm, and returns them.
+
+    The First algorithm is used for for predicting scores,
+    The second is used for calculating cv error.
+
+    Args:
+        algorithm: One of the Algorithm types defined in util_functions.AlgorithmTypes
+
+    Returns:
+        A tuple of the form (classifier, classifier), where
+            The First algorithm is used for for predicting scores,
+            The second is used for calculating cv error.
+    """
+    if algorithm == util_functions.AlgorithmTypes.classification:
+        clf = sklearn.ensemble.GradientBoostingClassifier(
+            n_estimators=100, learn_rate=.05, max_depth=4, random_state=1, min_samples_leaf=3
+        )
+        clf2 = sklearn.ensemble.GradientBoostingClassifier(
+            n_estimators=100, learn_rate=.05, max_depth=4, random_state=1, min_samples_leaf=3
+        )
+    else:
+        clf = sklearn.ensemble.GradientBoostingRegressor(
+            n_estimators=100, learn_rate=.05, max_depth=4, random_state=1, min_samples_leaf=3
+        )
+        clf2 = sklearn.ensemble.GradientBoostingRegressor(
+            n_estimators=100, learn_rate=.05, max_depth=4, random_state=1, min_samples_leaf=3
+        )
+    return clf, clf2
+
+
+def get_cv_error(classifier, features, scores):
+    """
+    Gets cross validated error for a given classifier, set of features, and scores
+
+    Args:
+        classifier: The classifier to be used for CV
+        features: The features to feed into the classifier and to cross validate over.
+                    Stored as a list of lists. Each row in the outer list associates with a single essay
+        scores: the scores associated with each of the features.  Feature row 1 associates with score 1, etc.
+
+    Returns:
+        (dict) with the following keys:
+            'mae': Mean Absolute Error (measures the average deviation between AI grade and Human Grade)
+            'kappa': Quadratic weighted kappa (measures the similarity between graders (AI and Human))
+            'success': Whether or not the calculation was successful.
+    """
+    results = {'success': False, 'kappa': 0, 'mae': 0}
+    try:
+        cv_preds = util_functions.gen_cv_preds(classifier, features, scores)
+        err = numpy.mean(numpy.abs(numpy.array(cv_preds) - scores))
+        kappa = util_functions.quadratic_weighted_kappa(list(cv_preds), scores)
+        results['mae'] = err
+        results['kappa'] = kappa
+        results['success'] = True
+    except ValueError as ex:
+        # If this is hit, everything is fine.  It is hard to explain why the error occurs, but it isn't a big deal.
+        # TODO Figure out why this error would occur in the first place.
+        msg = u"Not enough classes (0,1,etc) in each cross validation fold: {ex}".format(ex=ex)
+        log.debug(msg)
+    except:
+        log.exception("Error getting cv error estimates.")
+
+    return results

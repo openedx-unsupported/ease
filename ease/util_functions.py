@@ -89,9 +89,9 @@ def spell_correct(string):
         incorrect = p.readlines()
         p.close()
 
-    except Exception:
-        log.exception("aspell process failed; could not spell check")
-        # Return original string if aspell fails
+    except Exception as ex:
+        log.exception("aspell spell checking was not run, because it failed with the exception: {}".format(ex))
+        # DESIGN CHOICE: Return original string if aspell fails
         return string, 0, string
 
     finally:
@@ -201,6 +201,9 @@ def get_vocab(essays, scores, max_features_pass_1=750, max_features_pass_2=200):
 
 
 class InputError(Exception):
+    """
+    A class to report to the user that one of their inputs was incorrect.
+    """
     def __init__(self, expr, msg):
         self.expr = expr
         self.msg = msg

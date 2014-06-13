@@ -2,7 +2,7 @@
 Errors for the EASE repository
 """
 
-class ExampleCreationRequestError(Exception):
+class EssaySetRequestError(Exception):
     pass
 
 class ExampleCreationInternalError(Exception):
@@ -18,3 +18,4 @@ class ClassifierTrainingInternalError(Exception):
     pass
 
 class CreateRequestError(Exception):
+    pass

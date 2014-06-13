@@ -8,6 +8,7 @@ import sys
 import random
 import os
 import logging
+from errors import *
 
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
@@ -76,6 +77,9 @@ class EssaySet(object):
 
         Returns:
             A string confirmation that essay was added.
+
+        Raises
+            EssaySetRequestError
         """
 
         # Get maximum current essay id (the newest essay), or set to 0 if this is the first essay added
@@ -91,9 +95,10 @@ class EssaySet(object):
         except UnicodeError:
             try:
                 essay_text = (essay_text.decode('utf-8', 'replace')).encode('ascii', 'ignore')
-            except UnicodeError:
-                log.exception("Could not parse essay into ascii.")
-                raise
+            except UnicodeError as ex:
+                str = "Could not parse essay text into ascii: {}".format(ex)
+                log.exception(str)
+                raise EssaySetRequestError(ex)
 
         # Validates that score is an integer and essay_text is a string.
         try:
@@ -101,15 +106,15 @@ class EssaySet(object):
             essay_text = str(essay_text)
             essay_generated = int(essay_generated)
         except TypeError:
-            log.exception(
-                "Invalid type for essay score : {0} or essay text : {1}".format(type(essay_score), type(essay_text)))
-            raise
+            str = "Invalid type for essay score : {0} or essay text : {1}".format(type(essay_score), type(essay_text))
+            log.exception(str)
+            raise EssaySetRequestError(str)
 
         # Validates that essay generated is 0 or 1
         if essay_generated != 0 and essay_generated != 1:
             ex = "Invalid value for essay_generated ({}).  Value must be 0 or 1.".format(essay_generated)
             log.exception(ex)
-            raise util_functions.InputError(ex)
+            raise EssaySetRequestError(ex)
 
         # Validates to make sure that the essay is at least five characters long.
         if len(essay_text) < 5:
@@ -159,8 +164,11 @@ class EssaySet(object):
 
         Returns:
             (str): The prompt, if it was stored successfully.
+
+        Raises:
+            InputError
         """
-        if (isinstance(prompt_text, basestring)):
+        if isinstance(prompt_text, basestring):
             self._prompt = util_functions.sub_chars(prompt_text)
         else:
             raise util_functions.InputError(prompt_text, "Invalid prompt. Need to enter a string value.")

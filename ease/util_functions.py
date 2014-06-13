@@ -200,15 +200,6 @@ def get_vocab(essays, scores, max_features_pass_1=750, max_features_pass_2=200):
     return vocab
 
 
-class InputError(Exception):
-    """
-    A class to report to the user that one of their inputs was incorrect.
-    """
-    def __init__(self, expr, msg):
-        self.expr = expr
-        self.msg = msg
-
-
 def gen_cv_preds(clf, arr, sel_score, num_chunks=3):
     """
     Generates cross validated predictions using an input classifier and data.

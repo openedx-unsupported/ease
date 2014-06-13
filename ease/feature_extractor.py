@@ -11,6 +11,7 @@ import os
 from itertools import chain
 import operator
 import logging
+from errors import *
 
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
@@ -100,9 +101,9 @@ class FeatureExtractor(object):
                 # Average index of how "topical" essays are
                 self._mean_topical_index = feature_row_sum / float(sum([len(t) for t in essay_set._cleaned_essays]))
             else:
-                raise util_functions.InputError(essay_set, "needs to be an essay set of the train type.")
+                raise InputError('essay_set', "The EssaySet provided needs to be an EssaySet of the 'train' type.")
         else:
-            raise util_functions.InputError(essay_set, "wrong input. need an essay set object.")
+            raise InputError('essay_set', "Wrong input provided, it must provide an EssaySet object.")
 
     def generate_features(self, essay_set):
         """
@@ -117,9 +118,14 @@ class FeatureExtractor(object):
                 - Vocabulary Features (both Normal and Stemmed Vocabulary)
                 - Prompt Features
         """
-        vocabulary_features = self._generate_vocabulary_features(essay_set)
-        length_features = self._generate_length_features(essay_set)
-        prompt_features = self._generate_prompt_features(essay_set)
+        try:
+            vocabulary_features = self._generate_vocabulary_features(essay_set)
+            length_features = self._generate_length_features(essay_set)
+            prompt_features = self._generate_prompt_features(essay_set)
+        except Exception as ex:
+            msg = "An unexpected error occurred during feature extraction: {}".format(ex)
+            log.exception(msg)
+            raise FeatureExtractionInternalError(msg)
 
         # Lumps them all together, copies to solidify, and returns
         overall_features = numpy.concatenate((length_features, prompt_features, vocabulary_features), axis=1)

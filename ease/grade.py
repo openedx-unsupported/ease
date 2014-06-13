@@ -2,9 +2,11 @@
 Functions to score specified data using specified ML models
 """
 
-import sys
 import os
 import logging
+
+import sys
+
 
 # Append sys to base path to import the following modules
 base_path = os.path.dirname(__file__)
@@ -52,18 +54,17 @@ def grade(grader_data, submission):
     try:
         grader_set.add_essay(str(submission), 0)
         grader_set.update_prompt(str(grader_data['prompt']))
-    except:
+    except (EssaySetRequestError, InputError):
         error_message = "Essay could not be added to essay set:{0}".format(submission)
         log.exception(error_message)
         results['errors'].append(error_message)
 
     # Tries to extract features from submission and assign score via the model
-    grader_features = None
     try:
         grader_features = extractor.generate_features(grader_set)
         results['score'] = int(model.predict(grader_features)[0])
-    except:
-        error_message = "Could not extract features and score essay."
+    except FeatureExtractionInternalError as ex:
+        error_message = "Could not extract features and score essay: {ex}".format(ex=ex)
         log.exception(error_message)
         results['errors'].append(error_message)
 

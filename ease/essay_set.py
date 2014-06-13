@@ -8,6 +8,7 @@ import sys
 import random
 import os
 import logging
+from ease.errors import InputError
 from errors import *
 
 base_path = os.path.dirname(__file__)
@@ -171,7 +172,7 @@ class EssaySet(object):
         if isinstance(prompt_text, basestring):
             self._prompt = util_functions.sub_chars(prompt_text)
         else:
-            raise util_functions.InputError(prompt_text, "Invalid prompt. Need to enter a string value.")
+            raise InputError('prompt_text', "Invalid prompt. Need to enter a string value.")
         return self._prompt
 
     def generate_additional_essays(self, original_essay, original_score, to_generate=3):

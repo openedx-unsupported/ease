@@ -69,7 +69,7 @@ def create(examples, scores, prompt_string, dump_data=False):
     # Create an essay set object that encapsulates all the essays and alternate representations (tokens, etc)
     try:
         essay_set = _create_essay_set(examples, scores, prompt_string)
-    except (EssaySetRequestError, ExampleCreationInternalError) as ex:
+    except EssaySetRequestError as ex:
         msg = "Essay Set Creation failed (likely due to an error in essay cleaning/parsing) {}".format(ex)
         results['errors'].append(msg)
         log.exception(msg)

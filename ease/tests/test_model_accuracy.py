@@ -121,9 +121,6 @@ class ModelCreator():
     def create_model(self):
         if not self.create_model_generic:
             return create.create(self.text, self.scores, "")
-        else:
-            return create.create_generic(self.text.get('numeric_values', []), self.text.get('textual_values', []),
-                                         self.scores)
 
 
 class Grader():
@@ -133,9 +130,6 @@ class Grader():
     def grade(self, submission):
         if isinstance(submission, basestring):
             return grade.grade(self.model_data, submission)
-        else:
-            return grade.grade_generic(self.model_data, submission.get('numeric_values', []),
-                                       submission.get('textual_values', []))
 
 
 class GenericTest(object):
@@ -173,7 +167,10 @@ class GenericTest(object):
 
         grader = Grader(results)
         results = grader.grade(self.text[0])
+        if not results['success']:
+            raise Exception(results['errors'])
         assert results['success'] == True
+
 
     def scoring_accuracy(self):
         random.seed(1)
@@ -184,27 +181,6 @@ class GenericTest(object):
         cv_mae = results['cv_mean_absolute_error']
         assert cv_kappa >= self.expected_kappa_min
         assert cv_mae <= self.expected_mae_max
-
-    def generic_model_creation_and_grading(self):
-        log.info(self.scores)
-        log.info(self.text)
-        score_subset = [random.randint(0, 100) for i in xrange(0, min([QUICK_TEST_LIMIT, len(self.scores)]))]
-        text_subset = self.text[:QUICK_TEST_LIMIT]
-        text_subset = {
-            'textual_values': [[t] for t in text_subset],
-            'numeric_values': [[1] for i in xrange(0, len(text_subset))]
-        }
-        model_creator = ModelCreator(score_subset, text_subset)
-        results = model_creator.create_model()
-        assert results['success'] == True
-
-        grader = Grader(results)
-        test_text = {
-            'textual_values': [self.text[0]],
-            'numeric_values': [1]
-        }
-        results = grader.grade(test_text)
-        assert results['success'] == True
 
 
 class PolarityTest(unittest.TestCase, GenericTest):
@@ -225,9 +201,6 @@ class PolarityTest(unittest.TestCase, GenericTest):
 
     def test_scoring_accuracy(self):
         self.scoring_accuracy()
-
-    def test_generic_model_creation_and_grading(self):
-        self.generic_model_creation_and_grading()
 
 
 class JSONTest(GenericTest):

@@ -52,7 +52,7 @@ class EssaySet(object):
         self._cleaned_spelled_essays = []
         self._tokens = []
         self._pos_tags = []
-        self._cleaned_stem_essays = []
+        self._cleaned_stemmed_essays = []
         self._generated = []
         self._prompt = ""
         self._spelling_errors = []
@@ -147,7 +147,7 @@ class EssaySet(object):
         # from words in English.
         porter = nltk.PorterStemmer()
         porter_tokens = " ".join([porter.stem(token) for token in tokens])
-        self._cleaned_stem_essays.append(porter_tokens)
+        self._cleaned_stemmed_essays.append(porter_tokens)
 
         return "Essay Added. Text: " + cleaned_essay + " Score: " + str(essay_score)
 

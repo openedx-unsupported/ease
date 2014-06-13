@@ -35,7 +35,6 @@ class FeatureExtractor(object):
     features from an object which will allow object classification.
     """
 
-
     def __init__(self, essay_set, max_features_pass_2=200):
         """
         Initializes requisite dictionaries/statistics before the feature extraction can occur.
@@ -50,7 +49,6 @@ class FeatureExtractor(object):
             max_features_pass_2: The maximum number of features we consider on the second pass of vocabulary grooming
 
         """
-
         if hasattr(essay_set, '_type'):
             if essay_set._type == "train":
                 # Finds vocabulary which differentiates good/high scoring essays from bad/low scoring essays.
@@ -60,7 +58,7 @@ class FeatureExtractor(object):
 
                 # Finds vocab (same criteria as above), but with essays that have been porter stemmed
                 stemmed_vocab = util_functions.get_vocab(
-                    essay_set._clean_stem_text, essay_set._scores, max_features_pass_2=max_features_pass_2
+                    essay_set._cleaned_stemmed_essays, essay_set._scores, max_features_pass_2=max_features_pass_2
                 )
 
                 # Constructs dictionaries trained based on the important vocabularies
@@ -81,101 +79,55 @@ class FeatureExtractor(object):
                     essay_set._pos_tags, essay_set._cleaned_essays, essay_set._tokens
                 )
                 # NOTE!!! Here, I changed the definition from utilizing good grammar ratios to using the counts of
-                # gramatical errors.  Though this was not what the original author used, it is clearly what his code
+                # grammatical errors.  Though this was not what the original author used, it is clearly what his code
                 # implies, as if this is intended to be a true "grammar errors per character", we should have that
                 # exact number.  The replaced call is included for posterity.
                 # self._grammar_errors_per_character =
                 # (sum(good_pos_tags) / float(sum([len(t) for t in essay_set._text])))
                 total_grammar_errors = sum(len(l) for l in bad_pos_positions)
-                total_characters = float(sum([len(t) for t in essay_set._text]))
+                total_characters = float(sum([len(t) for t in essay_set._cleaned_essays]))
                 self._grammar_errors_per_character = total_grammar_errors / total_characters
 
                 # Generates a bag of vocabulary features
-                vocabulary_features = self.generate_vocabulary_features(essay_set)
+                vocabulary_features = self._generate_vocabulary_features(essay_set)
 
                 # Sum of a row of bag of words features (topical words in an essay)
                 feature_row_sum = numpy.sum(vocabulary_features[:, :])
 
                 # Average index of how "topical" essays are
-                self._mean_f_prop = feature_row_sum / float(sum([len(t) for t in essay_set._text]))
+                self._mean_topical_index = feature_row_sum / float(sum([len(t) for t in essay_set._cleaned_essays]))
             else:
                 raise util_functions.InputError(essay_set, "needs to be an essay set of the train type.")
         else:
             raise util_functions.InputError(essay_set, "wrong input. need an essay set object.")
 
-        self._good_pos_ngrams = self.get_good_pos_ngrams()
-        self.dict_initialized = False
+        self._good_pos_ngrams = self._get_good_pos_ngrams()
         self._spell_errors_per_character = 0
         self._grammar_errors_per_character = 0
 
-    def get_good_pos_ngrams(self):
+    def generate_features(self, essay_set):
         """
-        Gets a list of grammatically correct part of speech sequences from an input file called essaycorpus.txt
-        Returns the list and caches the file
-
-        Returns:
-            A list of all grammatically correct parts of speech.
-        """
-        if (os.path.isfile(NGRAM_PATH)):
-            good_pos_ngrams = pickle.load(open(NGRAM_PATH, 'rb'))
-        else:
-            #Hard coded an incomplete list in case the needed files cannot be found
-            good_pos_ngrams = ['NN PRP', 'NN PRP .', 'NN PRP . DT', 'PRP .', 'PRP . DT', 'PRP . DT NNP', '. DT',
-                               '. DT NNP', '. DT NNP NNP', 'DT NNP', 'DT NNP NNP', 'DT NNP NNP NNP', 'NNP NNP',
-                               'NNP NNP NNP', 'NNP NNP NNP NNP', 'NNP NNP NNP .', 'NNP NNP .', 'NNP NNP . TO',
-                               'NNP .', 'NNP . TO', 'NNP . TO NNP', '. TO', '. TO NNP', '. TO NNP NNP',
-                               'TO NNP', 'TO NNP NNP']
-        return good_pos_ngrams
-
-    def _get_grammar_errors(self, pos, essays, tokens):
-        """
-        Internal function to get the number of grammar errors in given text
+        Generates bag of words, length, and prompt features from an essay set object
 
         Args:
-            pos: list of pos values for an essay set
-            essays: list of essay texts
-            tokens: list of the lists of the tokens in each essay
+            essay_set (EssaySet): the essay set to extract features for
 
         Returns:
-            Tuple of the form (good_grammar_ratios, bad_pos_positions)
-                The former is a list of each essay's "good grammar ratio", which is not very well defined
-                The latter is a list of lists of each essay's grammatical mistakes as a location in its tokens
+            Array of features with the following included:
+                - Length Features
+                - Vocabulary Features (both Normal and Stemmed Vocabulary)
+                - Prompt Features
         """
-        word_counts = [max(len(t), 1) for t in tokens]
-        good_grammar_ratios = []
-        min_pos_seq = 2
-        max_pos_seq = 4
-        bad_pos_positions = []
-        for i in xrange(0, len(essays)):
-            pos_seq = [tag[1] for tag in pos[i]]
-            pos_ngrams = util_functions.ngrams(pos_seq, min_pos_seq, max_pos_seq)
-            long_pos_ngrams = [z for z in pos_ngrams if z.count(' ') == (max_pos_seq - 1)]
-            bad_pos_tuples = [[z, z + max_pos_seq] for z in xrange(0, len(long_pos_ngrams)) if
-                              long_pos_ngrams[z] not in self._good_pos_ngrams]
-            bad_pos_tuples.sort(key=operator.itemgetter(1))
-            to_delete = []
-            for m in reversed(xrange(len(bad_pos_tuples) - 1)):
-                start, end = bad_pos_tuples[m]
-                for j in xrange(m + 1, len(bad_pos_tuples)):
-                    lstart, lend = bad_pos_tuples[j]
-                    if lstart >= start and lstart <= end:
-                        bad_pos_tuples[m][1] = bad_pos_tuples[j][1]
-                        to_delete.append(j)
+        vocabulary_features = self._generate_vocabulary_features(essay_set)
+        length_features = self._generate_length_features(essay_set)
+        prompt_features = self._generate_prompt_features(essay_set)
 
-            fixed_bad_pos_tuples = [bad_pos_tuples[z] for z in xrange(0, len(bad_pos_tuples)) if z not in to_delete]
-            bad_pos_positions.append(fixed_bad_pos_tuples)
-            overlap_ngrams = [z for z in pos_ngrams if z in self._good_pos_ngrams]
-            if (len(pos_ngrams) - len(overlap_ngrams)) > 0:
-                divisor = len(pos_ngrams) / len(pos_seq)
-            else:
-                divisor = 1
-            if divisor == 0:
-                divisor = 1
-            good_grammar_ratio = (len(pos_ngrams) - len(overlap_ngrams)) / divisor
-            good_grammar_ratios.append(good_grammar_ratio)
-        return good_grammar_ratios, bad_pos_positions
+        # Lumps them all together, copies to solidify, and returns
+        overall_features = numpy.concatenate((length_features, prompt_features, vocabulary_features), axis=1)
+        overall_features = overall_features.copy()
+        return overall_features
 
-    def generate_length_features(self, essay_set):
+    def _generate_length_features(self, essay_set):
         """
         Generates length based features from an essay set
 
@@ -196,7 +148,8 @@ class FeatureExtractor(object):
         chars_per_word = [lengths[m] / float(word_counts[m]) for m in xrange(0, len(essays))]
 
         # SEE COMMENT AROUND LINE 85
-        good_grammar_ratios, bad_pos_positions = self._get_grammar_errors(essay_set._pos, essay_set._text, essay_set._tokens)
+        good_grammar_ratios, bad_pos_positions = self._get_grammar_errors(essay_set._pos_tags,
+                                                                          essay_set._cleaned_essays, essay_set._tokens)
         good_pos_tag_proportion = [len(bad_pos_positions[m]) / float(word_counts[m]) for m in xrange(0, len(essays))]
 
         length_array = numpy.array((
@@ -205,7 +158,7 @@ class FeatureExtractor(object):
 
         return length_array.copy()
 
-    def generate_vocabulary_features(self, essay_set):
+    def _generate_vocabulary_features(self, essay_set):
         """
         Generates a bag of words features from an essay set and a trained FeatureExtractor (self)
 
@@ -217,36 +170,14 @@ class FeatureExtractor(object):
             An array of features to be used for extraction
         """
         # Calculates Stem and Normal features
-        stem_features = self._stem_dict.transform(essay_set._cleaned_stem_essays)
+        stem_features = self._stem_dict.transform(essay_set._cleaned_stemmed_essays)
         normal_features = self._normal_dict.transform(essay_set._cleaned_essays)
 
         # Mushes them together and returns
         bag_features = numpy.concatenate((stem_features.toarray(), normal_features.toarray()), axis=1)
         return bag_features.copy()
 
-    def generate_features(self, essay_set):
-        """
-        Generates bag of words, length, and prompt features from an essay set object
-
-        Args:
-            essay_set (EssaySet): the essay set to extract features for
-
-        Returns:
-            Array of features with the following included:
-                - Length Features
-                - Vocabulary Features (both Normal and Stemmed Vocabulary)
-                - Prompt Features
-        """
-        vocabulary_features = self.generate_vocabulary_features(essay_set)
-        length_features = self.generate_length_features(essay_set)
-        prompt_features = self.generate_prompt_features(essay_set)
-
-        # Lumps them all together, copies to solidify, and returns
-        overall_features = numpy.concatenate((length_features, prompt_features, vocabulary_features), axis=1)
-        overall_features = overall_features.copy()
-        return overall_features
-
-    def generate_prompt_features(self, essay_set):
+    def _generate_prompt_features(self, essay_set):
         """
         Generates prompt based features from an essay set object and internal prompt variable.
 
@@ -285,85 +216,68 @@ class FeatureExtractor(object):
 
         return prompt_arr.copy()
 
-    def generate_feedback(self, essay_set, features=None):
+    def _get_grammar_errors(self, pos, essays, tokens):
         """
-        Generates feedback for a given set of essays
+        Internal function to get the number of grammar errors in given text
 
         Args:
-            essay_set (EssaySet): The essay set that will have feedback assigned to it.
+            pos: list of pos values for an essay set
+            essays: list of essay texts
+            tokens: list of the lists of the tokens in each essay
 
-        Kwargs:
-            features (list of feature): optionally, a matrix of features extracted from e_set using FeatureExtractor
-
-
+        Returns:
+            Tuple of the form (good_grammar_ratios, bad_pos_positions)
+                The former is a list of each essay's "good grammar ratio", which is not very well defined
+                The latter is a list of lists of each essay's grammatical mistakes as a location in its tokens
         """
-        #TODO This is still bad.
+        good_grammar_ratios = []
+        min_pos_seq = 2
+        max_pos_seq = 4
+        bad_pos_positions = []
+        for i in xrange(0, len(essays)):
+            pos_seq = [tag[1] for tag in pos[i]]
+            pos_ngrams = util_functions.ngrams(pos_seq, min_pos_seq, max_pos_seq)
+            long_pos_ngrams = [z for z in pos_ngrams if z.count(' ') == (max_pos_seq - 1)]
+            bad_pos_tuples = [[z, z + max_pos_seq] for z in xrange(0, len(long_pos_ngrams)) if
+                              long_pos_ngrams[z] not in self._good_pos_ngrams]
+            bad_pos_tuples.sort(key=operator.itemgetter(1))
+            to_delete = []
+            for m in reversed(xrange(len(bad_pos_tuples) - 1)):
+                start, end = bad_pos_tuples[m]
+                for j in xrange(m + 1, len(bad_pos_tuples)):
+                    lstart, lend = bad_pos_tuples[j]
+                    if lstart >= start and lstart <= end:
+                        bad_pos_tuples[m][1] = bad_pos_tuples[j][1]
+                        to_delete.append(j)
 
-        # Set ratio to modify thresholds for grammar/spelling errors
-        modifier_ratio = 1.05
-        # GBW TODO: This might be wrong.
-        # Calc number of grammar and spelling errors per character
-        set_grammar, bad_pos_positions = self._get_grammar_errors(essay_set._pos, essay_set._text, essay_set._tokens)
-        set_grammar_per_character = [
-            set_grammar[m] / float(
-                len(essay_set._cleaned_essays[m]) + .1) for m in xrange(0, len(essay_set._cleaned_essays)
-            )
-        ]
+            fixed_bad_pos_tuples = [bad_pos_tuples[z] for z in xrange(0, len(bad_pos_tuples)) if z not in to_delete]
+            bad_pos_positions.append(fixed_bad_pos_tuples)
+            overlap_ngrams = [z for z in pos_ngrams if z in self._good_pos_ngrams]
+            if (len(pos_ngrams) - len(overlap_ngrams)) > 0:
+                divisor = len(pos_ngrams) / len(pos_seq)
+            else:
+                divisor = 1
+            if divisor == 0:
+                divisor = 1
+            good_grammar_ratio = (len(pos_ngrams) - len(overlap_ngrams)) / divisor
+            good_grammar_ratios.append(good_grammar_ratio)
+        return good_grammar_ratios, bad_pos_positions
 
-        set_spell_errors_per_character = [
-            essay_set._spelling_errors[m] / float(
-                len(essay_set._cleaned_essays[m]) + .1) for m in xrange(0, len(essay_set._cleaned_essays)
-            )
-        ]
+    def _get_good_pos_ngrams(self):
+        """
+        Gets a list of grammatically correct part of speech sequences from an input file called essaycorpus.txt
+        Returns the list and caches the file
 
-        # Iterate through essays and create a feedback dictionary for each
-        all_feedback = []
-        for m in xrange(0, len(essay_set._text)):
-            #Be very careful about changing these messages!
-            individual_feedback = {'grammar': "Grammar: Ok.",
-                                   'spelling': "Spelling: Ok.",
-                                   'markup_text': "",
-                                   'grammar_per_char': set_grammar_per_character[m],
-                                   'spelling_per_char': set_spell_errors_per_character[m],
-                                   'too_similar_to_prompt': False,
-            }
-            markup_tokens = essay_set._markup_text[m].split(" ")
-
-            # This loop ensures that sequences of bad grammar get put together into one sequence instead of staying
-            # disjointed
-            bad_pos_starts = [z[0] for z in bad_pos_positions[m]]
-            bad_pos_ends = [z[1] - 1 for z in bad_pos_positions[m]]
-            for z in xrange(0, len(markup_tokens)):
-                if z in bad_pos_starts:
-                    markup_tokens[z] = '<bg>' + markup_tokens[z]
-                elif z in bad_pos_ends:
-                    markup_tokens[z] += "</bg>"
-            if len(bad_pos_ends) > 0 and len(bad_pos_starts) > 0 and len(markup_tokens) > 1:
-                if max(bad_pos_ends) > (len(markup_tokens) - 1) and max(bad_pos_starts) < (len(markup_tokens) - 1):
-                    markup_tokens[len(markup_tokens) - 1] += "</bg>"
-
-            # Display messages if grammar/spelling errors greater than average in training set
-            if set_grammar_per_character[m] > (self._grammar_errors_per_character * modifier_ratio):
-                individual_feedback['grammar'] = "Grammar: More grammar errors than average."
-            if set_spell_errors_per_character[m] > (self._spell_errors_per_character * modifier_ratio):
-                individual_feedback['spelling'] = "Spelling: More spelling errors than average."
-
-            # Test topicality by calculating # of on topic words per character and comparing to the training set
-            # mean.  Requires features to be passed in
-            if features is not None:
-                f_row_sum = numpy.sum(features[m, 12:])
-                f_row_prop = f_row_sum / len(essay_set._text[m])
-                if f_row_prop < (self._mean_f_prop / 1.5) or len(essay_set._text[m]) < 20:
-                    individual_feedback['topicality'] = "Topicality: Essay may be off topic."
-
-                if (features[m, 9] > .6):
-                    individual_feedback['prompt_overlap'] = "Prompt Overlap: Too much overlap with prompt."
-                    individual_feedback['too_similar_to_prompt'] = True
-                    log.debug(features[m, 9])
-
-            # Create string representation of markup text
-            markup_string = " ".join(markup_tokens)
-            individual_feedback['markup_text'] = markup_string
-            all_feedback.append(individual_feedback)
-
-        return all_feedback
+        Returns:
+            A list of all grammatically correct parts of speech.
+        """
+        if os.path.isfile(NGRAM_PATH):
+            good_pos_ngrams = pickle.load(open(NGRAM_PATH, 'rb'))
+        else:
+            # Hard coded an incomplete list in case the needed files cannot be found
+            good_pos_ngrams = ['NN PRP', 'NN PRP .', 'NN PRP . DT', 'PRP .', 'PRP . DT', 'PRP . DT NNP', '. DT',
+                               '. DT NNP', '. DT NNP NNP', 'DT NNP', 'DT NNP NNP', 'DT NNP NNP NNP', 'NNP NNP',
+                               'NNP NNP NNP', 'NNP NNP NNP NNP', 'NNP NNP NNP .', 'NNP NNP .', 'NNP NNP . TO',
+                               'NNP .', 'NNP . TO', 'NNP . TO NNP', '. TO', '. TO NNP', '. TO NNP NNP',
+                               'TO NNP', 'TO NNP NNP']
+        return good_pos_ngrams

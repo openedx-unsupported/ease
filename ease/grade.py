@@ -66,36 +66,15 @@ def grade(grader_data, submission):
     grader_features = None
     try:
         grader_features = extractor.generate_features(grader_set)
-        feedback = extractor.generate_feedback(grader_set, grader_features)[0]
         results['score'] = int(model.predict(grader_features)[0])
     except:
         error_message = "Could not extract features and score essay."
         log.exception(error_message)
         results['errors'].append(error_message)
 
-    # If we have errors above, we do not continue here, but return the dictionary of failure
+    # We have gotten through without an error, so we have been successful
     if len(results['errors']) < 0:
-
-        # We have gotten through without an error, so we have been successful
         results['success'] = True
-
-        # If the essay is just a copy of the prompt (or too similar), return a 0 as the score
-        if 'too_similar_to_prompt' in feedback and feedback['too_similar_to_prompt']:
-            results['score'] = 0
-
-        # Generate feedback, identifying a number of explicable problem areas
-        results['feedback'] = {
-            'spelling': feedback['spelling'],
-            'grammar': feedback['grammar'],
-            'markup-text': feedback['markup_text'],
-        }
-
-        if 'topicality' in feedback and 'prompt_overlap' in feedback:
-            results['feedback'].update({
-                'topicality': feedback['topicality'],
-                'prompt-overlap': feedback['prompt_overlap'],
-            })
-
     # If we get here, that means there was 1+ error above. Set success to false and return
     else:
         results['success'] = False

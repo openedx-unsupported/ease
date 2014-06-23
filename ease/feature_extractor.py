@@ -74,8 +74,8 @@ class FeatureExtractor(object):
 
     def get_good_pos_ngrams(self):
         """
-        Gets a list of gramatically correct part of speech sequences from an input file called essaycorpus.txt
-        Returns the list and caches the file
+        Gets a set of gramatically correct part of speech sequences from an input file called essaycorpus.txt
+        Returns the set and caches the file
         """
         if(os.path.isfile(NGRAM_PATH)):
             good_pos_ngrams = pickle.load(open(NGRAM_PATH, 'rb'))
@@ -92,7 +92,7 @@ class FeatureExtractor(object):
              'NNP .', 'NNP . TO', 'NNP . TO NNP', '. TO', '. TO NNP', '. TO NNP NNP',
              'TO NNP', 'TO NNP NNP']
 
-        return good_pos_ngrams
+        return set(good_pos_ngrams)
 
     def _get_grammar_errors(self,pos,text,tokens):
         """

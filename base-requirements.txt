@@ -5,6 +5,6 @@
 # every time.
 
 lxml==3.0.1
-path.py==3.0
+path.py
 pytz==2015.2
 fisher==0.1.4

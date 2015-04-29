@@ -6,5 +6,5 @@
 
 lxml==3.0.1
 path.py==3.0
-pytz==2012h
+pytz==2015.2
 fisher==0.1.4

@@ -34,7 +34,7 @@ def load_requirements(*requirements_paths):
 
 setup(
     name = "ease",
-    version = "0.1.3",
+    version = "0.1.4",
     packages=['ease'],
     package_data = {
         '': ['*.txt', '*.rst', '*.p', '*.zip'],
@@ -46,8 +46,20 @@ setup(
     keywords = "ml machine learning nlp essay education",
     url = "https://github.com/edx/ease",
     include_package_data = True,
-    install_requires=load_requirements(
-        "pre-requirements.txt", "base-requirements.txt", "requirements.txt"
+    install_requires=[
+        'numpy',
+        'lxml',
+        'path.py',
+        'pytz',
+        'fisher',
+        'scipy',
+        'scikit-learn',
+        'nltk',
+    ],
+    tests_require=load_requirements(
+        "pre-requirements.txt",
+        "base-requirements.txt",
+        "requirements.txt",
+        "dev-requirements.txt",
     ),
-    tests_require=load_requirements("dev-requirements.txt"),
 )

@@ -18,6 +18,7 @@ def is_requirement(line):
         line.startswith('git+')
     )
 
+
 def load_requirements(*requirements_paths):
     """
     Load all requirements from the specified requirements files.
@@ -33,19 +34,19 @@ def load_requirements(*requirements_paths):
 
 
 setup(
-    name = "ease",
-    version = "0.1.3",
+    name="ease",
+    version="0.1.4",
     packages=['ease'],
-    package_data = {
+    package_data={
         '': ['*.txt', '*.rst', '*.p', '*.zip'],
-        },
-    author = "Vik Paruchuri",
-    author_email = "vik@edx.org",
-    description = "Machine learning based automated text classification library.  Useful for essay scoring and other tasks.  Please see https://github.com/edx/discern for an API wrapper of this code.",
-    license = "AGPL",
-    keywords = "ml machine learning nlp essay education",
-    url = "https://github.com/edx/ease",
-    include_package_data = True,
+    },
+    author="Vik Paruchuri",
+    author_email="vik@edx.org",
+    description="Machine learning based automated text classification library.  Useful for essay scoring and other tasks.  Please see https://github.com/edx/discern for an API wrapper of this code.",
+    license="AGPL",
+    keywords="ml machine learning nlp essay education",
+    url="https://github.com/edx/ease",
+    include_package_data=True,
     install_requires=load_requirements(
         "pre-requirements.txt", "base-requirements.txt", "requirements.txt"
     ),

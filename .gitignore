@@ -3,3 +3,11 @@ __pycache__/
 models/
 *.pyc
 *~
+tests/
+_build/
+build/
+dist/
+machine_learning.egg-info/
+ease.egg-info/
+*.egg
+

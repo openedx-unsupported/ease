@@ -1,4 +1,4 @@
 # Numpy needs to be installed separately from Scipy,
 # so we can't include them in the same requirements file.
 
-numpy==1.6.2
+numpy==1.16.5

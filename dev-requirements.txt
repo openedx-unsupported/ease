@@ -1,8 +1,0 @@
-# Test and doc requirements
-
-coverage==3.5.3
-django-sphinx-autodoc
-mock==0.8.0
-nose==1.2.1
-pylint==0.26.0
-sphinx

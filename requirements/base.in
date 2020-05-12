@@ -1,10 +1,13 @@
+# Core requirements for using this package
 # Most of the requirements, except for the ones
 # that take a long time to install and have pre-built
 # binaries on Ubuntu.  This allows us to speed up the
 # test builds, since we don't need to recompile numpy/scipy/nltk/scikit
 # every time.
 
-lxml==3.4.4
-path.py
-pytz==2015.2
-fisher==0.1.4
+-c constraints.txt
+
+lxml
+path
+pytz
+fisher

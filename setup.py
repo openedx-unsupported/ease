@@ -1,23 +1,6 @@
 from setuptools import setup, find_packages
 
 
-def is_requirement(line):
-    """
-    Return True if the requirement line is a package requirement;
-    that is, it is not blank, a comment, or editable.
-    """
-    # Remove whitespace at the start/end of the line
-    line = line.strip()
-
-    # Skip blank lines, comments, and editable installs
-    return not (
-        line == '' or
-        line.startswith('-r') or
-        line.startswith('#') or
-        line.startswith('-e') or
-        line.startswith('git+')
-    )
-
 def load_requirements(*requirements_paths):
     """
     Load all requirements from the specified requirements files.
@@ -25,12 +8,20 @@ def load_requirements(*requirements_paths):
     """
     requirements = set()
     for path in requirements_paths:
-        requirements.update(
-            line.strip() for line in open(path).readlines()
-            if is_requirement(line)
-        )
+        with open(path) as reqs:
+            requirements.update(
+                line.split('#')[0].strip() for line in reqs
+                if is_requirement(line.strip())
+            )
     return list(requirements)
 
+
+def is_requirement(line):
+    """
+    Return True if the requirement line is a package requirement;
+    that is, it is not blank, a comment, a URL, or an included file.
+    """
+    return line and not line.startswith(('-r', '#', '-e', 'git+', '-c'))
 
 setup(
     name = "ease",
@@ -46,8 +37,6 @@ setup(
     keywords = "ml machine learning nlp essay education",
     url = "https://github.com/edx/ease",
     include_package_data = True,
-    install_requires=load_requirements(
-        "pre-requirements.txt", "base-requirements.txt", "requirements.txt"
-    ),
-    tests_require=load_requirements("dev-requirements.txt"),
+    install_requires=load_requirements('requirements/production.in'),
+    tests_require=load_requirements('requirements/test.in'),
 )

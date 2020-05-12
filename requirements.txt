@@ -1,4 +1,0 @@
--r base-requirements.txt
-scipy==0.14.0
-scikit-learn==0.12.1
--e git+https://github.com/edx/nltk.git@2.0.6#egg=nltk

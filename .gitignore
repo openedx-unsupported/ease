@@ -6,6 +6,7 @@ models/
 _build/
 build/
 dist/
+venv/
 machine_learning.egg-info/
 ease.egg-info/
 *.egg

@@ -1,6 +1,4 @@
-# added dist: trusty which is ubuntu 14 , because some packages in apt-packages.txt ie libblas3gf , liblapack3gf can
-#  only be installed on ubuntu 14
-dist: trusty
+dist: xenial
 language: python
 python:
   - 3.5

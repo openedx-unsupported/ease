@@ -2,6 +2,7 @@
 Functions to score specified data using specified ML models
 """
 
+from __future__ import absolute_import
 import sys
 import pickle
 import os
@@ -13,13 +14,13 @@ base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
 
 #Depend on base path to be imported
-from essay_set import EssaySet
-import predictor_extractor
-import predictor_set
-import util_functions
+from .essay_set import EssaySet
+from . import predictor_extractor
+from . import predictor_set
+from . import util_functions
 
 #Imports needed to unpickle grader data
-import feature_extractor
+from . import feature_extractor
 import sklearn.ensemble
 import math
 

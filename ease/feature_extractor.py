@@ -2,6 +2,7 @@
 Extracts features from training set and test set essays
 """
 
+from __future__ import absolute_import
 import numpy
 import re
 import nltk
@@ -13,11 +14,12 @@ from itertools import chain
 import copy
 import operator
 import logging
+from six.moves import range
 
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
-from essay_set import EssaySet
-import util_functions
+from .essay_set import EssaySet
+from . import util_functions
 
 if not base_path.endswith("/"):
     base_path=base_path+"/"
@@ -106,22 +108,22 @@ class FeatureExtractor(object):
         min_pos_seq=2
         max_pos_seq=4
         bad_pos_positions=[]
-        for i in xrange(0, len(text)):
+        for i in range(0, len(text)):
             pos_seq = [tag[1] for tag in pos[i]]
             pos_ngrams = util_functions.ngrams(pos_seq, min_pos_seq, max_pos_seq)
             long_pos_ngrams=[z for z in pos_ngrams if z.count(' ')==(max_pos_seq-1)]
-            bad_pos_tuples=[[z,z+max_pos_seq] for z in xrange(0,len(long_pos_ngrams)) if long_pos_ngrams[z] not in self._good_pos_ngrams]
+            bad_pos_tuples=[[z,z+max_pos_seq] for z in range(0,len(long_pos_ngrams)) if long_pos_ngrams[z] not in self._good_pos_ngrams]
             bad_pos_tuples.sort(key=operator.itemgetter(1))
             to_delete=[]
-            for m in reversed(xrange(len(bad_pos_tuples)-1)):
+            for m in reversed(range(len(bad_pos_tuples)-1)):
                 start, end = bad_pos_tuples[m]
-                for j in xrange(m+1, len(bad_pos_tuples)):
+                for j in range(m+1, len(bad_pos_tuples)):
                     lstart, lend = bad_pos_tuples[j]
                     if lstart >= start and lstart <= end:
                         bad_pos_tuples[m][1]=bad_pos_tuples[j][1]
                         to_delete.append(j)
 
-            fixed_bad_pos_tuples=[bad_pos_tuples[z] for z in xrange(0,len(bad_pos_tuples)) if z not in to_delete]
+            fixed_bad_pos_tuples=[bad_pos_tuples[z] for z in range(0,len(bad_pos_tuples)) if z not in to_delete]
             bad_pos_positions.append(fixed_bad_pos_tuples)
             overlap_ngrams = [z for z in pos_ngrams if z in self._good_pos_ngrams]
             if (len(pos_ngrams)-len(overlap_ngrams))>0:
@@ -147,10 +149,10 @@ class FeatureExtractor(object):
         comma_count = [e.count(",") for e in text]
         ap_count = [e.count("'") for e in text]
         punc_count = [e.count(".") + e.count("?") + e.count("!") for e in text]
-        chars_per_word = [lengths[m] / float(word_counts[m]) for m in xrange(0, len(text))]
+        chars_per_word = [lengths[m] / float(word_counts[m]) for m in range(0, len(text))]
 
         good_pos_tags,bad_pos_positions= self._get_grammar_errors(e_set._pos,e_set._text,e_set._tokens)
-        good_pos_tag_prop = [good_pos_tags[m] / float(word_counts[m]) for m in xrange(0, len(text))]
+        good_pos_tag_prop = [good_pos_tags[m] / float(word_counts[m]) for m in range(0, len(text))]
 
         length_arr = numpy.array((
         lengths, word_counts, comma_count, ap_count, punc_count, chars_per_word, good_pos_tags,
@@ -236,12 +238,12 @@ class FeatureExtractor(object):
 
         #Calc number of grammar and spelling errors per character
         set_grammar,bad_pos_positions=self._get_grammar_errors(e_set._pos,e_set._text,e_set._tokens)
-        set_grammar_per_character=[set_grammar[m]/float(len(e_set._text[m])+.1) for m in xrange(0,len(e_set._text))]
-        set_spell_errors_per_character=[e_set._spelling_errors[m]/float(len(e_set._text[m])+.1) for m in xrange(0,len(e_set._text))]
+        set_grammar_per_character=[set_grammar[m]/float(len(e_set._text[m])+.1) for m in range(0,len(e_set._text))]
+        set_spell_errors_per_character=[e_set._spelling_errors[m]/float(len(e_set._text[m])+.1) for m in range(0,len(e_set._text))]
 
         #Iterate through essays and create a feedback dict for each
         all_feedback=[]
-        for m in xrange(0,len(e_set._text)):
+        for m in range(0,len(e_set._text)):
             #Be very careful about changing these messages!
             individual_feedback={'grammar' : "Grammar: Ok.",
                                  'spelling' : "Spelling: Ok.",
@@ -256,7 +258,7 @@ class FeatureExtractor(object):
             #disjointed
             bad_pos_starts=[z[0] for z in bad_pos_positions[m]]
             bad_pos_ends=[z[1]-1 for z in bad_pos_positions[m]]
-            for z in xrange(0,len(markup_tokens)):
+            for z in range(0,len(markup_tokens)):
                 if z in bad_pos_starts:
                     markup_tokens[z]='<bg>' + markup_tokens[z]
                 elif z in bad_pos_ends:

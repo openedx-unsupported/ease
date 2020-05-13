@@ -1,6 +1,9 @@
 #Collection of misc functions needed to support essay_set.py and feature_extractor.py.
 #Requires aspell to be installed and added to the path
+from __future__ import absolute_import
 from fisher import pvalue
+from six.moves import range
+from six.moves import zip
 
 aspell_path = "aspell"
 import re
@@ -131,7 +134,7 @@ def spell_correct(string):
     already_subbed=[]
     for i in range(0, len(incorrect_words)):
         sub_pat = r"\b" + incorrect_words[i] + r"\b"
-        sub_comp = re.compile(sub_pat)
+        sub_comp = re.compile(sub_pat, flags=re.ASCII)
         newstring = re.sub(sub_comp, correct_spelling[i], newstring)
         if incorrect_words[i] not in already_subbed:
             markup_string=re.sub(sub_comp,'<bs>' + incorrect_words[i] + "</bs>", markup_string)
@@ -150,8 +153,8 @@ def ngrams(tokens, min_n, max_n):
     """
     all_ngrams = list()
     n_tokens = len(tokens)
-    for i in xrange(n_tokens):
-        for j in xrange(i + min_n, min(n_tokens, i + max_n) + 1):
+    for i in range(n_tokens):
+        for j in range(i + min_n, min(n_tokens, i + max_n) + 1):
             all_ngrams.append(" ".join(tokens[i:j]))
     return all_ngrams
 
@@ -241,13 +244,13 @@ def edit_distance(s1, s2):
     d = {}
     lenstr1 = len(s1)
     lenstr2 = len(s2)
-    for i in xrange(-1, lenstr1 + 1):
+    for i in range(-1, lenstr1 + 1):
         d[(i, -1)] = i + 1
-    for j in xrange(-1, lenstr2 + 1):
+    for j in range(-1, lenstr2 + 1):
         d[(-1, j)] = j + 1
 
-    for i in xrange(lenstr1):
-        for j in xrange(lenstr2):
+    for i in range(lenstr1):
+        for j in range(lenstr2):
             if s1[i] == s2[j]:
                 cost = 0
             else:
@@ -289,11 +292,11 @@ def gen_cv_preds(clf, arr, sel_score, num_chunks=3):
         range_max = ((i + 1) * cv_len)
         if i == num_chunks - 1:
             range_max = len(sel_score)
-        chunks.append(range(range_min, range_max))
+        chunks.append(list(range(range_min, range_max)))
     preds = []
     set_score = numpy.asarray(sel_score, dtype=numpy.int)
-    chunk_vec = numpy.asarray(range(0, len(chunks)))
-    for i in xrange(0, len(chunks)):
+    chunk_vec = numpy.asarray(list(range(0, len(chunks))))
+    for i in range(0, len(chunks)):
         loop_inds = list(
             chain.from_iterable([chunks[int(z)] for z, m in enumerate(range(0, len(chunks))) if int(z) != i]))
         sim_fit = clf.fit(arr[loop_inds], set_score[loop_inds])
@@ -436,7 +439,7 @@ def get_wordnet_syns(word):
     pat = re.compile(regex)
     synset = nltk.wordnet.wordnet.synsets(word)
     for ss in synset:
-        for swords in ss.lemma_names:
+        for swords in ss.lemma_names():
             synonyms.append(pat.sub(" ", swords.lower()))
     synonyms = f7(synonyms)
     return synonyms

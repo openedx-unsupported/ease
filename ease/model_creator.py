@@ -1,5 +1,6 @@
 #Provides interface functions to create and save models
 
+from __future__ import absolute_import
 import numpy
 import re
 import nltk
@@ -9,15 +10,16 @@ import pickle
 import os
 import sklearn.ensemble
 from itertools import chain
+from six.moves import range
 
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
 
-from essay_set import EssaySet
-import util_functions
-import feature_extractor
+from .essay_set import EssaySet
+from . import util_functions
+from . import feature_extractor
 import logging
-import predictor_extractor
+from . import predictor_extractor
 
 log=logging.getLogger()
 
@@ -30,7 +32,7 @@ def read_in_test_data(filename):
     tid, e_set, score, score2, text = [], [], [], [], []
     combined_raw = open(filename).read()
     raw_lines = combined_raw.splitlines()
-    for row in xrange(1, len(raw_lines)):
+    for row in range(1, len(raw_lines)):
         tid1, set1, score1, score12, text1 = raw_lines[row].strip().split("\t")
         tid.append(int(tid1))
         text.append(text1)
@@ -60,7 +62,7 @@ def read_in_test_data_twocolumn(filename,sep=","):
     score, text = [], []
     combined_raw = open(filename).read()
     raw_lines = combined_raw.splitlines()
-    for row in xrange(1, len(raw_lines)):
+    for row in range(1, len(raw_lines)):
         score1, text1 = raw_lines[row].strip().split("\t")
         text.append(text1)
         score.append(int(score1))
@@ -77,7 +79,7 @@ def create_essay_set(text, score, prompt_string, generate_additional=True):
     Generate_additional indicates whether to generate additional essays at the minimum score point or not.
     """
     x = EssaySet()
-    for i in xrange(0, len(text)):
+    for i in range(0, len(text)):
         x.add_essay(text[i], score[i])
         if score[i] == min(score) and generate_additional == True:
             x.generate_additional_essays(x._clean_text[len(x._clean_text) - 1], score[i])

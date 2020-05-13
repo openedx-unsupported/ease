@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from unittest import TestCase
 from nose.tools import assert_equal
 from mock import patch

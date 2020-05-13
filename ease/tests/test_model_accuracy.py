@@ -1,9 +1,12 @@
+from __future__ import absolute_import
 import unittest
 import os
 from ease import create, grade
 import random
 import logging
 import json
+import six
+from six.moves import range
 
 log = logging.getLogger(__name__)
 
@@ -51,7 +54,7 @@ class PolarityLoader(DataLoader):
         neg = self.load_text_files(directories[0])
         pos = self.load_text_files(directories[1])
 
-        scores = [0 for i in xrange(0,len(neg))] + [1 for i in xrange(0,len(pos))]
+        scores = [0 for i in range(0,len(neg))] + [1 for i in range(0,len(pos))]
         text = neg + pos
 
         return scores, text
@@ -76,14 +79,14 @@ class JSONLoader(DataLoader):
 
         all_scores = []
         all_text = []
-        for i in xrange(0,len(data)):
+        for i in range(0,len(data)):
             scores = [d['score'] for d in data[i]]
             text = [d['text'] for d in data[i]]
 
             if isinstance(scores[0], list):
                 new_text = []
                 new_scores = []
-                for i in xrange(0,len(scores)):
+                for i in range(0,len(scores)):
                     text = scores[i]
                     s = scores[i]
                     for j in s:
@@ -119,7 +122,7 @@ class Grader():
         self.model_data = model_data
 
     def grade(self, submission):
-        if isinstance(submission, basestring):
+        if isinstance(submission, six.string_types):
             return grade.grade(self.model_data, submission)
         else:
             return grade.grade_generic(self.model_data, submission.get('numeric_values', []), submission.get('textual_values', []))
@@ -141,7 +144,7 @@ class GenericTest(object):
         random.seed(1)
         shuffled_scores = []
         shuffled_text = []
-        indices = [i for i in xrange(0,len(scores))]
+        indices = [i for i in range(0,len(scores))]
         random.shuffle(indices)
         for i in indices:
             shuffled_scores.append(scores[i])
@@ -174,11 +177,11 @@ class GenericTest(object):
     def generic_model_creation_and_grading(self):
         log.info(self.scores)
         log.info(self.text)
-        score_subset = [random.randint(0,100) for i in xrange(0,min([QUICK_TEST_LIMIT, len(self.scores)]))]
+        score_subset = [random.randint(0,100) for i in range(0,min([QUICK_TEST_LIMIT, len(self.scores)]))]
         text_subset = self.text[:QUICK_TEST_LIMIT]
         text_subset = {
             'textual_values' : [[t] for t in text_subset],
-            'numeric_values' : [[1] for i in xrange(0,len(text_subset))]
+            'numeric_values' : [[1] for i in range(0,len(text_subset))]
         }
         model_creator = ModelCreator(score_subset, text_subset)
         results = model_creator.create_model()
@@ -230,7 +233,7 @@ class JSONTest(GenericTest):
 def test_loop():
     json_test = JSONTest()
     scores, text = json_test.setUp()
-    for i in xrange(0,len(scores)):
+    for i in range(0,len(scores)):
         json_test.generic_setup(scores[i], text[i])
         yield json_test.model_creation_and_grading
         yield json_test.scoring_accuracy

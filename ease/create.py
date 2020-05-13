@@ -2,10 +2,12 @@
 Functions that create a machine learning model from training data
 """
 
+from __future__ import absolute_import
 import os
 import sys
 import logging
 import numpy
+from six.moves import range
 
 #Define base path and add to sys path
 base_path = os.path.dirname(__file__)
@@ -14,10 +16,10 @@ one_up_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..//'))
 sys.path.append(one_up_path)
 
 #Import modules that are dependent on the base path
-import model_creator
-import util_functions
-import predictor_set
-import predictor_extractor
+from . import model_creator
+from . import util_functions
+from . import predictor_set
+from . import predictor_extractor
 from datetime import datetime
 import json
 
@@ -31,7 +33,7 @@ def dump_input_data(text, score):
         prefix = "test-case-"
         filename = prefix + time_suffix + ".json"
         json_data = []
-        for i in xrange(0, len(text)):
+        for i in range(0, len(text)):
             json_data.append({'text' : text[i], 'score' : score[i]})
         with open(file_path + filename, 'w+') as outfile:
             json.dump(json_data, outfile)
@@ -111,7 +113,7 @@ def create_generic(numeric_values, textual_values, target, algorithm = util_func
     try:
         #Initialize a predictor set object that encapsulates all of the text and numeric predictors
         pset = predictor_set.PredictorSet(essaytype="train")
-        for i in xrange(0, len(numeric_values)):
+        for i in range(0, len(numeric_values)):
             pset.add_row(numeric_values[i], textual_values[i], target[i])
     except:
         msg = "predictor set creation failed."

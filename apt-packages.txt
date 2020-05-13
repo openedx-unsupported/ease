@@ -8,4 +8,5 @@ libatlas-base-dev
 libxml2-dev
 libxslt1-dev
 aspell
+aspell-en
 python

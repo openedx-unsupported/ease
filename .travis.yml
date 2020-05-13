@@ -3,6 +3,9 @@ language: python
 python:
   - 3.5
   - 3.8
+matrix:
+  allow_failures:
+    - python: 3.8
 virtualenv:
   system_site_packages: true
 before_install:

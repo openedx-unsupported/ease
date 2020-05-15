@@ -2,12 +2,11 @@ python-pip
 gcc
 g++
 gfortran
-libblas3gf
 libblas-dev
-liblapack3gf
 liblapack-dev
 libatlas-base-dev
 libxml2-dev
 libxslt1-dev
 aspell
+aspell-en
 python

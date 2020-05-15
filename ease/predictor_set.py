@@ -1,14 +1,16 @@
+from __future__ import absolute_import
 import numpy
 import nltk
 import sys
 import random
 import os
 import logging
-import essay_set
+from . import essay_set
+from six.moves import range
 
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
-import util_functions
+from . import util_functions
 
 if not base_path.endswith("/"):
     base_path=base_path+"/"
@@ -31,7 +33,7 @@ class PredictorSet(object):
 
     def add_row(self, numeric_features, textual_features, target):
         #Basic input checking
-        if not isinstance(target, (int, long, float)):
+        if not isinstance(target, (int, int, float)):
             error_message = "Target is not a numeric value."
             log.exception(error_message)
             raise util_functions.InputError(target, error_message)
@@ -65,7 +67,7 @@ class PredictorSet(object):
 
         #Now check to see if text features and numeric features are individually correct
 
-        for i in xrange(0,len(numeric_features)):
+        for i in range(0,len(numeric_features)):
             try:
                 numeric_features[i] = float(numeric_features[i])
             except:
@@ -74,7 +76,7 @@ class PredictorSet(object):
                 raise util_functions.InputError(numeric_features, error_message)
 
 
-        for i in xrange(0,len(textual_features)):
+        for i in range(0,len(textual_features)):
             try:
                 textual_features[i] = str(textual_features[i].encode('ascii', 'ignore'))
             except:
@@ -84,7 +86,7 @@ class PredictorSet(object):
 
         #Create essay sets for textual features if needed
         if len(self._textual_features)==0:
-            for i in xrange(0,len(textual_features)):
+            for i in range(0,len(textual_features)):
                 self._essay_sets.append(essay_set.EssaySet(essaytype=self._type))
 
         #Add numeric and textual features
@@ -95,6 +97,6 @@ class PredictorSet(object):
         self._target.append(target)
 
         #Add textual features to essay sets
-        for i in xrange(0,len(textual_features)):
+        for i in range(0,len(textual_features)):
             self._essay_sets[i].add_essay(textual_features[i], target)
 

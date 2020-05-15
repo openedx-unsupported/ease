@@ -3,16 +3,19 @@ Defines an essay set object, which encapsulates essays from training and test se
 Performs spell and grammar checking, tokenization, and stemming.
 """
 
+from __future__ import absolute_import
 import numpy
 import nltk
 import sys
 import random
 import os
 import logging
+import six
+from six.moves import range
 
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
-import util_functions
+from . import util_functions
 
 if not base_path.endswith("/"):
     base_path = base_path + "/"
@@ -73,7 +76,7 @@ class EssaySet(object):
             # Nothing needed here, will return error in any case.
             log.exception("Invalid type for essay score : {0} or essay text : {1}".format(type(essay_score), type(essay_text)))
 
-        if isinstance(essay_score, int) and isinstance(essay_text, basestring)\
+        if isinstance(essay_score, int) and isinstance(essay_text, six.string_types)\
                 and (essay_generated == 0 or essay_generated == 1):
             self._id.append(max_id + 1)
             self._score.append(essay_score)
@@ -113,7 +116,7 @@ class EssaySet(object):
         prompt_text should be a string.
         Returns the prompt as a confirmation.
         """
-        if(isinstance(prompt_text, basestring)):
+        if(isinstance(prompt_text, six.string_types)):
             self._prompt = util_functions.sub_chars(prompt_text)
             ret = self._prompt
         else:
@@ -144,5 +147,5 @@ class EssaySet(object):
                 if len(all_syns[z]) > i and (dictionary == None or e_toks[z] in dictionary):
                     syn_toks[z] = all_syns[z][i]
             new_essays.append(" ".join(syn_toks))
-        for z in xrange(0, len(new_essays)):
+        for z in range(0, len(new_essays)):
             self.add_essay(new_essays[z], e_score, 1)

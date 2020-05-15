@@ -2,6 +2,8 @@
 Extracts features for an arbitrary set of textual and numeric inputs
 """
 
+from __future__ import absolute_import
+from __future__ import print_function
 import numpy
 import re
 import nltk
@@ -14,13 +16,14 @@ import copy
 import operator
 import logging
 import math
-from feature_extractor import FeatureExtractor
+from .feature_extractor import FeatureExtractor
+from six.moves import range
 
 #Append to path and then import things that depend on path
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
-from essay_set import EssaySet
-import util_functions
+from .essay_set import EssaySet
+from . import util_functions
 
 if not base_path.endswith("/"):
     base_path=base_path+"/"
@@ -54,7 +57,7 @@ class PredictorExtractor(object):
 
         #Ensures that even with a large amount of input textual features, training time stays reasonable
         max_feats2 = int(math.floor(200/div_length))
-        for i in xrange(0,len(p_set._essay_sets)):
+        for i in range(0,len(p_set._essay_sets)):
             self._extractors.append(FeatureExtractor())
             self._extractors[i].initialize_dictionaries(p_set._essay_sets[i], max_feats2=max_feats2)
             self._initialized = True
@@ -72,14 +75,14 @@ class PredictorExtractor(object):
             raise util_functions.InputError(p_set, error_message)
 
         textual_features = []
-        for i in xrange(0,len(p_set._essay_sets)):
+        for i in range(0,len(p_set._essay_sets)):
             textual_features.append(self._extractors[i].gen_feats(p_set._essay_sets[i]))
 
         textual_matrix = numpy.concatenate(textual_features, axis=1)
         predictor_matrix = numpy.array(p_set._numeric_features)
 
-        print textual_matrix.shape
-        print predictor_matrix.shape
+        print(textual_matrix.shape)
+        print(predictor_matrix.shape)
 
         overall_matrix = numpy.concatenate((textual_matrix, predictor_matrix), axis=1)
 

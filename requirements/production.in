@@ -1,0 +1,9 @@
+# Production requirements for using this package
+# Includes packages that take long time to be compiled.
+-c constraints.txt
+
+-r base.txt               # Core dependencies
+
+scipy
+scikit-learn
+-e git+https://github.com/edx/nltk.git@3.0.3#egg=nltk

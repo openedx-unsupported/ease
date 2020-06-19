@@ -3,18 +3,10 @@ language: python
 python:
   - 3.5
   - 3.8
-matrix:
-  allow_failures:
-    - python: 3.8
-virtualenv:
-  system_site_packages: true
 before_install:
   - sudo apt-get update
   - sudo xargs -a apt-packages.txt apt-get install --fix-missing
 install:
   - pip install -r requirements/travis.txt
-  - sudo apt-get install python-matplotlib python-numpy python-scipy python-sklearn
-  - pip install scikit-learn==0.20.4
-  - pip install -e git+https://github.com/edx/nltk.git@3.0.3#egg=nltk
   - travis_retry ./download-nltk-corpus.sh
 script:  nosetests

@@ -2,7 +2,6 @@
 Functions that create a machine learning model from training data
 """
 
-from __future__ import absolute_import
 import os
 import sys
 import logging

@@ -1,6 +1,6 @@
 #Collection of misc functions needed to support essay_set.py and feature_extractor.py.
 #Requires aspell to be installed and added to the path
-from __future__ import absolute_import
+
 from fisher import pvalue
 from six.moves import range
 from six.moves import zip

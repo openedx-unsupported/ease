@@ -2,7 +2,6 @@
 Extracts features from training set and test set essays
 """
 
-from __future__ import absolute_import
 import numpy
 import re
 import nltk

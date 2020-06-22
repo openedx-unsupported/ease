@@ -2,8 +2,6 @@
 Extracts features for an arbitrary set of textual and numeric inputs
 """
 
-from __future__ import absolute_import
-from __future__ import print_function
 import numpy
 import re
 import nltk

@@ -1,6 +1,6 @@
 #Provides interface functions to create and save models
 
-from __future__ import absolute_import
+
 import numpy
 import re
 import nltk

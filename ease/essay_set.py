@@ -3,7 +3,6 @@ Defines an essay set object, which encapsulates essays from training and test se
 Performs spell and grammar checking, tokenization, and stemming.
 """
 
-from __future__ import absolute_import
 import numpy
 import nltk
 import sys

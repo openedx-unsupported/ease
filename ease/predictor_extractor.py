@@ -15,7 +15,6 @@ import operator
 import logging
 import math
 from .feature_extractor import FeatureExtractor
-from six.moves import range
 
 #Append to path and then import things that depend on path
 base_path = os.path.dirname(__file__)

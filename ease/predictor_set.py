@@ -6,7 +6,6 @@ import random
 import os
 import logging
 from . import essay_set
-from six.moves import range
 
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)

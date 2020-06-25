@@ -9,8 +9,6 @@ import sys
 import random
 import os
 import logging
-import six
-from six.moves import range
 
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)
@@ -75,7 +73,7 @@ class EssaySet(object):
             # Nothing needed here, will return error in any case.
             log.exception("Invalid type for essay score : {0} or essay text : {1}".format(type(essay_score), type(essay_text)))
 
-        if isinstance(essay_score, int) and isinstance(essay_text, six.string_types)\
+        if isinstance(essay_score, int) and isinstance(essay_text, str)\
                 and (essay_generated == 0 or essay_generated == 1):
             self._id.append(max_id + 1)
             self._score.append(essay_score)
@@ -115,7 +113,7 @@ class EssaySet(object):
         prompt_text should be a string.
         Returns the prompt as a confirmation.
         """
-        if(isinstance(prompt_text, six.string_types)):
+        if(isinstance(prompt_text, str)):
             self._prompt = util_functions.sub_chars(prompt_text)
             ret = self._prompt
         else:

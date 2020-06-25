@@ -2,8 +2,6 @@
 #Requires aspell to be installed and added to the path
 
 from fisher import pvalue
-from six.moves import range
-from six.moves import zip
 
 aspell_path = "aspell"
 import re
@@ -498,4 +496,4 @@ def getMedian(numericValues):
         lower = theValues[len(theValues) / 2 - 1]
         upper = theValues[len(theValues) / 2]
 
-        return (float(lower + upper)) / 2 
+        return (float(lower + upper)) / 2

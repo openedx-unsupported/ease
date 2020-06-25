@@ -5,8 +5,6 @@ from ease import create, grade
 import random
 import logging
 import json
-import six
-from six.moves import range
 
 log = logging.getLogger(__name__)
 
@@ -122,7 +120,7 @@ class Grader():
         self.model_data = model_data
 
     def grade(self, submission):
-        if isinstance(submission, six.string_types):
+        if isinstance(submission, str):
             return grade.grade(self.model_data, submission)
         else:
             return grade.grade_generic(self.model_data, submission.get('numeric_values', []), submission.get('textual_values', []))

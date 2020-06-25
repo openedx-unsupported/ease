@@ -6,7 +6,6 @@ import os
 import sys
 import logging
 import numpy
-from six.moves import range
 
 #Define base path and add to sys path
 base_path = os.path.dirname(__file__)

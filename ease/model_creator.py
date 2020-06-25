@@ -10,7 +10,6 @@ import pickle
 import os
 import sklearn.ensemble
 from itertools import chain
-from six.moves import range
 
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)

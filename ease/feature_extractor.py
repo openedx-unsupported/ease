@@ -13,7 +13,6 @@ from itertools import chain
 import copy
 import operator
 import logging
-from six.moves import range
 
 base_path = os.path.dirname(__file__)
 sys.path.append(base_path)

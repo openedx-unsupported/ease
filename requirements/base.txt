@@ -5,8 +5,8 @@
 #    make upgrade
 #
 fisher==0.1.9             # via -r requirements/base.in
-importlib-metadata==1.6.1  # via path
-lxml==4.5.1               # via -r requirements/base.in
+importlib-metadata==1.7.0  # via path
+lxml==4.5.2               # via -r requirements/base.in
 path==13.1.0              # via -r requirements/base.in
 pytz==2020.1              # via -r requirements/base.in
 zipp==1.2.0               # via importlib-metadata

@@ -5,5 +5,5 @@
 
 coverage
 mock
-nose
+pytest-cov
 pylint

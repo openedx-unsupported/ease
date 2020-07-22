@@ -9,4 +9,5 @@ before_install:
 install:
   - pip install -r requirements/travis.txt
   - travis_retry ./download-nltk-corpus.sh
-script:  nosetests
+script:
+  - make test

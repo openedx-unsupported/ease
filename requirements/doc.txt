@@ -5,35 +5,32 @@
 #    make upgrade
 #
 alabaster==0.7.12         # via sphinx
-babel==2.8.0              # via sphinx
-certifi==2020.6.20        # via requests
-chardet==3.0.4            # via requests
+babel==2.9.0              # via sphinx
+certifi==2020.12.5        # via requests
+chardet==4.0.0            # via requests
 django-sphinx-autodoc==0.2  # via -r requirements/doc.in
 docutils==0.16            # via sphinx
 fisher==0.1.9             # via -r requirements/base.txt
 idna==2.10                # via requests
 imagesize==1.2.0          # via sphinx
-importlib-metadata==1.7.0  # via -r requirements/base.txt, path
 jinja2==2.11.2            # via sphinx
-lxml==4.5.2               # via -r requirements/base.txt
+lxml==4.6.2               # via -r requirements/base.txt
 markupsafe==1.1.1         # via jinja2
-packaging==20.4           # via sphinx
-path==13.1.0              # via -r requirements/base.txt
-pygments==2.6.1           # via sphinx
+packaging==20.8           # via sphinx
+path==15.0.1              # via -r requirements/base.txt
+pygments==2.7.4           # via sphinx
 pyparsing==2.4.7          # via packaging
-pytz==2020.1              # via -r requirements/base.txt, babel
-requests==2.24.0          # via sphinx
-six==1.15.0               # via packaging
-snowballstemmer==2.0.0    # via sphinx
-sphinx==3.1.2             # via -r requirements/doc.in
+pytz==2020.5              # via -r requirements/base.txt, babel
+requests==2.25.1          # via sphinx
+snowballstemmer==2.1.0    # via sphinx
+sphinx==3.4.3             # via -r requirements/doc.in
 sphinxcontrib-applehelp==1.0.2  # via sphinx
 sphinxcontrib-devhelp==1.0.2  # via sphinx
 sphinxcontrib-htmlhelp==1.0.3  # via sphinx
 sphinxcontrib-jsmath==1.0.1  # via sphinx
 sphinxcontrib-qthelp==1.0.3  # via sphinx
 sphinxcontrib-serializinghtml==1.1.4  # via sphinx
-urllib3==1.25.9           # via requests
-zipp==1.2.0               # via -r requirements/base.txt, importlib-metadata
+urllib3==1.26.3           # via requests
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

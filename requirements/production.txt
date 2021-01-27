@@ -6,12 +6,11 @@
 #
 -e git+https://github.com/edx/nltk.git@3.0.3#egg=nltk  # via -r requirements/production.in
 fisher==0.1.9             # via -r requirements/base.txt
-importlib-metadata==1.7.0  # via -r requirements/base.txt, path
-joblib==0.14.1            # via scikit-learn
-lxml==4.5.2               # via -r requirements/base.txt
+joblib==1.0.0             # via scikit-learn
+lxml==4.6.2               # via -r requirements/base.txt
 numpy==1.16.5             # via -c requirements/constraints.txt, scikit-learn, scipy
-path==13.1.0              # via -r requirements/base.txt
-pytz==2020.1              # via -r requirements/base.txt
-scikit-learn==0.22.2.post1  # via -r requirements/production.in
-scipy==1.4.1              # via -r requirements/production.in, scikit-learn
-zipp==1.2.0               # via -r requirements/base.txt, importlib-metadata
+path==15.0.1              # via -r requirements/base.txt
+pytz==2020.5              # via -r requirements/base.txt
+scikit-learn==0.24.1      # via -r requirements/production.in
+scipy==1.6.0              # via -r requirements/production.in, scikit-learn
+threadpoolctl==2.1.0      # via scikit-learn

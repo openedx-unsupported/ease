@@ -27,7 +27,7 @@ if not base_path.endswith("/"):
 ESSAY_CORPUS_PATH = base_path + "data/essaycorpus.txt"
 ESSAY_COR_TOKENS_PATH = base_path + "data/essay_cor_tokens.p"
 
-class AlgorithmTypes(object):
+class AlgorithmTypes:
     """
     Defines what types of algorithm can be used
     """

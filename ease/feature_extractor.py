@@ -28,7 +28,7 @@ log = logging.getLogger(__name__)
 NGRAM_PATH = base_path + "data/good_pos_ngrams.p"
 ESSAY_CORPUS_PATH = util_functions.ESSAY_CORPUS_PATH
 
-class FeatureExtractor(object):
+class FeatureExtractor:
     def __init__(self):
         self._good_pos_ngrams = self.get_good_pos_ngrams()
         self.dict_initialized = False

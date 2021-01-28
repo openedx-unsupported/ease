@@ -1,4 +1,3 @@
-
 import numpy
 import nltk
 import sys
@@ -16,7 +15,7 @@ if not base_path.endswith("/"):
 
 log=logging.getLogger(__name__)
 
-class PredictorSet(object):
+class PredictorSet:
     def __init__(self, essaytype = "train"):
         """
         Initialize variables and check essay set type
@@ -70,7 +69,7 @@ class PredictorSet(object):
             try:
                 numeric_features[i] = float(numeric_features[i])
             except:
-                error_message = "Numeric feature {0} not numeric.".format(numeric_features[i])
+                error_message = "Numeric feature {} not numeric.".format(numeric_features[i])
                 log.exception(error_message)
                 raise util_functions.InputError(numeric_features, error_message)
 
@@ -79,7 +78,7 @@ class PredictorSet(object):
             try:
                 textual_features[i] = str(textual_features[i].encode('ascii', 'ignore'))
             except:
-                error_message = "Textual feature {0} not string.".format(textual_features[i])
+                error_message = "Textual feature {} not string.".format(textual_features[i])
                 log.exception(error_message)
                 raise util_functions.InputError(textual_features, error_message)
 

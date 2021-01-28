@@ -56,7 +56,7 @@ def grade(grader_data,submission):
         grader_set.add_essay(str(submission),0)
         grader_set.update_prompt(str(grader_data['prompt']))
     except Exception:
-        error_message = "Essay could not be added to essay set:{0}".format(submission)
+        error_message = f"Essay could not be added to essay set:{submission}"
         log.exception(error_message)
         results['errors'].append(error_message)
         has_error=True
@@ -137,7 +137,7 @@ def grade_generic(grader_data, numeric_features, textual_features):
     try:
         grader_set.add_row(numeric_features, textual_features,0)
     except Exception:
-        error_msg = "Row could not be added to predictor set:{0} {1}".format(numeric_features, textual_features)
+        error_msg = f"Row could not be added to predictor set:{numeric_features} {textual_features}"
         log.exception(error_msg)
         results['errors'].append(error_msg)
         has_error=True

@@ -1,7 +1,6 @@
-
 from unittest import TestCase
 from nose.tools import assert_equal
-from mock import patch
+from unittest.mock import patch
 from ease.util_functions import spell_correct
 
 

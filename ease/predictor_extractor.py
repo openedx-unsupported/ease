@@ -27,7 +27,7 @@ if not base_path.endswith("/"):
 
 log = logging.getLogger(__name__)
 
-class PredictorExtractor(object):
+class PredictorExtractor:
     def __init__(self):
         self._extractors = []
         self._initialized = False

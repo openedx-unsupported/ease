@@ -22,7 +22,7 @@ log = logging.getLogger(__name__)
 MAXIMUM_ESSAY_LENGTH = 20000
 
 
-class EssaySet(object):
+class EssaySet:
     def __init__(self, essaytype="train"):
         """
         Initialize variables and check essay set type
@@ -71,7 +71,7 @@ class EssaySet(object):
             essay_text = str(essay_text)
         except:
             # Nothing needed here, will return error in any case.
-            log.exception("Invalid type for essay score : {0} or essay text : {1}".format(type(essay_score), type(essay_text)))
+            log.exception("Invalid type for essay score : {} or essay text : {}".format(type(essay_score), type(essay_text)))
 
         if isinstance(essay_score, int) and isinstance(essay_text, str)\
                 and (essay_generated == 0 or essay_generated == 1):

@@ -1,8 +1,7 @@
 dist: xenial
 language: python
 python:
-  - 3.5
-  - 3.8
+  - '3.8'
 before_install:
   - sudo apt-get update
   - sudo xargs -a apt-packages.txt apt-get install --fix-missing

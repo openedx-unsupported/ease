@@ -1,4 +1,3 @@
-
 import unittest
 import os
 from ease import create, grade
@@ -47,7 +46,7 @@ class PolarityLoader(DataLoader):
         directories.sort()
         #We need to have both a postive and a negative folder to classify
         if len(directories)!=2:
-            raise Exception("Need a pos and a neg directory in {0}".format(self.pathname))
+            raise Exception(f"Need a pos and a neg directory in {self.pathname}")
 
         neg = self.load_text_files(directories[0])
         pos = self.load_text_files(directories[1])
@@ -125,7 +124,7 @@ class Grader():
         else:
             return grade.grade_generic(self.model_data, submission.get('numeric_values', []), submission.get('textual_values', []))
 
-class GenericTest(object):
+class GenericTest:
     loader = DataLoader
     data_path = ""
     expected_kappa_min = 0

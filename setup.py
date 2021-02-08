@@ -25,7 +25,7 @@ def is_requirement(line):
 
 setup(
     name = "ease",
-    version = "0.1.3",
+    version = "1.0",
     packages=['ease'],
     package_data = {
         '': ['*.txt', '*.rst', '*.p', '*.zip'],

@@ -20,13 +20,13 @@ upgrade: ## update the requirements/*.txt files with the latest packages satisfy
 	pip-compile --upgrade -o requirements/production.txt requirements/production.in
 	pip-compile --upgrade -o requirements/doc.txt requirements/doc.in
 	pip-compile --upgrade -o requirements/test.txt requirements/test.in
-	pip-compile --upgrade -o requirements/travis.txt requirements/travis.in
+	pip-compile --upgrade -o requirements/ci.txt requirements/ci.in
 
 
 requirements: ## install development environment requirements
 	pip install -q -r requirements/pip_tools.txt
 	pip install -qr requirements/base.txt --exists-action w
-	pip-sync requirements/base.txt requirements/constraints.txt requirements/test.txt requirements/travis.txt
+	pip-sync requirements/base.txt requirements/constraints.txt requirements/test.txt requirements/ci.txt
 
 quality-python: ## Run python linters
 	flake8 . --count --select=E901,E999,F821,F822,F823 --show-source --statistics

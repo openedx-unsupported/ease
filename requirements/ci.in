@@ -1,9 +1,10 @@
-# Requirements for running tests in Travis
+# Requirements for running tests in CI
 -c constraints.txt
 
 -r test.txt
 
 matplotlib
+nose
 numpy
 scikit-learn<0.23
 scipy

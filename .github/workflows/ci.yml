@@ -33,5 +33,8 @@ jobs:
     - name: Download nltk corpus
       run: ././download-nltk-corpus.sh
 
+    - name: Add User permissions
+      run: sudo chmod -R 777 ./src/nltk/nltk
+
     - name: Run Tests
       run: make test

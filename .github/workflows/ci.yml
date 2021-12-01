@@ -30,6 +30,11 @@ jobs:
     - name: Install Dependencies
       run: pip install -r requirements/ci.txt
 
+    - name: Install required packages
+      run: |
+        sudo apt-get update
+        sudo xargs -a apt-packages.txt apt-get install --fix-missing
+
     - name: Download nltk corpus
       run: ././download-nltk-corpus.sh
 

@@ -35,6 +35,6 @@ quality-python: ## Run python linters
 quality: quality-python ## Run linters
 
 test-python: clean ## run tests and generate coverage report
-	pytest --cov-branch --cov=ease
+	pytest --cov-branch --cov=ease ease/tests
 
 test: test-python ## run tests
